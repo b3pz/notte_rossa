@@ -3780,6 +3780,12 @@ class Game {
     // Passi audio
     this._stepTimer = 0;
 
+    // Offscreen canvas per darkness (riusato ogni frame)
+    this._darkCanvas = document.createElement('canvas');
+    this._darkCanvas.width  = 1280;
+    this._darkCanvas.height = 720;
+    this._darkCtx = this._darkCanvas.getContext('2d');
+
     this._initSystems();
     this._bindMenuEvents();
     this._handleResize();
@@ -4269,8 +4275,74 @@ class Game {
 
   _drawDarkness(ctx, room) {
     const lightLevel = room.lightLevel ?? 0.3;
-    ctx.fillStyle = `rgba(0,0,0,${Math.max(0, 1 - lightLevel)})`;
-    ctx.fillRect(0, 0, room.width, room.height);
+    const darkness   = Math.max(0, 1 - lightLevel);
+    if (darkness <= 0) return;
+
+    // Coordinate schermo del centro player (tramite camera)
+    const cam = this.camera;
+    const p   = this.player;
+    const pwx = p.x + p.width  / 2;
+    const pwy = p.y + p.height / 2;
+    // Converti da coordinate mondo a schermo: scale(zoom) * translate(-cam.x, -cam.y)
+    const sx  = (pwx - cam.x) * cam.zoom;
+    const sy  = (pwy - cam.y) * cam.zoom;
+
+    const oc = this._darkCtx;
+    const W  = 1280, H = 720;
+
+    // Riempi tutto di nero con l'opacità del buio
+    oc.clearRect(0, 0, W, H);
+    oc.fillStyle = `rgba(0,0,0,${darkness})`;
+    oc.fillRect(0, 0, W, H);
+
+    oc.save();
+    oc.globalCompositeOperation = 'destination-out';
+
+    if (p.flashlightOn) {
+      // Cono direzionale torcia
+      const angle  = p.facingRight ? 0 : Math.PI;
+      const spread = Math.PI / 4;
+      const len    = 420 * cam.zoom;
+
+      const g = oc.createRadialGradient(sx, sy, 0, sx, sy, len);
+      g.addColorStop(0,    'rgba(0,0,0,1)');
+      g.addColorStop(0.5,  'rgba(0,0,0,0.85)');
+      g.addColorStop(1,    'rgba(0,0,0,0)');
+      oc.fillStyle = g;
+      oc.beginPath();
+      oc.moveTo(sx, sy);
+      oc.arc(sx, sy, len, angle - spread, angle + spread);
+      oc.closePath();
+      oc.fill();
+
+      // Piccolo alone attorno al corpo sempre visibile
+      const ga = oc.createRadialGradient(sx, sy, 0, sx, sy, 55 * cam.zoom);
+      ga.addColorStop(0,   'rgba(0,0,0,0.7)');
+      ga.addColorStop(1,   'rgba(0,0,0,0)');
+      oc.fillStyle = ga;
+      oc.beginPath();
+      oc.arc(sx, sy, 55 * cam.zoom, 0, Math.PI * 2);
+      oc.fill();
+    } else {
+      // Senza torcia: alone ambientale minimo (player sempre distinguibile)
+      const r  = 100 * cam.zoom;
+      const ga = oc.createRadialGradient(sx, sy, 0, sx, sy, r);
+      ga.addColorStop(0,   `rgba(0,0,0,${Math.min(0.65, darkness * 0.7)})`);
+      ga.addColorStop(1,   'rgba(0,0,0,0)');
+      oc.fillStyle = ga;
+      oc.beginPath();
+      oc.arc(sx, sy, r, 0, Math.PI * 2);
+      oc.fill();
+    }
+
+    oc.restore();
+
+    // Disegna il layer di buio (in coordinate schermo, quindi fuori dalla transform camera)
+    // ma siamo già dentro cam.applyTransform → bisogna resettare temporaneamente
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(this._darkCanvas, 0, 0);
+    ctx.restore();
   }
 
   _drawRainWorld(ctx, room) {
