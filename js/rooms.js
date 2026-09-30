@@ -442,10 +442,10 @@ export const ROOMS = {
     name: 'Il rifugio di Elena', chapter: 'Sotterranei', bg: BGP + 'safe_room.png',
     light: 0.8, map: [5, 3], safe: true,
     hotspots: [
-      { id: 'safe_shelf', x: 330, w: 220, label: 'Scaffale', markY: 470,
+      { id: 'safe_shelf', x: 190, w: 280, label: 'Scaffale', markY: 470,
         give: ['medikit_small', ['ammo_shells', 4], ['ammo_pistol_small', 8]] },
-      { id: 'safe_radio', x: 620, w: 200, label: 'Radio di Elena [SALVA]', icon: 'radio', iconY: 560, event: 'open_save' },
-      { id: 'safe_recorder', x: 880, w: 130, label: 'Registratore sul tavolo', icon: 'recorder', iconY: 590, event: 'elena_tape_2' },
+      { id: 'safe_recorder', x: 560, w: 160, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 372, event: 'elena_tape_2' },
+      { id: 'safe_radio', x: 760, w: 200, label: 'Radio di Elena [SALVA]', markY: 330, event: 'open_save' },
     ],
     doors: [
       { id: 'safe_to_maint', edge: 'left', label: 'Officina', target: 'stanza_manutenzione', targetX: 230 },
@@ -617,7 +617,7 @@ const FRAMING = {
   metro_tunnel:       [0.85, 668],
   sala_generatori:    [0.90, 668],
   stanza_manutenzione:[1.20, 682],
-  safe_room:          [1.50, 702],
+  safe_room:          [2.10, 710],   // inquadratura ravvicinata: sedia e scrivania in primo piano
   lab_ingresso:       [1.20, 676],
   lab_corridoio:      [1.05, 670],
   lab_biologico:      [1.00, 666],

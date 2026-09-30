@@ -135,8 +135,8 @@ export const SPRITES = {
     }
   },
   "corridore": {
-    "cellW": 357,
-    "cellH": 282,
+    "cellW": 315,
+    "cellH": 248,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -178,8 +178,8 @@ export const SPRITES = {
     }
   },
   "crawler": {
-    "cellW": 417,
-    "cellH": 228,
+    "cellW": 342,
+    "cellH": 187,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -307,8 +307,8 @@ export const SPRITES = {
     }
   },
   "elena": {
-    "cellW": 201,
-    "cellH": 282,
+    "cellW": 191,
+    "cellH": 268,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -411,42 +411,42 @@ export const ICONS = {
 export const PROPS = {
   "body_0": {
     "file": "assets/sprites/cut/props/body_0.png",
-    "w": 285,
-    "h": 151
+    "w": 240,
+    "h": 128
   },
   "body_1": {
     "file": "assets/sprites/cut/props/body_1.png",
-    "w": 326,
-    "h": 220
+    "w": 240,
+    "h": 163
   },
   "body_2": {
     "file": "assets/sprites/cut/props/body_2.png",
-    "w": 218,
-    "h": 206
+    "w": 221,
+    "h": 209
   },
   "body_3": {
     "file": "assets/sprites/cut/props/body_3.png",
-    "w": 287,
-    "h": 247
+    "w": 240,
+    "h": 207
   },
   "body_4": {
     "file": "assets/sprites/cut/props/body_4.png",
-    "w": 299,
-    "h": 162
+    "w": 240,
+    "h": 130
   },
   "body_5": {
     "file": "assets/sprites/cut/props/body_5.png",
-    "w": 316,
-    "h": 242
+    "w": 240,
+    "h": 183
   },
   "body_6": {
     "file": "assets/sprites/cut/props/body_6.png",
-    "w": 231,
-    "h": 249
+    "w": 194,
+    "h": 209
   },
   "body_7": {
     "file": "assets/sprites/cut/props/body_7.png",
-    "w": 313,
-    "h": 253
+    "w": 240,
+    "h": 194
   }
 };

@@ -80,7 +80,7 @@ CONFIG = {
   },
   'corridore': {
     'sheets': {
-      'enemy_corridore_sheet.png': {'layout': 'grid', 'cols': 4, 'rows': 2, 'flip': True, 'overflow': True},
+      'enemy_corridore_sheet.png': {'layout': 'grid', 'cols': 4, 'rows': 2, 'flip': True, 'overflow': True, 'mul': 0.88},
     },
     'anims': {
       'idle':   ('enemy_corridore_sheet.png', [0],     6,  True),
@@ -93,7 +93,7 @@ CONFIG = {
   },
   'crawler': {
     'sheets': {
-      'enemy_crawler_sheet.png': {'layout': 'grid', 'cols': 4, 'rows': 2, 'scale': 1.0, 'overflow': True},
+      'enemy_crawler_sheet.png': {'layout': 'grid', 'cols': 4, 'rows': 2, 'scale': 0.82, 'overflow': True},
     },
     'anims': {
       'idle':    ('enemy_crawler_sheet.png', [0],   3, True),
@@ -130,7 +130,7 @@ CONFIG = {
     },
   },
   'elena': {     # sorella del protagonista (player_states.png)
-    'sheets': {'player_states.png': {'layout': 'free'}},
+    'sheets': {'player_states.png': {'layout': 'free', 'mul': 0.95}},
     'anims': {
       'idle':   ('player_states.png', [0], 1, True),
       'talk':   ('player_states.png', [1], 1, True),
@@ -189,7 +189,10 @@ ICONS = {
 ICON_SIZE = 96
 
 # ── Cadaveri (decorazioni di scena) ──
-BODIES = ('bodies_sheet.png', {'layout': 'free'}, 1.05)
+# ogni corpo viene scalato perché la sua "lunghezza" (max tra larghezza e 1,15×altezza)
+# sia BODY_LEN: circa 0,86 di una persona in piedi
+BODIES = ('bodies_sheet.png', {'layout': 'free'}, None)
+BODY_LEN = 240
 
 
 # ─────────────────────────────────────────────
@@ -348,7 +351,7 @@ def main():
                 scales[f] = o['scale']
             else:
                 tallest = max(fr[0].shape[0] for fr in sheets[f] if fr is not None)
-                scales[f] = HUMAN_H / tallest
+                scales[f] = HUMAN_H / tallest * o.get('mul', 1.0)
         # scala e prepara ogni frame usato
         prepared = {}
         for anim, (f, idxs, fps, loop) in cdef['anims'].items():
@@ -415,7 +418,8 @@ def main():
     for k, fr in enumerate(slice_sheet(bf, bo)):
         if fr is None: continue
         im = Image.fromarray(fr[0], 'RGBA')
-        im = im.resize((round(im.width * bs), round(im.height * bs)), Image.LANCZOS)
+        k_s = BODY_LEN / max(im.width, im.height * 1.15)
+        im = im.resize((round(im.width * k_s), round(im.height * k_s)), Image.LANCZOS)
         im.save(os.path.join(prop_dir, f'body_{k}.png'))
         props[f'body_{k}'] = {'file': f'assets/sprites/cut/props/body_{k}.png', 'w': im.width, 'h': im.height}
     print(f'cadaveri: {len(props)}')

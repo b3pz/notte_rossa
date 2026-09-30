@@ -394,8 +394,8 @@ const SPRITES = {
     }
   },
   "corridore": {
-    "cellW": 357,
-    "cellH": 282,
+    "cellW": 315,
+    "cellH": 248,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -437,8 +437,8 @@ const SPRITES = {
     }
   },
   "crawler": {
-    "cellW": 417,
-    "cellH": 228,
+    "cellW": 342,
+    "cellH": 187,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -566,8 +566,8 @@ const SPRITES = {
     }
   },
   "elena": {
-    "cellW": 201,
-    "cellH": 282,
+    "cellW": 191,
+    "cellH": 268,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -670,43 +670,43 @@ const ICONS = {
 const PROPS = {
   "body_0": {
     "file": "assets/sprites/cut/props/body_0.png",
-    "w": 285,
-    "h": 151
+    "w": 240,
+    "h": 128
   },
   "body_1": {
     "file": "assets/sprites/cut/props/body_1.png",
-    "w": 326,
-    "h": 220
+    "w": 240,
+    "h": 163
   },
   "body_2": {
     "file": "assets/sprites/cut/props/body_2.png",
-    "w": 218,
-    "h": 206
+    "w": 221,
+    "h": 209
   },
   "body_3": {
     "file": "assets/sprites/cut/props/body_3.png",
-    "w": 287,
-    "h": 247
+    "w": 240,
+    "h": 207
   },
   "body_4": {
     "file": "assets/sprites/cut/props/body_4.png",
-    "w": 299,
-    "h": 162
+    "w": 240,
+    "h": 130
   },
   "body_5": {
     "file": "assets/sprites/cut/props/body_5.png",
-    "w": 316,
-    "h": 242
+    "w": 240,
+    "h": 183
   },
   "body_6": {
     "file": "assets/sprites/cut/props/body_6.png",
-    "w": 231,
-    "h": 249
+    "w": 194,
+    "h": 209
   },
   "body_7": {
     "file": "assets/sprites/cut/props/body_7.png",
-    "w": 313,
-    "h": 253
+    "w": 240,
+    "h": 194
   }
 };
 
@@ -2574,14 +2574,14 @@ const ENEMY_DEFS = {
   },
   corridore: {
     name: 'Corridore', sprite: 'corridore',
-    width: 120, height: 190, maxHp: 55,
+    width: 110, height: 170, maxHp: 55,
     speed: 60, chaseSpeed: 270,
     damage: 12, cooldown: 0.8, windup: 0.2, range: 105,
     vision: 720, stun: 0.25,
   },
   crawler: {
     name: 'Crawler', sprite: 'crawler',
-    width: 160, height: 140, maxHp: 65,
+    width: 150, height: 120, maxHp: 65,
     speed: 45, chaseSpeed: 175,
     damage: 20, cooldown: 1.2, windup: 0.25, range: 120,
     vision: 400, stun: 0.3,
@@ -4245,10 +4245,10 @@ const ROOMS = {
     name: 'Il rifugio di Elena', chapter: 'Sotterranei', bg: BGP + 'safe_room.png',
     light: 0.8, map: [5, 3], safe: true,
     hotspots: [
-      { id: 'safe_shelf', x: 330, w: 220, label: 'Scaffale', markY: 470,
+      { id: 'safe_shelf', x: 190, w: 280, label: 'Scaffale', markY: 470,
         give: ['medikit_small', ['ammo_shells', 4], ['ammo_pistol_small', 8]] },
-      { id: 'safe_radio', x: 620, w: 200, label: 'Radio di Elena [SALVA]', icon: 'radio', iconY: 560, event: 'open_save' },
-      { id: 'safe_recorder', x: 880, w: 130, label: 'Registratore sul tavolo', icon: 'recorder', iconY: 590, event: 'elena_tape_2' },
+      { id: 'safe_recorder', x: 560, w: 160, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 372, event: 'elena_tape_2' },
+      { id: 'safe_radio', x: 760, w: 200, label: 'Radio di Elena [SALVA]', markY: 330, event: 'open_save' },
     ],
     doors: [
       { id: 'safe_to_maint', edge: 'left', label: 'Officina', target: 'stanza_manutenzione', targetX: 230 },
@@ -4420,7 +4420,7 @@ const FRAMING = {
   metro_tunnel:       [0.85, 668],
   sala_generatori:    [0.90, 668],
   stanza_manutenzione:[1.20, 682],
-  safe_room:          [1.50, 702],
+  safe_room:          [2.10, 710],   // inquadratura ravvicinata: sedia e scrivania in primo piano
   lab_ingresso:       [1.20, 676],
   lab_corridoio:      [1.05, 670],
   lab_biologico:      [1.00, 666],

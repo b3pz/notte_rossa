@@ -17,14 +17,14 @@ export const ENEMY_DEFS = {
   },
   corridore: {
     name: 'Corridore', sprite: 'corridore',
-    width: 120, height: 190, maxHp: 55,
+    width: 110, height: 170, maxHp: 55,
     speed: 60, chaseSpeed: 270,
     damage: 12, cooldown: 0.8, windup: 0.2, range: 105,
     vision: 720, stun: 0.25,
   },
   crawler: {
     name: 'Crawler', sprite: 'crawler',
-    width: 160, height: 140, maxHp: 65,
+    width: 150, height: 120, maxHp: 65,
     speed: 45, chaseSpeed: 175,
     damage: 20, cooldown: 1.2, windup: 0.25, range: 120,
     vision: 400, stun: 0.3,
