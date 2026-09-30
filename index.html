@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOTTE ROSSA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+  <!-- SCHERMATA PRINCIPALE -->
+  <div id="game-wrapper">
+
+    <!-- MENU PRINCIPALE -->
+    <div id="main-menu" class="screen active">
+      <div class="menu-bg"></div>
+      <div class="menu-vignette"></div>
+      <div class="rain-overlay"></div>
+      <div class="menu-content">
+        <div class="menu-title">
+          <span class="title-notte">NOTTE</span>
+          <span class="title-rossa">ROSSA</span>
+        </div>
+        <div class="menu-subtitle">Una città. Un blackout. Qualcosa si è svegliato.</div>
+        <nav class="menu-nav">
+          <button class="menu-btn" id="btn-nuova">NUOVA PARTITA</button>
+          <button class="menu-btn" id="btn-continua" disabled>CONTINUA</button>
+          <button class="menu-btn" id="btn-carica">CARICA</button>
+          <button class="menu-btn" id="btn-opzioni">OPZIONI</button>
+          <button class="menu-btn" id="btn-crediti">CREDITI</button>
+        </nav>
+        <div class="menu-version">v0.1 — Demo</div>
+      </div>
+    </div>
+
+    <!-- SCHERMATA CARICA -->
+    <div id="load-screen" class="screen">
+      <div class="load-content">
+        <h2 class="screen-title">CARICA PARTITA</h2>
+        <div class="save-slots" id="load-slots"></div>
+        <button class="menu-btn back-btn" id="btn-load-back">INDIETRO</button>
+      </div>
+    </div>
+
+    <!-- SCHERMATA OPZIONI -->
+    <div id="options-screen" class="screen">
+      <div class="options-content">
+        <h2 class="screen-title">OPZIONI</h2>
+        <div class="option-row">
+          <label>VOLUME MUSICA</label>
+          <input type="range" id="opt-music" min="0" max="100" value="70">
+          <span id="opt-music-val">70</span>
+        </div>
+        <div class="option-row">
+          <label>VOLUME EFFETTI</label>
+          <input type="range" id="opt-sfx" min="0" max="100" value="80">
+          <span id="opt-sfx-val">80</span>
+        </div>
+        <div class="option-row">
+          <label>VOLUME AMBIENTE</label>
+          <input type="range" id="opt-amb" min="0" max="100" value="60">
+          <span id="opt-amb-val">60</span>
+        </div>
+        <div class="option-row">
+          <label>DEBUG MODE</label>
+          <input type="checkbox" id="opt-debug">
+        </div>
+        <button class="menu-btn back-btn" id="btn-opts-back">INDIETRO</button>
+      </div>
+    </div>
+
+    <!-- SCHERMATA CREDITI -->
+    <div id="credits-screen" class="screen">
+      <div class="credits-content">
+        <h2 class="screen-title">CREDITI</h2>
+        <p>NOTTE ROSSA</p>
+        <p>Survival Horror 2D — v0.1</p>
+        <p>&nbsp;</p>
+        <p>Concept &amp; Design</p>
+        <p>Sviluppo</p>
+        <button class="menu-btn back-btn" id="btn-cred-back">INDIETRO</button>
+      </div>
+    </div>
+
+    <!-- CANVAS DI GIOCO -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <div id="hud-ammo" class="hud-element hidden">
+        <span id="hud-ammo-mag">0</span>
+        <span class="hud-divider">/</span>
+        <span id="hud-ammo-total">0</span>
+      </div>
+      <div id="hud-health" class="hud-element">
+        <div id="hud-health-bar">
+          <div id="hud-health-fill"></div>
+        </div>
+        <span id="hud-health-status">FINE</span>
+      </div>
+      <div id="hud-flashlight" class="hud-element hidden">
+        <span class="hud-label">TORCIA</span>
+        <div id="hud-battery-bar">
+          <div id="hud-battery-fill"></div>
+        </div>
+        <span id="hud-battery-pct">100%</span>
+      </div>
+    </div>
+
+    <!-- PROMPT INTERAZIONE -->
+    <div id="interact-prompt" class="hidden">
+      <span class="interact-key">[E]</span>
+      <span id="interact-label">Esamina</span>
+    </div>
+
+    <!-- BOX DIALOGO -->
+    <div id="dialogue-box" class="hidden">
+      <div id="dialogue-speaker"></div>
+      <div id="dialogue-text"></div>
+      <div id="dialogue-continue">▼</div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div id="inventory-screen" class="screen-overlay hidden">
+      <div class="inventory-panel">
+        <h3 class="inv-title">INVENTARIO</h3>
+        <div id="inventory-grid"></div>
+        <div id="item-detail">
+          <div id="item-detail-name"></div>
+          <div id="item-detail-desc"></div>
+          <div id="item-detail-actions"></div>
+        </div>
+        <div class="inv-hint">[TAB] o [ESC] per chiudere</div>
+      </div>
+    </div>
+
+    <!-- MAPPA -->
+    <div id="map-screen" class="screen-overlay hidden">
+      <div class="map-panel">
+        <h3 class="map-title">MAPPA</h3>
+        <canvas id="map-canvas" width="600" height="400"></canvas>
+        <div class="inv-hint">[M] o [ESC] per chiudere</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTI -->
+    <div id="document-screen" class="screen-overlay hidden">
+      <div class="document-panel">
+        <div id="doc-header">
+          <span id="doc-title"></span>
+          <span id="doc-date"></span>
+        </div>
+        <div id="doc-body"></div>
+        <div class="inv-hint">[ESC] per chiudere</div>
+      </div>
+    </div>
+
+    <!-- PAUSA -->
+    <div id="pause-screen" class="screen-overlay hidden">
+      <div class="pause-panel">
+        <h3 class="pause-title">— PAUSA —</h3>
+        <button class="menu-btn" id="btn-resume">RIPRENDI</button>
+        <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
+        <button class="menu-btn" id="btn-pause-map">MAPPA</button>
+        <button class="menu-btn" id="btn-pause-docs">DOCUMENTI</button>
+        <button class="menu-btn" id="btn-pause-opts">OPZIONI</button>
+        <button class="menu-btn" id="btn-pause-menu">TORNA AL MENU</button>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="gameover-screen" class="screen-overlay hidden">
+      <div class="gameover-panel">
+        <div class="gameover-title">GAME OVER</div>
+        <button class="menu-btn" id="btn-go-load">CARICA ULTIMO SALVATAGGIO</button>
+        <button class="menu-btn" id="btn-go-menu">TORNA AL MENU</button>
+      </div>
+    </div>
+
+    <!-- RADIO DI EMERGENZA (SAVE) -->
+    <div id="save-screen" class="screen-overlay hidden">
+      <div class="save-panel">
+        <div class="save-icon">📻</div>
+        <h3 class="save-title">RADIO DI EMERGENZA</h3>
+        <div class="save-options">
+          <button class="menu-btn" id="btn-save-game">SALVA</button>
+          <button class="menu-btn" id="btn-save-docs">DOCUMENTI</button>
+          <button class="menu-btn" id="btn-save-map">MAPPA</button>
+          <button class="menu-btn" id="btn-save-close">CHIUDI</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICA -->
+    <div id="notification" class="hidden">
+      <span id="notification-text"></span>
+    </div>
+
+    <!-- FADE OVERLAY -->
+    <div id="fade-overlay"></div>
+
+    <!-- TITOLO CINEMATICO -->
+    <div id="cinematic-title" class="hidden">
+      <span class="cin-notte">NOTTE</span>
+      <span class="cin-rossa">ROSSA</span>
+    </div>
+
+    <!-- DEBUG PANEL -->
+    <div id="debug-panel" class="hidden">
+      <div id="dbg-fps">FPS: 0</div>
+      <div id="dbg-pos">X: 0 Y: 0</div>
+      <div id="dbg-room">Stanza: —</div>
+      <div id="dbg-state">Stato: —</div>
+      <div id="dbg-flags">Flag: —</div>
+    </div>
+
+  </div>
+
+  <!-- MODULI JS (ordine di dipendenza) -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

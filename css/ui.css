@@ -1,0 +1,490 @@
+/* =============================================
+   NOTTE ROSSA — ui.css
+   HUD, inventario, dialogo, mappa, salvataggio
+   ============================================= */
+
+/* ── HUD ── */
+#hud {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.hud-element {
+  position: absolute;
+}
+
+/* Munizioni — basso destra */
+#hud-ammo {
+  bottom: 24px;
+  right: 24px;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255,255,255,0.4);
+  font-weight: 700;
+}
+
+#hud-ammo .hud-divider {
+  color: rgba(255,255,255,0.3);
+  margin: 0 4px;
+  font-size: 16px;
+}
+
+#hud-ammo span:last-child {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* Salute — basso sinistra */
+#hud-health {
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#hud-health-bar {
+  width: 120px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#hud-health-fill {
+  height: 100%;
+  width: 100%;
+  background: #3ad66a;
+  border-radius: 2px;
+  transition: width 0.5s ease, background 0.5s ease;
+}
+
+#hud-health-fill.caution { background: var(--text-warn); }
+#hud-health-fill.danger  { background: var(--red); animation: blink-health 0.8s infinite; }
+
+@keyframes blink-health {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+#hud-health-status {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+/* Torcia — alto destra */
+#hud-flashlight {
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+
+#hud-battery-bar {
+  width: 60px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#hud-battery-fill {
+  height: 100%;
+  width: 100%;
+  background: #f0d050;
+  border-radius: 2px;
+  transition: width 0.5s, background 0.5s;
+}
+
+#hud-battery-fill.low { background: var(--red); }
+
+#hud-battery-pct {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 36px;
+}
+
+/* ── PROMPT INTERAZIONE ── */
+#interact-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--ui-border);
+  padding: 6px 16px;
+  pointer-events: none;
+  animation: prompt-pulse 2s ease-in-out infinite;
+}
+
+@keyframes prompt-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+.interact-key {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+#interact-label {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-main);
+}
+
+/* ── DIALOGO ── */
+#dialogue-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: linear-gradient(0deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.85) 100%);
+  border-top: 1px solid var(--ui-border);
+  padding: 20px 60px 24px;
+  min-height: 110px;
+  pointer-events: all;
+}
+
+#dialogue-speaker {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--red);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+#dialogue-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+}
+
+#dialogue-continue {
+  position: absolute;
+  bottom: 12px;
+  right: 24px;
+  color: var(--text-dim);
+  font-size: 12px;
+  animation: blink-arrow 1s step-end infinite;
+}
+
+@keyframes blink-arrow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── INVENTARIO ── */
+.inventory-panel {
+  background: var(--bg-dark);
+  border: 1px solid var(--ui-border);
+  padding: 30px;
+  min-width: 500px;
+  max-width: 700px;
+  width: 90vw;
+}
+
+.inv-title {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--red);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  grid-template-rows: repeat(2, 80px);
+  gap: 6px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.inv-slot {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--ui-border);
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  gap: 4px;
+}
+
+.inv-slot:hover,
+.inv-slot.selected {
+  border-color: rgba(192,21,42,0.6);
+  background: rgba(192,21,42,0.1);
+}
+
+.inv-slot.empty {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.inv-slot .slot-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.inv-slot .slot-name {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.inv-slot .slot-qty {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: var(--text-main);
+}
+
+#item-detail {
+  border-top: 1px solid var(--ui-border);
+  padding-top: 16px;
+  min-height: 80px;
+}
+
+#item-detail-name {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+#item-detail-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+#item-detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.item-action-btn {
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid var(--ui-border);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.item-action-btn:hover {
+  border-color: rgba(192,21,42,0.6);
+  background: rgba(192,21,42,0.1);
+}
+
+.inv-hint {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  margin-top: 16px;
+}
+
+/* ── MAPPA ── */
+.map-panel {
+  background: var(--bg-dark);
+  border: 1px solid var(--ui-border);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.map-title {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--red);
+}
+
+#map-canvas {
+  border: 1px solid var(--ui-border);
+  background: #050709;
+  max-width: 90vw;
+  max-height: 60vh;
+}
+
+/* ── DOCUMENTO ── */
+.document-panel {
+  background: #0e0c0a;
+  border: 1px solid rgba(200,180,140,0.2);
+  padding: 40px 50px;
+  max-width: 600px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+#doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(200,180,140,0.15);
+}
+
+#doc-title {
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: rgba(220,200,160,0.9);
+  text-transform: uppercase;
+}
+
+#doc-date {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+#doc-body {
+  font-size: 13px;
+  line-height: 1.9;
+  color: rgba(200,185,155,0.85);
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+}
+
+/* ── PAUSA ── */
+.pause-panel {
+  background: var(--bg-dark);
+  border: 1px solid var(--ui-border);
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 280px;
+}
+
+.pause-title {
+  font-size: 14px;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+/* ── GAME OVER ── */
+.gameover-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.gameover-title {
+  font-size: clamp(36px, 6vw, 72px);
+  letter-spacing: 0.3em;
+  color: var(--red);
+  text-shadow:
+    0 0 20px rgba(192,21,42,0.8),
+    0 0 50px rgba(192,21,42,0.4);
+  animation: gameover-pulse 2s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes gameover-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── RADIO / SAVE ── */
+.save-panel {
+  background: var(--bg-dark);
+  border: 1px solid var(--ui-border);
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+}
+
+.save-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+  filter: grayscale(0.5);
+}
+
+.save-title {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.save-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ── SLOT SALVATAGGIO ── */
+.save-slot-panel {
+  width: 100%;
+  border: 1px solid var(--ui-border);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.save-slot-panel:hover {
+  border-color: rgba(192,21,42,0.5);
+  background: rgba(192,21,42,0.08);
+}
+
+.save-slot-panel .slot-title {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--text-main);
+}
+
+.save-slot-panel .slot-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+}
