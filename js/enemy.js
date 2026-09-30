@@ -1,286 +1,344 @@
 /* =============================================
    NOTTE ROSSA — enemy.js
-   Nemici base: Contaminato, Corridore
-   State machine: IDLE → PATROL → CHASE → ATTACK → STUNNED → DEAD
+   Nemici: Contaminato (+ varianti ferroviere / infermiere / tecnico),
+   Corridore, Crawler, Listener.
+   Gioco a corsia unica: distanze solo sull'asse X.
    ============================================= */
 
-import { CollisionManager } from './collision.js';
+import { SpriteLib } from './sprites.js';
 
-const ENEMY_DEFS = {
+export const ENEMY_DEFS = {
   contaminato: {
-    id: 'contaminato', name: 'Contaminato',
-    width: 36, height: 60,
-    maxHp: 120,
-    speed:     60,   // px/s
-    chaseSpeed:90,
-    attackDamage: 18,
-    attackCooldown: 1.8,
-    attackRange: 50,
-    visionRange: 400,
-    visionAngle: 0.7,  // radiani (poco angolo, vede dritto)
-    stunnedTime: 0.5,
-    patrolDelay: 1.5,  // secondi di pausa ai bordi
-    color: '#4a2a1a',
-    colorDark: '#2a1005',
+    name: 'Contaminato', sprite: 'contaminato',
+    width: 80, height: 260, maxHp: 110,
+    speed: 55, chaseSpeed: 88,
+    damage: 18, cooldown: 1.6, windup: 0.4, range: 95,
+    vision: 520, stun: 0.35,
   },
   corridore: {
-    id: 'corridore', name: 'Corridore',
-    width: 28, height: 52,
-    maxHp:  50,
-    speed:     40,
-    chaseSpeed:220,
-    attackDamage: 12,
-    attackCooldown: 0.8,
-    attackRange: 40,
-    visionRange: 500,
-    visionAngle: 1.0,
-    stunnedTime: 0.2,
-    patrolDelay: 0.8,
-    color: '#3a1a30',
-    colorDark: '#1a0a18',
+    name: 'Corridore', sprite: 'corridore',
+    width: 120, height: 190, maxHp: 55,
+    speed: 60, chaseSpeed: 270,
+    damage: 12, cooldown: 0.8, windup: 0.2, range: 105,
+    vision: 720, stun: 0.25,
+  },
+  crawler: {
+    name: 'Crawler', sprite: 'crawler',
+    width: 160, height: 140, maxHp: 65,
+    speed: 45, chaseSpeed: 175,
+    damage: 20, cooldown: 1.2, windup: 0.25, range: 120,
+    vision: 400, stun: 0.3,
+  },
+  listener: {
+    name: 'Listener', sprite: 'listener',
+    width: 80, height: 260, maxHp: 90,
+    speed: 32, chaseSpeed: 215,
+    damage: 32, cooldown: 2.0, windup: 0.45, range: 100,
+    vision: 150, hearing: true, stun: 0.6,
+  },
+  // Varianti (una posa sola: il movimento è simulato con oscillazione)
+  ferroviere: {
+    name: 'Ferroviere', sprite: 'ferroviere', singlePose: true,
+    width: 80, height: 260, maxHp: 100,
+    speed: 45, chaseSpeed: 80,
+    damage: 18, cooldown: 1.7, windup: 0.45, range: 95,
+    vision: 480, stun: 0.35,
+  },
+  infermiere: {
+    name: 'Infermiere', sprite: 'infermiere', singlePose: true,
+    width: 80, height: 260, maxHp: 90,
+    speed: 50, chaseSpeed: 95,
+    damage: 16, cooldown: 1.4, windup: 0.4, range: 95,
+    vision: 520, stun: 0.35,
+  },
+  tecnico: {
+    name: 'Tecnico', sprite: 'tecnico', singlePose: true,
+    width: 80, height: 260, maxHp: 130,
+    speed: 40, chaseSpeed: 75,
+    damage: 24, cooldown: 1.9, windup: 0.5, range: 100,
+    vision: 460, stun: 0.3,
   },
 };
 
 export const AI_STATE = {
-  IDLE:       'IDLE',
-  PATROL:     'PATROL',
-  SUSPICIOUS: 'SUSPICIOUS',
-  SEARCH:     'SEARCH',
-  CHASE:      'CHASE',
-  ATTACK:     'ATTACK',
-  STUNNED:    'STUNNED',
-  DEAD:       'DEAD',
+  IDLE: 'IDLE', PATROL: 'PATROL', CEILING: 'CEILING', DROP: 'DROP',
+  CHASE: 'CHASE', ATTACK: 'ATTACK', STUNNED: 'STUNNED', SEARCH: 'SEARCH', DEAD: 'DEAD',
 };
 
 export class Enemy {
   constructor(type, x, y, spawnDef = {}) {
-    const def = ENEMY_DEFS[type] || ENEMY_DEFS.contaminato;
-    this.def    = def;
-    this.type   = type;
+    let def = ENEMY_DEFS[type] || ENEMY_DEFS.contaminato;
+    this.type   = ENEMY_DEFS[type] ? type : 'contaminato';
+    this.key    = spawnDef.id || `${type}_${Math.round(x)}`;
+    const sc    = spawnDef.scale ?? 1;
+    this.scale  = sc;
+    const k     = 0.35 + 0.65 * sc;
+    // copia della definizione adattata all'inquadratura
+    this.def    = def = { ...def,
+      speed: def.speed * k, chaseSpeed: def.chaseSpeed * k,
+      range: def.range * sc, vision: def.vision * sc };
+    this.width  = Math.round(def.width * sc);
+    this.height = Math.round(def.height * sc);
     this.x      = x;
     this.y      = y;
-    this.width  = def.width;
-    this.height = def.height;
     this.hp     = def.maxHp;
     this.maxHp  = def.maxHp;
     this.alive  = true;
-    this.facingRight = true;
+    this.facingRight = spawnDef.facingRight ?? (Math.random() < 0.5);
 
-    // IA
-    this.state  = AI_STATE.PATROL;
-    this._stateTimer  = 0;
-    this._patrolMin   = spawnDef.patrol?.[0] ?? x - 200;
-    this._patrolMax   = spawnDef.patrol?.[1] ?? x + 200;
-    this._patrolDir   = 1;
-    this._patrolPause = 0;
+    this._patrolMin = spawnDef.patrol?.[0] ?? Math.max(60, x - 220);
+    this._patrolMax = spawnDef.patrol?.[1] ?? Math.min(1220 - def.width, x + 220);
+    this._pause     = 0.5 + Math.random();
 
-    // Combattimento
-    this._attackTimer  = 0;
-    this._stunnedTimer = 0;
-    this._invulnTimer  = 0;
-    this.INVULN_TIME   = 0.3;
+    this.state       = spawnDef.ceiling ? AI_STATE.CEILING : (spawnDef.idle ? AI_STATE.IDLE : AI_STATE.PATROL);
+    this._timer      = 0;
+    this._attackCd   = 0.6;
+    this._windup     = 0;
+    this._alertTimer = 0;
+    this._deadTimer  = 0;
+    this._dropY      = 0;
 
-    // Offset hitbox
-    this.hitboxOffX = 4;
-    this.hitboxOffY = 4;
-    this.hitboxW    = this.width - 8;
-    this.hitboxH    = this.height - 4;
-
-    // Animazione placeholder
-    this._animTimer = 0;
-    this._animFrame = 0;
+    this.anim      = 'idle';
+    this.animFrame = 0;
+    this.animTimer = 0;
+    this._phase    = Math.random() * 10;
   }
 
-  update(dt, player, collisionManager) {
-    if (!this.alive) return;
+  get centerX() { return this.x + this.width / 2; }
+  get footY()   { return this.y + this.height; }
 
-    // Invulnerabilità temporanea
-    if (this._invulnTimer > 0) this._invulnTimer -= dt;
-    if (this._attackTimer  > 0) this._attackTimer -= dt;
+  /* ── PERCEZIONE ── */
+  _dx(player)   { return player.centerX - this.centerX; }
+
+  _canSee(player) {
+    if (!player.alive) return false;
+    const dx = this._dx(player), dist = Math.abs(dx);
+    if (dist < 110 * this.scale) return true;
+    let range = this.def.vision;
+    if (player.flashlightOn) range *= 1.35;
+    if (player.isCrouching)  range *= 0.6;
+    if (dist > range) return false;
+    return (dx > 0) === this.facingRight;
+  }
+
+  _canHear(player) {
+    if (!this.def.hearing || !player.alive) return false;
+    const dist = Math.abs(this._dx(player));
+    const n = player.noiseLevel;
+    return (n >= 3 && dist < 1300) || (n === 2 && dist < 900) || (n === 1 && dist < 320);
+  }
+
+  _notice(player) {
+    return this._canSee(player) || this._canHear(player);
+  }
+
+  /* ── UPDATE ── */
+  update(dt, player, col) {
+    if (this._alertTimer > 0) this._alertTimer -= dt;
+    if (!this.alive) {
+      this._deadTimer += dt;
+      this._animate(dt);
+      return;
+    }
+    if (this._attackCd > 0) this._attackCd -= dt;
+
+    const dx   = this._dx(player);
+    const dist = Math.abs(dx);
 
     switch (this.state) {
-      case AI_STATE.IDLE:     this._updateIdle(dt, player); break;
-      case AI_STATE.PATROL:   this._updatePatrol(dt, player, collisionManager); break;
-      case AI_STATE.CHASE:    this._updateChase(dt, player, collisionManager); break;
-      case AI_STATE.ATTACK:   this._updateAttack(dt, player); break;
-      case AI_STATE.STUNNED:  this._updateStunned(dt); break;
-      case AI_STATE.SUSPICIOUS:
-      case AI_STATE.SEARCH:   this._updateSearch(dt, player); break;
+      case AI_STATE.CEILING:
+        if (player.alive && dist < 230 * this.scale) {
+          this.state = AI_STATE.DROP;
+          this._dropY = -(150 * this.scale);   // parte dal soffitto
+          this._alertTimer = 1;
+          this.facingRight = dx > 0;
+        }
+        break;
+
+      case AI_STATE.DROP:
+        this._dropY += 1600 * dt;
+        if (this._dropY >= 0) { this._dropY = 0; this._toChase(); }
+        break;
+
+      case AI_STATE.IDLE:
+        this._timer -= dt;
+        if (this._notice(player)) this._toChase();
+        break;
+
+      case AI_STATE.PATROL:
+        if (this._pause > 0) {
+          this._pause -= dt;
+        } else {
+          const dir = this.facingRight ? 1 : -1;
+          this._move(col, dir * this.def.speed * dt);
+          if (this.x <= this._patrolMin) { this.facingRight = true;  this._pause = 1 + Math.random() * 1.5; }
+          if (this.x >= this._patrolMax) { this.facingRight = false; this._pause = 1 + Math.random() * 1.5; }
+        }
+        if (this._notice(player)) this._toChase();
+        break;
+
+      case AI_STATE.CHASE:
+        this.facingRight = dx > 0;
+        if (!player.alive) { this.state = AI_STATE.PATROL; break; }
+        if (dist <= this.def.range) {
+          this.state   = AI_STATE.ATTACK;
+          this._windup = this.def.windup;
+          break;
+        }
+        this._move(col, Math.sign(dx) * this.def.chaseSpeed * dt);
+        // Il Listener perde la traccia se il giocatore torna silenzioso e lontano
+        if (this.def.hearing && !this._notice(player) && dist > 500) {
+          this.state = AI_STATE.SEARCH; this._timer = 3;
+        }
+        break;
+
+      case AI_STATE.ATTACK:
+        this.facingRight = dx > 0;
+        if (this._windup > 0) {
+          this._windup -= dt;
+          if (this._windup <= 0) {
+            if (dist <= this.def.range + 25 && this._attackCd <= 0) {
+              if (player.takeDamage(this.def.damage)) this.onHitPlayer?.();
+              this._attackCd = this.def.cooldown;
+            }
+          }
+        } else if (dist > this.def.range + 30) {
+          this.state = AI_STATE.CHASE;
+        } else if (this._attackCd <= 0) {
+          this._windup = this.def.windup;
+        }
+        break;
+
+      case AI_STATE.STUNNED:
+        this._timer -= dt;
+        if (this._timer <= 0) this.state = AI_STATE.CHASE;
+        break;
+
+      case AI_STATE.SEARCH:
+        this._timer -= dt;
+        if (this._notice(player)) this._toChase();
+        else if (this._timer <= 0) this.state = AI_STATE.PATROL;
+        break;
     }
 
-    // Aggiorna animazione
-    this._animTimer += dt;
-    if (this._animTimer > 0.15) { this._animTimer = 0; this._animFrame = (this._animFrame + 1) % 4; }
+    this._animate(dt);
   }
 
-  _canSeePlayer(player) {
-    const dx = (player.x + player.width/2)  - (this.x + this.width/2);
-    const dy = (player.y + player.height/2) - (this.y + this.height/2);
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist > this.def.visionRange) return false;
-    // Direzione facing
-    const facingDX = this.facingRight ? 1 : -1;
-    const dot = (dx / dist) * facingDX;
-    return dot > Math.cos(this.def.visionAngle);
+  _toChase() {
+    if (this.state !== AI_STATE.CHASE && this.state !== AI_STATE.ATTACK) this._alertTimer = 1.1;
+    this.state = AI_STATE.CHASE;
   }
 
-  _distanceToPlayer(player) {
-    const dx = (player.x + player.width/2)  - (this.x + this.width/2);
-    const dy = (player.y + player.height/2) - (this.y + this.height/2);
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-
-  _updateIdle(dt, player) {
-    this._stateTimer -= dt;
-    if (this._stateTimer <= 0) this.setState(AI_STATE.PATROL);
-    if (this._canSeePlayer(player)) this.setState(AI_STATE.CHASE);
-  }
-
-  _updatePatrol(dt, player, col) {
-    if (this._patrolPause > 0) {
-      this._patrolPause -= dt;
-      if (this._canSeePlayer(player)) this.setState(AI_STATE.CHASE);
-      return;
-    }
-
-    const speed = this.def.speed * dt;
-    const newX  = this.x + this._patrolDir * speed;
-    this.facingRight = this._patrolDir > 0;
-
+  _move(col, dx) {
     if (col) {
-      const moved = col.moveEntity(this, this._patrolDir * speed, 0);
-      this.x = moved.x;
-      this.y = moved.y;
+      const m = col.moveEntity(this, dx, 0);
+      this.x = m.x;
     } else {
-      this.x = newX;
-    }
-
-    if (this.x <= this._patrolMin) { this._patrolDir =  1; this._patrolPause = this.def.patrolDelay; }
-    if (this.x >= this._patrolMax) { this._patrolDir = -1; this._patrolPause = this.def.patrolDelay; }
-
-    if (this._canSeePlayer(player)) this.setState(AI_STATE.CHASE);
-  }
-
-  _updateChase(dt, player, col) {
-    const dist = this._distanceToPlayer(player);
-
-    if (dist <= this.def.attackRange) {
-      this.setState(AI_STATE.ATTACK);
-      return;
-    }
-
-    const dx = (player.x + player.width/2) - (this.x + this.width/2);
-    this.facingRight = dx > 0;
-    const dir = dx > 0 ? 1 : -1;
-    const speed = this.def.chaseSpeed * dt;
-
-    if (col) {
-      const moved = col.moveEntity(this, dir * speed, 0);
-      this.x = moved.x;
-      this.y = moved.y;
-    } else {
-      this.x += dir * speed;
-    }
-
-    // Se il giocatore è troppo lontano, torna a pattugliare
-    if (dist > this.def.visionRange * 1.5) this.setState(AI_STATE.PATROL);
-  }
-
-  _updateAttack(dt, player) {
-    const dist = this._distanceToPlayer(player);
-
-    if (this._attackTimer <= 0) {
-      player.takeDamage(this.def.attackDamage);
-      this._attackTimer = this.def.attackCooldown;
-    }
-
-    if (dist > this.def.attackRange * 1.4) {
-      this.setState(AI_STATE.CHASE);
+      this.x += dx;
     }
   }
 
-  _updateSearch(dt, player) {
-    this._stateTimer -= dt;
-    if (this._canSeePlayer(player)) { this.setState(AI_STATE.CHASE); return; }
-    if (this._stateTimer <= 0) this.setState(AI_STATE.PATROL);
-  }
-
-  _updateStunned(dt) {
-    this._stunnedTimer -= dt;
-    if (this._stunnedTimer <= 0) this.setState(AI_STATE.CHASE);
-  }
-
-  setState(newState) {
-    this.state = newState;
-    switch (newState) {
-      case AI_STATE.IDLE:     this._stateTimer = 1.5; break;
-      case AI_STATE.SEARCH:   this._stateTimer = 4.0; break;
-      case AI_STATE.STUNNED:  this._stunnedTimer = this.def.stunnedTime; break;
-    }
-  }
-
-  takeDamage(amount) {
-    if (!this.alive || this._invulnTimer > 0) return;
+  takeDamage(amount, knockDir = 0) {
+    if (!this.alive) return;
     this.hp -= amount;
-    this._invulnTimer = this.INVULN_TIME;
+    this.x += knockDir * 18 * this.scale;
+    if (this.state === AI_STATE.CEILING || this.state === AI_STATE.DROP) this._dropY = 0;
     if (this.hp <= 0) {
-      this.hp    = 0;
+      this.hp = 0;
       this.alive = false;
       this.state = AI_STATE.DEAD;
-    } else {
-      this.setState(AI_STATE.STUNNED);
-      if (this.state !== AI_STATE.CHASE) this.setState(AI_STATE.CHASE);
+      this._deadTimer = 0;
+      this.animFrame = 0;
+      return;
     }
+    this.state  = AI_STATE.STUNNED;
+    this._timer = this.def.stun;
+    this._alertTimer = 0.8;
   }
 
   getHitbox() {
-    return { x: this.x + this.hitboxOffX, y: this.y + this.hitboxOffY,
-             w: this.hitboxW, h: this.hitboxH };
+    return { x: this.x, y: this.y, w: this.width, h: this.height };
   }
 
-  /* ── RENDER PLACEHOLDER ── */
+  /* ── ANIMAZIONE ── */
+  _pickAnim() {
+    const s = this.def.sprite;
+    const has = (a) => SpriteLib.has(s, a);
+    switch (this.state) {
+      case AI_STATE.DEAD:    return has('dead') ? 'dead' : (has('hurt') ? 'hurt' : 'idle');
+      case AI_STATE.CEILING: return has('ceiling') ? 'ceiling' : 'idle';
+      case AI_STATE.DROP:    return has('leap') ? 'leap' : 'idle';
+      case AI_STATE.STUNNED: return has('hurt') ? 'hurt' : 'idle';
+      case AI_STATE.ATTACK:  return has('attack') ? 'attack' : 'idle';
+      case AI_STATE.CHASE:   return has('run') ? 'run' : (has('walk') ? 'walk' : 'idle');
+      case AI_STATE.SEARCH:  return has('listen') ? 'listen' : 'idle';
+      case AI_STATE.PATROL:  return this._pause > 0 ? (has('listen') && Math.sin(this._phase) > 0 ? 'listen' : 'idle') : (has('walk') ? 'walk' : 'idle');
+      default:               return 'idle';
+    }
+  }
+
+  _animate(dt) {
+    this._phase += dt;
+    const next = this._pickAnim();
+    if (next !== this.anim) { this.anim = next; this.animFrame = 0; this.animTimer = 0; }
+    const def = SpriteLib.animDef(this.def.sprite, this.anim);
+    if (!def) return;
+    this.animTimer += dt;
+    const fd = 1 / def.fps;
+    while (this.animTimer >= fd) {
+      this.animTimer -= fd;
+      if (this.animFrame < def.frames - 1) this.animFrame++;
+      else if (def.loop) this.animFrame = 0;
+    }
+  }
+
+  /* ── RENDER ── */
   draw(ctx) {
+    const s = this.def.sprite;
+    const moving = this.state === AI_STATE.CHASE || (this.state === AI_STATE.PATROL && this._pause <= 0);
+    const opts = { scale: this.scale };
+    let footY = this.footY;
+
     if (!this.alive) {
-      this._drawDead(ctx);
-      return;
-    }
-    const blink = this._invulnTimer > 0 && Math.floor(Date.now() / 70) % 2 === 0;
-    if (blink) return;
-
-    const def = this.def;
-
-    // Corpo
-    ctx.fillStyle = this.state === AI_STATE.ATTACK ? '#8a1010' : def.color;
-    ctx.fillRect(this.x, this.y + 14, this.width, this.height - 14);
-
-    // Testa (più distorta per i contaminati)
-    ctx.fillStyle = def.colorDark;
-    const tw = this.type === 'contaminato' ? this.width - 4 : this.width - 8;
-    ctx.fillRect(this.x + 2, this.y, tw, 18);
-
-    // Occhi — sempre aperti, inquietanti
-    const eyeX = this.facingRight ? this.x + tw - 8 : this.x + 4;
-    ctx.fillStyle = this.state === AI_STATE.CHASE || this.state === AI_STATE.ATTACK ? '#ff2020' : '#cc4040';
-    ctx.fillRect(eyeX, this.y + 5, 5, 6);
-
-    // Barra HP (piccola, sopra)
-    if (this.hp < this.maxHp) {
-      const hpPct = this.hp / this.maxHp;
-      ctx.fillStyle = '#300';
-      ctx.fillRect(this.x, this.y - 8, this.width, 4);
-      ctx.fillStyle = hpPct > 0.5 ? '#a03030' : '#c04040';
-      ctx.fillRect(this.x, this.y - 8, this.width * hpPct, 4);
+      // Dopo qualche secondo il corpo resta, un po' più scuro
+      opts.alpha = Math.max(0.55, 1 - this._deadTimer * 0.15);
+      if (!SpriteLib.has(s, 'dead')) {
+        const t = Math.min(1, this._deadTimer / 0.35);
+        opts.rotate = (this.facingRight ? -1 : 1) * t * Math.PI / 2;
+        footY -= t * 35 * this.scale;
+      }
+    } else if (this.state === AI_STATE.CEILING) {
+      footY = this.y - 150 * this.scale;  // appeso in alto
+    } else if (this.state === AI_STATE.DROP) {
+      footY = this.footY + Math.min(0, this._dropY);
+    } else if (this.def.singlePose) {
+      // Posa unica: barcollamento
+      const sp = moving ? (this.state === AI_STATE.CHASE ? 9 : 5) : 1.5;
+      opts.skew   = Math.sin(this._phase * sp) * (moving ? 0.06 : 0.02);
+      footY      -= moving ? Math.abs(Math.sin(this._phase * sp)) * 6 : 0;
+      if (this.state === AI_STATE.ATTACK) opts.rotate = (this.facingRight ? 1 : -1) * (this._windup > 0 ? 0.12 : 0.2);
+      if (this.state === AI_STATE.STUNNED) opts.rotate = (this.facingRight ? -1 : 1) * 0.15;
     }
 
-    // Stato IA (debug)
-    // (gestito dal debug panel)
-  }
+    const ok = SpriteLib.draw(ctx, s, this.anim, this.animFrame, this.centerX, footY, this.facingRight, opts);
+    if (!ok) {
+      ctx.fillStyle = this.alive ? '#3a2a24' : 'rgba(60,20,10,0.6)';
+      ctx.fillRect(this.x, this.alive ? this.y : this.footY - 30, this.width, this.alive ? this.height : 30);
+    }
 
-  _drawDead(ctx) {
-    ctx.fillStyle = 'rgba(60,20,10,0.7)';
-    ctx.fillRect(this.x, this.y + this.height - 16, this.width, 16);
-    ctx.fillStyle = 'rgba(80,30,15,0.4)';
-    ctx.fillRect(this.x - 4, this.y + this.height - 8, this.width + 8, 8);
+    // "!" quando ti nota
+    if (this.alive && this._alertTimer > 0) {
+      const top = (this.state === AI_STATE.CEILING ? this.y - 150 * this.scale : this.y) - 50 * this.scale;
+      SpriteLib.drawIcon(ctx, 'alert', this.centerX, top, 40, Math.min(1, this._alertTimer * 2));
+    }
+
+    // barra vita dopo il primo colpo
+    if (this.alive && this.hp < this.maxHp) {
+      const w = 70, pct = this.hp / this.maxHp;
+      const bx = this.centerX - w / 2, by = this.y - 16;
+      ctx.fillStyle = 'rgba(20,0,0,0.7)'; ctx.fillRect(bx, by, w, 5);
+      ctx.fillStyle = '#b02020';          ctx.fillRect(bx, by, w * pct, 5);
+    }
   }
 }
 
@@ -295,41 +353,43 @@ export class EnemyManager {
 
   spawnEnemy(type, x, y, spawnDef = {}) {
     const e = new Enemy(type, x, y, spawnDef);
+    e.onHitPlayer = () => {
+      this.game.audio?.playSfx('hurt');
+      this.game.camera?.shake(8, 0.2);
+    };
     this.enemies.push(e);
     return e;
   }
 
-  clearEnemies() {
-    this.enemies = [];
-  }
+  clearEnemies() { this.enemies = []; }
 
   update(dt) {
     const player = this.game.player;
     const col    = this.game.collision;
     for (const e of this.enemies) {
-      if (!e.alive) continue;
+      const wasAlive = e.alive;
       e.update(dt, player, col);
+      if (wasAlive && !e.alive) this.onEnemyKilled(e);
     }
-    // Rimuovi i morti dopo un po'
-    // (li lasciamo per ora visibili come cadaveri)
+  }
+
+  /** Chiamato da WeaponSystem quando un nemico muore */
+  onEnemyKilled(e) {
+    this.game.roomManager?.markEnemyKilled(e.key);
+    this.game.events?.onEnemyKilled?.(e);
   }
 
   draw(ctx) {
-    for (const e of this.enemies) {
-      e.draw(ctx);
-    }
-    // Debug hitbox
+    // prima i morti, poi i vivi
+    for (const e of this.enemies) if (!e.alive) e.draw(ctx);
+    for (const e of this.enemies) if (e.alive)  e.draw(ctx);
     if (this.game.debug) {
-      ctx.strokeStyle = 'rgba(255,50,50,0.5)';
       ctx.lineWidth = 1;
       for (const e of this.enemies) {
-        const hb = e.getHitbox();
-        ctx.strokeRect(hb.x, hb.y, hb.w, hb.h);
-        if (e.alive) {
-          ctx.fillStyle = 'rgba(255,150,0,0.6)';
-          ctx.font = '9px monospace';
-          ctx.fillText(e.state, e.x, e.y - 12);
-        }
+        ctx.strokeStyle = 'rgba(255,50,50,0.6)';
+        ctx.strokeRect(e.x, e.y, e.width, e.height);
+        ctx.fillStyle = '#fa0'; ctx.font = '12px monospace';
+        ctx.fillText(e.state, e.x, e.y - 22);
       }
     }
   }

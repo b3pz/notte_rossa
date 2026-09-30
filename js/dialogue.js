@@ -24,7 +24,12 @@ export class DialogueManager {
     // Avanzamento con SPACE o click
     this._box?.addEventListener('click',    () => this.advance());
     document.addEventListener('keydown',    (e) => {
-      if (e.code === 'Space' && this.active) { e.preventDefault(); this.advance(); }
+      if (this.active && ['Space', 'Enter', 'KeyE'].includes(e.code)) {
+        e.preventDefault();
+        if (e.repeat) return;
+        this.game.input.consume(e.code);
+        this.advance();
+      }
     });
   }
 
@@ -106,7 +111,7 @@ export class DialogueManager {
       this._display(next.speaker, next.text, next.onComplete);
     } else {
       if (this._box) this._box.classList.add('hidden');
-      this.game.input.unlock();
+      if (!this.game.events?.isRunning() && !this.game.ui?.hasOpenOverlay()) this.game.input.unlock();
     }
 
     if (onC) onC();

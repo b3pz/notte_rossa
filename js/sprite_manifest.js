@@ -1,0 +1,452 @@
+/* Generato da tools/slice_sprites.py — NON modificare a mano */
+export const SPRITES = {
+  "player": {
+    "cellW": 318,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/player_idle.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/player_walk.png",
+        "frames": 4,
+        "fps": 8,
+        "loop": true
+      },
+      "run": {
+        "file": "assets/sprites/cut/player_run.png",
+        "frames": 3,
+        "fps": 10,
+        "loop": true
+      },
+      "gun_idle": {
+        "file": "assets/sprites/cut/player_gun_idle.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "aim": {
+        "file": "assets/sprites/cut/player_aim.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "shoot": {
+        "file": "assets/sprites/cut/player_shoot.png",
+        "frames": 3,
+        "fps": 14,
+        "loop": false
+      },
+      "reload": {
+        "file": "assets/sprites/cut/player_reload.png",
+        "frames": 3,
+        "fps": 5,
+        "loop": false
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/player_hurt.png",
+        "frames": 2,
+        "fps": 8,
+        "loop": false
+      },
+      "wounded": {
+        "file": "assets/sprites/cut/player_wounded.png",
+        "frames": 2,
+        "fps": 4,
+        "loop": true
+      },
+      "death": {
+        "file": "assets/sprites/cut/player_death.png",
+        "frames": 3,
+        "fps": 4,
+        "loop": false
+      },
+      "flashlight": {
+        "file": "assets/sprites/cut/player_flashlight.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "push": {
+        "file": "assets/sprites/cut/player_push.png",
+        "frames": 3,
+        "fps": 5,
+        "loop": false
+      },
+      "crouch": {
+        "file": "assets/sprites/cut/player_crouch.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "sneak": {
+        "file": "assets/sprites/cut/player_sneak.png",
+        "frames": 2,
+        "fps": 5,
+        "loop": true
+      },
+      "hide": {
+        "file": "assets/sprites/cut/player_hide.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      }
+    }
+  },
+  "contaminato": {
+    "cellW": 321,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/contaminato_idle.png",
+        "frames": 2,
+        "fps": 3,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/contaminato_walk.png",
+        "frames": 3,
+        "fps": 5,
+        "loop": true
+      },
+      "attack": {
+        "file": "assets/sprites/cut/contaminato_attack.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/contaminato_hurt.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": false
+      },
+      "dead": {
+        "file": "assets/sprites/cut/contaminato_dead.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "corridore": {
+    "cellW": 357,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/corridore_idle.png",
+        "frames": 1,
+        "fps": 6,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/corridore_walk.png",
+        "frames": 3,
+        "fps": 12,
+        "loop": true
+      },
+      "leap": {
+        "file": "assets/sprites/cut/corridore_leap.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "attack": {
+        "file": "assets/sprites/cut/corridore_attack.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/corridore_hurt.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": false
+      },
+      "dead": {
+        "file": "assets/sprites/cut/corridore_dead.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "crawler": {
+    "cellW": 417,
+    "cellH": 228,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/crawler_idle.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/crawler_walk.png",
+        "frames": 2,
+        "fps": 6,
+        "loop": true
+      },
+      "run": {
+        "file": "assets/sprites/cut/crawler_run.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "ceiling": {
+        "file": "assets/sprites/cut/crawler_ceiling.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "leap": {
+        "file": "assets/sprites/cut/crawler_leap.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "attack": {
+        "file": "assets/sprites/cut/crawler_attack.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "dead": {
+        "file": "assets/sprites/cut/crawler_dead.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "listener": {
+    "cellW": 315,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/listener_idle.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/listener_walk.png",
+        "frames": 2,
+        "fps": 4,
+        "loop": true
+      },
+      "listen": {
+        "file": "assets/sprites/cut/listener_listen.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "alert": {
+        "file": "assets/sprites/cut/listener_alert.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "run": {
+        "file": "assets/sprites/cut/listener_run.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "attack": {
+        "file": "assets/sprites/cut/listener_attack.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": true
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/listener_hurt.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": false
+      }
+    }
+  },
+  "carmine": {
+    "cellW": 165,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/carmine_idle.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "talk": {
+        "file": "assets/sprites/cut/carmine_talk.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "check": {
+        "file": "assets/sprites/cut/carmine_check.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "scared": {
+        "file": "assets/sprites/cut/carmine_scared.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "elena": {
+    "cellW": 201,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/elena_idle.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "talk": {
+        "file": "assets/sprites/cut/elena_talk.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "point": {
+        "file": "assets/sprites/cut/elena_point.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      },
+      "scared": {
+        "file": "assets/sprites/cut/elena_scared.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "ferroviere": {
+    "cellW": 118,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/ferroviere_idle.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "infermiere": {
+    "cellW": 124,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/infermiere_idle.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      }
+    }
+  },
+  "tecnico": {
+    "cellW": 131,
+    "cellH": 282,
+    "humanH": 280,
+    "anims": {
+      "idle": {
+        "file": "assets/sprites/cut/tecnico_idle.png",
+        "frames": 1,
+        "fps": 1,
+        "loop": true
+      }
+    }
+  }
+};
+export const ICONS = {
+  "pistol": "assets/sprites/cut/icons/pistol.png",
+  "ammo_pistol": "assets/sprites/cut/icons/ammo_pistol.png",
+  "flashlight": "assets/sprites/cut/icons/flashlight.png",
+  "medikit": "assets/sprites/cut/icons/medikit.png",
+  "bandage": "assets/sprites/cut/icons/bandage.png",
+  "painkillers": "assets/sprites/cut/icons/painkillers.png",
+  "key_station": "assets/sprites/cut/icons/key_station.png",
+  "key_deposito": "assets/sprites/cut/icons/key_deposito.png",
+  "key_hospital": "assets/sprites/cut/icons/key_hospital.png",
+  "key_lab": "assets/sprites/cut/icons/key_lab.png",
+  "badge": "assets/sprites/cut/icons/badge.png",
+  "key_industrial": "assets/sprites/cut/icons/key_industrial.png",
+  "key_rusty": "assets/sprites/cut/icons/key_rusty.png",
+  "card": "assets/sprites/cut/icons/card.png",
+  "fuse": "assets/sprites/cut/icons/fuse.png",
+  "battery": "assets/sprites/cut/icons/battery.png",
+  "crank": "assets/sprites/cut/icons/crank.png",
+  "valve": "assets/sprites/cut/icons/valve.png",
+  "note": "assets/sprites/cut/icons/note.png",
+  "radio": "assets/sprites/cut/icons/radio.png",
+  "shotgun": "assets/sprites/cut/icons/shotgun.png",
+  "ammo_shells": "assets/sprites/cut/icons/ammo_shells.png",
+  "crowbar": "assets/sprites/cut/icons/crowbar.png",
+  "recorder": "assets/sprites/cut/icons/recorder.png",
+  "usb": "assets/sprites/cut/icons/usb.png",
+  "vial": "assets/sprites/cut/icons/vial.png",
+  "city_map": "assets/sprites/cut/icons/city_map.png",
+  "alert": "assets/sprites/cut/icons/alert.png",
+  "padlock": "assets/sprites/cut/icons/padlock.png"
+};
+export const PROPS = {
+  "body_0": {
+    "file": "assets/sprites/cut/props/body_0.png",
+    "w": 285,
+    "h": 151
+  },
+  "body_1": {
+    "file": "assets/sprites/cut/props/body_1.png",
+    "w": 326,
+    "h": 220
+  },
+  "body_2": {
+    "file": "assets/sprites/cut/props/body_2.png",
+    "w": 218,
+    "h": 206
+  },
+  "body_3": {
+    "file": "assets/sprites/cut/props/body_3.png",
+    "w": 287,
+    "h": 247
+  },
+  "body_4": {
+    "file": "assets/sprites/cut/props/body_4.png",
+    "w": 299,
+    "h": 162
+  },
+  "body_5": {
+    "file": "assets/sprites/cut/props/body_5.png",
+    "w": 316,
+    "h": 242
+  },
+  "body_6": {
+    "file": "assets/sprites/cut/props/body_6.png",
+    "w": 231,
+    "h": 249
+  },
+  "body_7": {
+    "file": "assets/sprites/cut/props/body_7.png",
+    "w": 313,
+    "h": 253
+  }
+};

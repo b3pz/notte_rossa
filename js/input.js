@@ -18,11 +18,11 @@ export class InputManager {
       moveLeft:    ['KeyA', 'ArrowLeft'],
       moveRight:   ['KeyD', 'ArrowRight'],
       run:         ['ShiftLeft', 'ShiftRight'],
-      interact:    ['KeyE'],
+      interact:    ['KeyE', 'Enter'],
       flashlight:  ['KeyF'],
       action:      ['Space'],
       aim:         ['ControlLeft', 'ControlRight', 'Mouse1'],
-      shoot:       ['Mouse0'],
+      shoot:       ['Mouse0', 'Space'],
       reload:      ['KeyR'],
       inventory:   ['Tab'],
       map:         ['KeyM'],
@@ -96,6 +96,9 @@ export class InputManager {
   rebind(action, keyCodes) {
     this.bindings[action] = keyCodes;
   }
+
+  /** Segna un tasto come già usato (non conta come "appena premuto") */
+  consume(code) { this._prev[code] = true; }
 
   /** Blocca temporaneamente l'input (es. durante cutscene) */
   lock()   { this._locked = true; }

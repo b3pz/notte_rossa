@@ -1,359 +1,370 @@
 /* =============================================
    NOTTE ROSSA — ui.js
-   UIManager: HUD, schermate overlay, menu pause,
-   game over, notifiche, documento
+   HUD, overlay (inventario, mappa, documenti, pausa,
+   radio, game over, finale), notifiche, capitoli
    ============================================= */
 
 import { HEALTH_STATE } from './player.js';
+import { SpriteLib } from './sprites.js';
+import { INV_SLOTS } from './inventory.js';
+
+const $ = (id) => document.getElementById(id);
 
 export class UIManager {
   constructor(game) {
     this.game = game;
+    this.$hud          = $('hud');
+    this.$room         = $('hud-room');
+    this.$ammoBox      = $('hud-ammo');
+    this.$ammoIcon     = $('hud-ammo-icon');
+    this.$ammoMag      = $('hud-ammo-mag');
+    this.$ammoTotal    = $('hud-ammo-total');
+    this.$healthFill   = $('hud-health-fill');
+    this.$healthStatus = $('hud-health-status');
+    this.$flashBox     = $('hud-flashlight');
+    this.$battFill     = $('hud-battery-fill');
+    this.$battPct      = $('hud-battery-pct');
+    this.$interPrompt  = $('interact-prompt');
+    this.$interLabel   = $('interact-label');
 
-    // HUD refs
-    this.$hud          = document.getElementById('hud');
-    this.$ammoBox      = document.getElementById('hud-ammo');
-    this.$ammoMag      = document.getElementById('hud-ammo-mag');
-    this.$ammoTotal    = document.getElementById('hud-ammo-total');
-    this.$healthFill   = document.getElementById('hud-health-fill');
-    this.$healthStatus = document.getElementById('hud-health-status');
-    this.$flashBox     = document.getElementById('hud-flashlight');
-    this.$battFill     = document.getElementById('hud-battery-fill');
-    this.$battPct      = document.getElementById('hud-battery-pct');
-    this.$interPrompt  = document.getElementById('interact-prompt');
-    this.$interLabel   = document.getElementById('interact-label');
-
-    // Schermate overlay
-    this.$inventory  = document.getElementById('inventory-screen');
-    this.$mapScreen  = document.getElementById('map-screen');
-    this.$docScreen  = document.getElementById('document-screen');
-    this.$pause      = document.getElementById('pause-screen');
-    this.$gameOver   = document.getElementById('gameover-screen');
-    this.$save       = document.getElementById('save-screen');
-    this.$notification= document.getElementById('notification');
-    this.$notifText  = document.getElementById('notification-text');
-    this.$fadeOvl    = document.getElementById('fade-overlay');
-    this.$cinTitle   = document.getElementById('cinematic-title');
-    this.$debug      = document.getElementById('debug-panel');
+    this.$inventory = $('inventory-screen');
+    this.$mapScreen = $('map-screen');
+    this.$docScreen = $('document-screen');
+    this.$docsList  = $('docs-list-screen');
+    this.$pause     = $('pause-screen');
+    this.$gameOver  = $('gameover-screen');
+    this.$save      = $('save-screen');
+    this.$notif     = $('notification');
+    this.$notifText = $('notification-text');
+    this.$fade      = $('fade-overlay');
+    this.$cinTitle  = $('cinematic-title');
+    this.$chapter   = $('chapter-card');
+    this.$ending    = $('ending-screen');
+    this.$debug     = $('debug-panel');
 
     this._notifTimer = null;
-    this._overlayStack = [];   // stack di overlay aperti
-
+    this._stack = [];
     this._bindButtons();
   }
 
   _bindButtons() {
     const g = this.game;
+    const on = (id, fn) => $(id)?.addEventListener('click', fn);
 
-    // Pausa
-    document.getElementById('btn-resume')?.addEventListener('click', () => g.togglePause());
-    document.getElementById('btn-pause-inv')?.addEventListener('click', () => { g.togglePause(); this.openInventory(); });
-    document.getElementById('btn-pause-map')?.addEventListener('click', () => { g.togglePause(); this.openMap(); });
-    document.getElementById('btn-pause-docs')?.addEventListener('click', () => { g.togglePause(); });
-    document.getElementById('btn-pause-menu')?.addEventListener('click', () => g.returnToMenu());
-    document.getElementById('btn-pause-opts')?.addEventListener('click', () => {});
+    on('btn-resume',     () => g.togglePause());
+    on('btn-pause-inv',  () => { g.togglePause(); this.openInventory(); });
+    on('btn-pause-map',  () => { g.togglePause(); this.openMap(); });
+    on('btn-pause-docs', () => { g.togglePause(); this.openDocsList(); });
+    on('btn-pause-menu', () => g.returnToMenu());
 
-    // Game Over
-    document.getElementById('btn-go-load')?.addEventListener('click', () => { this.hideGameOver(); g.save.loadLast(); });
-    document.getElementById('btn-go-menu')?.addEventListener('click', () => g.returnToMenu());
+    on('btn-go-load', () => g.restartFromDeath());
+    on('btn-go-menu', () => { this.hideGameOver(); g.returnToMenu(); });
 
-    // Radio / Save
-    document.getElementById('btn-save-game')?.addEventListener('click', () => { g.save.saveGame(0); this.showNotification('Partita salvata'); });
-    document.getElementById('btn-save-close')?.addEventListener('click', () => this.closeSaveScreen());
-    document.getElementById('btn-save-docs')?.addEventListener('click', () => {});
-    document.getElementById('btn-save-map')?.addEventListener('click', () => { this.closeSaveScreen(); this.openMap(); });
+    for (let i = 0; i < 3; i++) {
+      on(`btn-save-slot${i}`, () => {
+        if (g.save.saveGame(i)) this.showNotification(`Partita salvata nello slot ${i + 1}`);
+        this.closeSaveScreen();
+      });
+    }
+    on('btn-save-close', () => this.closeSaveScreen());
+    on('btn-ending-menu', () => { this.$ending.classList.add('hidden'); g.returnToMenu(); });
 
-    // ESC globale
     document.addEventListener('keydown', e => {
+      if (!g.running) return;
       if (e.code === 'Escape') {
-        if (this._overlayStack.length > 0) {
-          this.closeTopOverlay();
-        } else if (g.running) {
-          g.togglePause();
-        }
+        if (this._stack.length > 0) this.closeTopOverlay();
+        else if (!g.dialogue.isActive()) g.togglePause();
+        return;
       }
+      const top = this._stack[this._stack.length - 1];
+      if (e.code === 'Tab' && top === this.$inventory) { e.preventDefault(); g.input.consume('Tab'); this.closeTopOverlay(); }
+      if (e.code === 'KeyM' && top === this.$mapScreen) { g.input.consume('KeyM'); this.closeTopOverlay(); }
+      if (['KeyE', 'Space', 'Enter'].includes(e.code) && top === this.$docScreen) { e.preventDefault(); g.input.consume(e.code); this.closeTopOverlay(); }
     });
   }
 
   /* ── HUD ── */
-  showHUD()  { this.$hud?.classList.remove('hidden'); }
-  hideHUD()  { this.$hud?.classList.add('hidden'); }
+  showHUD() { this.$hud?.classList.remove('hidden'); }
+  hideHUD() { this.$hud?.classList.add('hidden'); this.hideInteractPrompt(); }
 
   updateHUD() {
-    const player = this.game.player;
-    if (!player) return;
+    const g = this.game, p = g.player;
+    if (!p) return;
+    const pct = p.hp / p.maxHp * 100;
+    this.$healthFill.style.width = pct + '%';
+    this.$healthFill.className = p.healthState === HEALTH_STATE.CAUTION ? 'caution' : p.healthState === HEALTH_STATE.DANGER ? 'danger' : '';
+    this.$healthStatus.textContent = { FINE: 'BENE', CAUTION: 'FERITO', DANGER: 'GRAVE' }[p.healthState];
 
-    // Salute
-    const pct = player.hp / player.maxHp * 100;
-    if (this.$healthFill) {
-      this.$healthFill.style.width = pct + '%';
-      this.$healthFill.className = '';
-      if (player.healthState === HEALTH_STATE.CAUTION) this.$healthFill.classList.add('caution');
-      if (player.healthState === HEALTH_STATE.DANGER)  this.$healthFill.classList.add('danger');
-    }
-    if (this.$healthStatus) this.$healthStatus.textContent = player.healthState;
-
-    // Torcia
-    const hasTorch = this.game.inventory?.hasItem('flashlight');
-    if (hasTorch) {
-      this.$flashBox?.classList.remove('hidden');
-      const batt = player.battery;
-      if (this.$battFill) {
-        this.$battFill.style.width = batt + '%';
-        this.$battFill.className = batt < 20 ? 'low' : '';
-      }
-      if (this.$battPct) this.$battPct.textContent = Math.round(batt) + '%';
+    if (g.inventory.hasItem('flashlight')) {
+      this.$flashBox.classList.remove('hidden');
+      this.$battFill.style.width = p.battery + '%';
+      this.$battFill.className = p.battery < 20 ? 'low' : '';
+      this.$battPct.textContent = Math.round(p.battery) + '%';
     } else {
-      this.$flashBox?.classList.add('hidden');
+      this.$flashBox.classList.add('hidden');
     }
 
-    // Munizioni
-    const weapon = this.game.weapon;
-    if (weapon && weapon.equipped) {
-      this.$ammoBox?.classList.remove('hidden');
-      if (this.$ammoMag)   this.$ammoMag.textContent   = weapon.ammoInMag;
-      if (this.$ammoTotal) this.$ammoTotal.textContent  = weapon.ammoReserve;
+    const w = g.weapon.equipped;
+    if (w) {
+      this.$ammoBox.classList.remove('hidden');
+      const icon = SpriteLib.icon(w.def.ammoItem === 'ammo_shells' ? 'ammo_shells' : 'ammo_pistol');
+      if (this.$ammoIcon.getAttribute('src') !== icon) this.$ammoIcon.setAttribute('src', icon);
+      this.$ammoMag.textContent = w.isReloading ? '··' : w.ammoInMag;
+      this.$ammoTotal.textContent = g.weapon.ammoReserve;
     } else {
-      this.$ammoBox?.classList.add('hidden');
+      this.$ammoBox.classList.add('hidden');
     }
+    const name = g.roomManager.current?.name || '';
+    if (this.$room.textContent !== name) this.$room.textContent = name;
   }
 
-  /* ── PROMPT INTERAZIONE ── */
   showInteractPrompt(label) {
-    this.$interPrompt?.classList.remove('hidden');
-    if (this.$interLabel) this.$interLabel.textContent = label || 'Esamina';
+    this.$interPrompt.classList.remove('hidden');
+    this.$interLabel.textContent = label || 'Esamina';
   }
-  hideInteractPrompt() {
-    this.$interPrompt?.classList.add('hidden');
-  }
+  hideInteractPrompt() { this.$interPrompt?.classList.add('hidden'); }
 
-  /* ── NOTIFICA ── */
-  showNotification(text, duration = 2500) {
-    if (!this.$notification) return;
-    if (this.$notifText) this.$notifText.textContent = text;
-    this.$notification.classList.remove('hidden');
-    this.$notification.classList.add('show');
+  showNotification(text, duration = 2600) {
+    this.$notifText.textContent = text;
+    this.$notif.classList.remove('hidden');
+    this.$notif.classList.add('show');
     clearTimeout(this._notifTimer);
     this._notifTimer = setTimeout(() => {
-      this.$notification.classList.remove('show');
-      setTimeout(() => this.$notification.classList.add('hidden'), 400);
+      this.$notif.classList.remove('show');
+      setTimeout(() => this.$notif.classList.add('hidden'), 400);
     }, duration);
   }
 
-  /* ── DOCUMENTO ── */
+  showChapter(text) {
+    $('chapter-text').textContent = text;
+    this.$chapter.classList.remove('hidden');
+    requestAnimationFrame(() => this.$chapter.classList.add('show'));
+    setTimeout(() => {
+      this.$chapter.classList.remove('show');
+      setTimeout(() => this.$chapter.classList.add('hidden'), 900);
+    }, 2200);
+  }
+
+  /* ── DOCUMENTI ── */
   showDocument(docId) {
-    const doc = this.game.inventory?.getDocument(docId);
+    const doc = this.game.inventory.getDocument(docId);
     if (!doc) return;
-    document.getElementById('doc-title').textContent = doc.title || '—';
-    document.getElementById('doc-date').textContent  = doc.date  || '';
-    document.getElementById('doc-body').textContent  = doc.text  || '';
-    this._openOverlay(this.$docScreen);
-    this.game.input.lock();
+    $('doc-title').textContent = doc.title || '—';
+    $('doc-date').textContent  = doc.date || '';
+    $('doc-body').textContent  = doc.text || '';
+    this._open(this.$docScreen);
+  }
+
+  openDocsList() {
+    const box = $('docs-list');
+    box.innerHTML = '';
+    const docs = this.game.inventory.getDocuments();
+    if (!docs.length) box.innerHTML = '<div class="docs-empty">Nessun documento trovato.</div>';
+    for (const d of docs) {
+      const row = document.createElement('div');
+      row.className = 'doc-row';
+      row.innerHTML = `<span>${d.title}</span><span class="d">${d.date || ''}</span>`;
+      row.addEventListener('click', () => this.showDocument(d.id));
+      box.appendChild(row);
+    }
+    this._open(this.$docsList);
   }
 
   /* ── INVENTARIO ── */
   openInventory() {
     this._renderInventory();
-    this._openOverlay(this.$inventory);
-    this.game.input.lock();
+    $('item-detail-name').textContent = '';
+    $('item-detail-desc').textContent = 'Seleziona un oggetto.';
+    $('item-detail-actions').innerHTML = '';
+    this._open(this.$inventory);
   }
 
   _renderInventory() {
-    const inv  = this.game.inventory;
-    const grid = document.getElementById('inventory-grid');
-    if (!grid || !inv) return;
+    const inv = this.game.inventory, grid = $('inventory-grid');
     grid.innerHTML = '';
-
     const slots = inv.getSlots();
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < INV_SLOTS; i++) {
       const item = slots[i];
-      const el   = document.createElement('div');
+      const el = document.createElement('div');
       el.className = 'inv-slot' + (item ? '' : ' empty');
       if (item) {
+        const src = SpriteLib.icon(item.icon);
+        const equipped = item.type === 'weapon' && this.game.weapon.equipped?.id === item.weaponId;
         el.innerHTML = `
-          <div class="slot-icon">${item.icon || '📦'}</div>
-          <div class="slot-name">${item.name}</div>
-          ${item.qty > 1 ? `<div class="slot-qty">${item.qty}</div>` : ''}
-        `;
+          <div class="slot-icon">${src ? `<img src="${src}" alt="">` : '▪'}</div>
+          <div class="slot-name">${item.name}${equipped ? ' ●' : ''}</div>
+          ${item.qty > 1 ? `<div class="slot-qty">${item.qty}</div>` : ''}`;
         el.addEventListener('click', () => this._selectItem(i, item));
       }
       grid.appendChild(el);
     }
+    // aggiungi scorciatoia ai documenti
+    const docsBtn = document.createElement('button');
+    docsBtn.className = 'item-action-btn';
+    docsBtn.style.gridColumn = '1 / -1';
+    docsBtn.textContent = `DOCUMENTI (${inv.getDocuments().length})`;
+    docsBtn.addEventListener('click', () => this.openDocsList());
+    grid.appendChild(docsBtn);
   }
 
   _selectItem(index, item) {
-    // Deselect
     document.querySelectorAll('.inv-slot').forEach(s => s.classList.remove('selected'));
     document.querySelectorAll('.inv-slot')[index]?.classList.add('selected');
-
-    document.getElementById('item-detail-name').textContent = item.name;
-    document.getElementById('item-detail-desc').textContent = item.description || '';
-
-    const actions = document.getElementById('item-detail-actions');
+    $('item-detail-name').textContent = item.name;
+    $('item-detail-desc').textContent = item.description || '';
+    const actions = $('item-detail-actions');
     actions.innerHTML = '';
-    const addBtn = (label, fn) => {
-      const btn = document.createElement('button');
-      btn.className = 'item-action-btn';
-      btn.textContent = label;
-      btn.addEventListener('click', fn);
-      actions.appendChild(btn);
+    const add = (label, fn) => {
+      const b = document.createElement('button');
+      b.className = 'item-action-btn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      actions.appendChild(b);
     };
-
-    if (item.usable)   addBtn('USA',      () => { this.game.inventory.useItem(index); this._renderInventory(); });
-    if (item.equippable) addBtn('EQUIPAGGIA', () => { this.game.inventory.equipItem(index); this._renderInventory(); });
-    addBtn('ESAMINA',  () => this.showNotification(item.description || item.name));
-    addBtn('LASCIA',   () => { this.game.inventory.dropItem(index); this._renderInventory(); });
+    const inv = this.game.inventory;
+    const refresh = () => { this._renderInventory(); const it = inv.getSlots()[index]; if (it) this._selectItem(index, it); else $('item-detail-actions').innerHTML = ''; };
+    if (item.usable) add('USA', () => { inv.useItem(index); if (this._stack.includes(this.$inventory)) refresh(); });
+    if (item.equippable) {
+      const eq = item.type === 'weapon' && this.game.weapon.equipped?.id === item.weaponId;
+      add(item.id === 'flashlight' ? (this.game.player.flashlightOn ? 'SPEGNI' : 'ACCENDI') : (eq ? 'RIPONI' : 'IMPUGNA'),
+        () => { inv.equipItem(index); refresh(); });
+    }
+    if (item.type !== 'key' && item.type !== 'weapon') add('LASCIA', () => { inv.dropItem(index); refresh(); });
   }
 
   /* ── MAPPA ── */
   openMap() {
-    this._openOverlay(this.$mapScreen);
-    this.game.input.lock();
+    this._open(this.$mapScreen);
     this._renderMap();
   }
 
   _renderMap() {
-    const canvas = document.getElementById('map-canvas');
-    if (!canvas) return;
+    const canvas = $('map-canvas');
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const rm = this.game.roomManager;
+    const rows = ['Stazione', 'Città', 'Ospedale', 'Sotterranei', 'Laboratorio', 'Porto'];
+    const nodeW = 118, nodeH = 44, gapX = 12, gapY = 30, left = 130, top = 24;
 
-    const colors = { visited: '#2a3040', completed: '#1a2820', unvisited: '#111318' };
-    const border = { visited: '#4a5870', completed: '#3a6050', unvisited: '#2a2a30' };
-
-    const roomDefs = this.game.roomManager?.roomData || {};
-    const states   = this.game.roomManager?.roomStates || {};
-
-    const nodeW = 120, nodeH = 40, padX = 20, padY = 20;
-
-    for (const [id, room] of Object.entries(roomDefs)) {
+    ctx.font = '11px "Courier New", monospace';
+    ctx.textBaseline = 'middle';
+    rows.forEach((r, i) => {
+      ctx.fillStyle = '#6a6058';
+      ctx.fillText(r.toUpperCase(), 12, top + i * (nodeH + gapY) + nodeH / 2);
+    });
+    for (const [id, room] of Object.entries(rm.roomData)) {
       const mp = room.mapPos;
       if (!mp) continue;
-      const state = states[id];
-      const x = padX + mp.col * (nodeW + 20);
-      const y = padY + mp.row * (nodeH + 20);
-
-      ctx.fillStyle   = state?.visited ? colors.visited : colors.unvisited;
-      ctx.strokeStyle = state?.visited ? border.visited : border.unvisited;
-      ctx.lineWidth   = 1;
+      const st = rm.roomStates[id];
+      const x = left + mp.col * (nodeW + gapX), y = top + mp.row * (nodeH + gapY);
+      const here = rm.current?.id === id;
+      ctx.fillStyle = st?.visited ? (room.safe ? '#16261c' : '#1c2230') : '#0c0e12';
       ctx.fillRect(x, y, nodeW, nodeH);
-      ctx.strokeRect(x, y, nodeW, nodeH);
-
-      if (state?.visited) {
-        ctx.fillStyle = '#8090a0';
-        ctx.font = '10px Courier New';
-        ctx.fillText(room.name, x + 6, y + 24);
-      } else {
-        ctx.fillStyle = '#303540';
-        ctx.font = '10px Courier New';
-        ctx.fillText('???', x + 6, y + 24);
-      }
-
-      // Player qui?
-      if (this.game.roomManager?.current?.id === id) {
-        ctx.strokeStyle = '#c0152a';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x - 1, y - 1, nodeW + 2, nodeH + 2);
-        ctx.lineWidth = 1;
-      }
+      ctx.strokeStyle = here ? '#c0152a' : (st?.visited ? '#4a5870' : '#22252c');
+      ctx.lineWidth = here ? 2 : 1;
+      ctx.strokeRect(x + 0.5, y + 0.5, nodeW - 1, nodeH - 1);
+      ctx.fillStyle = st?.visited ? '#b8b0a4' : '#34383f';
+      const label = st?.visited ? room.name : '???';
+      this._wrapText(ctx, label, x + 6, y + nodeH / 2, nodeW - 12);
     }
+    ctx.fillStyle = '#6a6058';
+    ctx.fillText('verde = zona sicura (radio)    rosso = sei qui', left, canvas.height - 14);
   }
 
-  /* ── PAUSA ── */
-  openPause() {
-    this._openOverlay(this.$pause);
+  _wrapText(ctx, text, x, cy, maxW) {
+    const words = text.split(' ');
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const t = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t;
+    }
+    lines.push(cur);
+    const lh = 12, y0 = cy - (lines.length - 1) * lh / 2;
+    lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x, y0 + i * lh));
   }
 
-  closePause() {
-    this._closeOverlay(this.$pause);
+  /* ── PAUSA / RADIO / GAME OVER / FINALE ── */
+  openPause()  { this._open(this.$pause); }
+  closePause() { this._close(this.$pause); }
+
+  openSaveScreen()  { this._open(this.$save); }
+  closeSaveScreen() { this._close(this.$save); }
+
+  showGameOver() { setTimeout(() => this.$gameOver.classList.remove('hidden'), 1600); }
+  hideGameOver() { this.$gameOver.classList.add('hidden'); }
+
+  showEnding({ title, text, stats }) {
+    this.hideHUD();
+    $('ending-title').textContent = title;
+    $('ending-text').textContent  = text;
+    $('ending-stats').textContent = stats;
+    this.$ending.classList.remove('hidden');
+    this.fadeIn(10);
   }
 
-  /* ── GAME OVER ── */
-  showGameOver() {
-    setTimeout(() => {
-      this.$gameOver?.classList.remove('hidden');
-    }, 1500);
+  fadeOut(ms = 600, cb) {
+    this.$fade.style.transition = `opacity ${ms}ms ease`;
+    this.$fade.classList.add('fade-in');
+    if (cb) setTimeout(cb, ms);
+  }
+  fadeIn(ms = 600, cb) {
+    this.$fade.style.transition = `opacity ${ms}ms ease`;
+    this.$fade.classList.remove('fade-in');
+    if (cb) setTimeout(cb, ms);
   }
 
-  hideGameOver() {
-    this.$gameOver?.classList.add('hidden');
-  }
-
-  /* ── SAVE SCREEN ── */
-  openSaveScreen() {
-    this._openOverlay(this.$save);
-    this.game.input.lock();
-  }
-
-  closeSaveScreen() {
-    this._closeOverlay(this.$save);
-  }
-
-  /* ── FADE ── */
-  fadeOut(duration = 600, callback) {
-    const el = this.$fadeOvl;
-    if (!el) { if (callback) callback(); return; }
-    el.style.transition = `opacity ${duration}ms ease`;
-    el.classList.add('fade-in');
-    if (callback) setTimeout(callback, duration);
-  }
-
-  fadeIn(duration = 600, callback) {
-    const el = this.$fadeOvl;
-    if (!el) { if (callback) callback(); return; }
-    el.style.transition = `opacity ${duration}ms ease`;
-    el.classList.remove('fade-in');
-    if (callback) setTimeout(callback, duration);
-  }
-
-  /* ── TITOLO CINEMATICO ── */
   showCinematicTitle(duration = 4) {
-    this.$cinTitle?.classList.remove('hidden');
-    this.$cinTitle?.classList.add('visible');
+    this.$cinTitle.classList.remove('hidden');
+    requestAnimationFrame(() => this.$cinTitle.classList.add('visible'));
     setTimeout(() => {
-      this.$cinTitle?.classList.remove('visible');
-      setTimeout(() => this.$cinTitle?.classList.add('hidden'), 1000);
+      this.$cinTitle.classList.remove('visible');
+      setTimeout(() => this.$cinTitle.classList.add('hidden'), 1000);
     }, duration * 1000);
   }
 
   /* ── DEBUG ── */
   updateDebug(fps, player, roomId, enemyCount, flags) {
     if (!this.game.debug) return;
-    document.getElementById('dbg-fps').textContent   = `FPS: ${fps}`;
-    document.getElementById('dbg-pos').textContent   = player ? `X:${Math.round(player.x)} Y:${Math.round(player.y)}` : '';
-    document.getElementById('dbg-room').textContent  = `Stanza: ${roomId || '—'}`;
-    document.getElementById('dbg-state').textContent = `Nemici: ${enemyCount}`;
-    const flagStr = Object.entries(flags||{}).filter(([,v])=>v).map(([k])=>k).join(', ');
-    document.getElementById('dbg-flags').textContent = `Flag: ${flagStr || '—'}`;
+    $('dbg-fps').textContent   = `FPS: ${fps}`;
+    $('dbg-pos').textContent   = `X:${Math.round(player.x)} Y:${Math.round(player.y)}`;
+    $('dbg-room').textContent  = `Stanza: ${roomId || '—'}`;
+    $('dbg-state').textContent = `Nemici vivi: ${enemyCount}`;
+    $('dbg-flags').textContent = `Flag: ${Object.entries(flags || {}).filter(([, v]) => v).map(([k]) => k).join(', ') || '—'}`;
   }
+  toggleDebug(on) { this.$debug?.classList.toggle('hidden', !on); }
 
-  toggleDebug(on) {
-    this.$debug?.classList.toggle('hidden', !on);
-  }
-
-  /* ── OVERLAY STACK ── */
-  _openOverlay(el) {
+  /* ── PILA OVERLAY ── */
+  _open(el) {
     if (!el) return;
     el.classList.remove('hidden');
-    this._overlayStack.push(el);
+    this._stack = this._stack.filter(e => e !== el);
+    this._stack.push(el);
+    this.game.input.lock();
+    this.hideInteractPrompt();
   }
 
-  _closeOverlay(el) {
+  _close(el) {
     if (!el) return;
     el.classList.add('hidden');
-    this._overlayStack = this._overlayStack.filter(e => e !== el);
-    if (this._overlayStack.length === 0) {
+    this._stack = this._stack.filter(e => e !== el);
+    if (el === this.$pause) this.game.paused = false;
+    if (this._stack.length === 0 && !this.game.dialogue.isActive() && !this.game.events.isRunning()) {
       this.game.input.unlock();
     }
   }
 
   closeTopOverlay() {
-    if (this._overlayStack.length === 0) return;
-    const top = this._overlayStack[this._overlayStack.length - 1];
-    this._closeOverlay(top);
+    const top = this._stack[this._stack.length - 1];
+    if (top) this._close(top);
   }
 
-  hasOpenOverlay() {
-    return this._overlayStack.length > 0;
+  hasOpenOverlay() { return this._stack.length > 0; }
+
+  resetOverlays() {
+    for (const el of [this.$inventory, this.$mapScreen, this.$docScreen, this.$docsList, this.$pause, this.$save, this.$gameOver, this.$ending]) {
+      el?.classList.add('hidden');
+    }
+    this._stack = [];
   }
 }

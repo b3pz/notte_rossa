@@ -1,189 +1,182 @@
 /* =============================================
    NOTTE ROSSA — weapons.js
-   Sistema armi: pistola, cooldown, rinculo, proiettili
+   Pistola 9mm e fucile a pompa. Colpi in corsia unica.
    ============================================= */
 
 const WEAPON_DEFS = {
   pistol: {
     id: 'pistol', name: 'Pistola 9mm',
-    magSize:     6,
-    damage:      35,
-    cooldown:    0.3,    // secondi tra un colpo e l'altro
-    reloadTime:  1.8,    // secondi per ricaricare
-    ammoType:    'pistol',
-    bulletSpeed: 900,    // px/s
-    bulletRange: 700,    // px prima di scomparire
-    recoilX:     8,      // px di rinculo visivo
-    recoilY:    -3,
+    magSize: 8, damage: 34, pellets: 1, spread: 0,
+    cooldown: 0.32, reloadTime: 1.5,
+    ammoItem: 'ammo_pistol_small',
+    bulletSpeed: 1500, bulletRange: 1100, knock: 1,
+    shake: 5,
   },
-  // Altre armi future...
+  shotgun: {
+    id: 'shotgun', name: 'Fucile a pompa',
+    magSize: 4, damage: 30, pellets: 4, spread: 14,
+    cooldown: 0.85, reloadTime: 2.4,
+    ammoItem: 'ammo_shells',
+    bulletSpeed: 1300, bulletRange: 480, knock: 3,
+    shake: 12,
+  },
 };
 
 export class WeaponSystem {
   constructor(game) {
     this.game     = game;
-    this.equipped = null;   // WeaponInstance attiva
-    this.bullets  = [];     // proiettili attivi
+    this.equipped = null;
+    this.bullets  = [];
+    this._flash   = 0;
+    this._mags    = {};   // colpi nel caricatore per arma, conservati quando si cambia arma
   }
 
-  /** Equipaggia un'arma */
   equip(weaponId) {
     const def = WEAPON_DEFS[weaponId];
     if (!def) return;
-    // Se già equipaggiata, non resettare le munizioni
     if (this.equipped?.id === weaponId) return;
-    const reserve = this.game.inventory?.countItem('ammo_pistol_small') || 0;
-    this.equipped = new WeaponInstance(def, reserve);
-    console.log(`[Weapon] Equipaggiata: ${def.name}`);
+    if (this.equipped) this._mags[this.equipped.id] = this.equipped.ammoInMag;
+    this.equipped = new WeaponInstance(def, this._mags[weaponId] ?? def.magSize);
   }
 
-  /** Aggiorna cooldown, ricarica, proiettili */
-  update(dt) {
-    if (this.equipped) this.equipped.update(dt);
+  unequip() {
+    if (this.equipped) this._mags[this.equipped.id] = this.equipped.ammoInMag;
+    this.equipped = null;
+  }
 
-    // Proiettili
+  /** Munizioni di riserva = quantità nell'inventario */
+  get ammoReserve() {
+    const w = this.equipped;
+    if (!w) return 0;
+    return this.game.inventory?.countItem(w.def.ammoItem) || 0;
+  }
+  get ammoInMag() { return this.equipped?.ammoInMag || 0; }
+
+  update(dt) {
+    if (this._flash > 0) this._flash -= dt;
+    const w = this.equipped;
+    if (w) {
+      if (w.cooldownTimer > 0) w.cooldownTimer -= dt;
+      if (w.isReloading) {
+        w.reloadTimer -= dt;
+        if (w.reloadTimer <= 0) this._finishReload();
+      }
+    }
+
+    const em = this.game.enemyManager;
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
-      b.x += b.vx * dt;
-      b.y += b.vy * dt;
-      b.distanceTraveled += Math.abs(b.vx * dt) + Math.abs(b.vy * dt);
+      const step = b.vx * dt;
+      b.x += step;
+      b.travel += Math.abs(step);
+      if (b.travel > b.range || b.x < -50 || b.x > 1330) { this.bullets.splice(i, 1); continue; }
 
-      // Fuori range
-      if (b.distanceTraveled > b.range) {
-        this.bullets.splice(i, 1);
-        continue;
-      }
-
-      // Hit nemici
-      const em = this.game.enemyManager;
-      if (em) {
-        const col = this.game.collision;
-        for (const enemy of em.enemies) {
-          if (!enemy.alive) continue;
-          if (col.bulletHitsEnemy(b, enemy)) {
-            enemy.takeDamage(b.damage);
-            this.bullets.splice(i, 1);
-            this.game.camera?.shake(4, 0.1);
-            break;
-          }
+      // Colpisce il primo nemico vivo attraversato (tutta l'altezza: corsia unica)
+      let hit = null;
+      for (const e of em?.enemies || []) {
+        if (!e.alive) continue;
+        if (b.x >= e.x && b.x <= e.x + e.width) {
+          if (!hit || Math.abs(e.centerX - b.x0) < Math.abs(hit.centerX - b.x0)) hit = e;
         }
+      }
+      if (hit) {
+        // il fucile perde forza con la distanza
+        const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
+        hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
+        if (!hit.alive) em.onEnemyKilled(hit);
+        this.bullets.splice(i, 1);
       }
     }
   }
 
-  /** Spara */
-  shoot(fromX, fromY, dirX, dirY) {
+  shoot(fromX, fromY, dir) {
     const w = this.equipped;
-    if (!w || !w.canShoot()) return false;
-    if (!w.shoot()) return false;
+    if (!w) return false;
+    if (w.isReloading || w.cooldownTimer > 0) return false;
+    if (w.ammoInMag <= 0) {
+      this.game.audio?.playSfx('door_locked');
+      if (this.ammoReserve > 0) this.reload();
+      else this.game.ui?.showNotification('Caricatore vuoto.');
+      w.cooldownTimer = 0.4;
+      return false;
+    }
+    w.ammoInMag--;
+    w.cooldownTimer = w.def.cooldown;
 
-    const len    = Math.sqrt(dirX*dirX + dirY*dirY) || 1;
-    const nx     = dirX / len;
-    const ny     = dirY / len;
-
-    this.bullets.push({
-      x: fromX, y: fromY,
-      vx: nx * w.def.bulletSpeed,
-      vy: ny * w.def.bulletSpeed,
-      damage: w.def.damage,
-      range:  w.def.bulletRange,
-      distanceTraveled: 0,
-      radius: 4,
-    });
-
+    for (let p = 0; p < w.def.pellets; p++) {
+      this.bullets.push({
+        x: fromX, x0: fromX,
+        y: fromY + (p - (w.def.pellets - 1) / 2) * w.def.spread,
+        vx: dir * w.def.bulletSpeed,
+        damage: w.def.damage, range: w.def.bulletRange,
+        knock: w.def.knock, travel: 0, pellet: w.def.pellets > 1,
+      });
+    }
+    this._flash = 0.06;
+    this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
     this.game.audio?.playSfx('shot');
-    this.game.camera?.shake(6, 0.15);
+    this.game.camera?.shake(w.def.shake, 0.12);
     return true;
   }
 
-  /** Ricarica */
   reload() {
-    const w   = this.equipped;
-    if (!w || w.isReloading || w.ammoInMag === w.def.magSize) return;
-    const inv = this.game.inventory;
-    const available = inv?.countItem('ammo_pistol_small') || 0;
-    if (available === 0) {
+    const w = this.equipped;
+    if (!w || w.isReloading || w.ammoInMag >= w.def.magSize) return;
+    if (this.ammoReserve <= 0) {
       this.game.ui?.showNotification('Nessuna munizione.');
       return;
     }
-    w.startReload(available);
+    w.isReloading = true;
+    w.reloadTimer = w.def.reloadTime;
     this.game.audio?.playSfx('reload');
   }
 
-  /** Carica munizioni dall'inventario */
-  loadAmmo(ammoType, qty) {
-    if (!this.equipped || this.equipped.def.ammoType !== ammoType) return 0;
-    return this.equipped.addReserve(qty);
+  _finishReload() {
+    const w = this.equipped;
+    w.isReloading = false;
+    const need = w.def.magSize - w.ammoInMag;
+    const take = this.game.inventory?.takeItem(w.def.ammoItem, need) || 0;
+    w.ammoInMag += take;
   }
 
-  /** Disegna proiettili */
+  /** compatibilità con l'inventario (le munizioni restano nell'inventario) */
+  loadAmmo() { return 0; }
+
   draw(ctx) {
-    ctx.fillStyle = '#f0d060';
+    // Proiettili: scia sottile
     for (const b of this.bullets) {
+      const g = ctx.createLinearGradient(b.x - Math.sign(b.vx) * 40, 0, b.x, 0);
+      g.addColorStop(0, 'rgba(255,220,140,0)');
+      g.addColorStop(1, 'rgba(255,230,160,0.9)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-      ctx.fill();
-      // Scia
-      ctx.fillStyle = 'rgba(240,180,40,0.3)';
+      ctx.moveTo(b.x - Math.sign(b.vx) * 40, b.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    // Vampata
+    if (this._flash > 0) {
+      const r = 38;
+      const gr = ctx.createRadialGradient(this._flashX, this._flashY, 0, this._flashX, this._flashY, r);
+      gr.addColorStop(0, 'rgba(255,240,190,0.95)');
+      gr.addColorStop(0.4, 'rgba(255,170,60,0.6)');
+      gr.addColorStop(1, 'rgba(255,120,20,0)');
+      ctx.fillStyle = gr;
       ctx.beginPath();
-      ctx.arc(b.x - b.vx * 0.016, b.y - b.vy * 0.016, b.radius * 0.6, 0, Math.PI * 2);
+      ctx.arc(this._flashX, this._flashY, r, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#f0d060';
     }
   }
-
-  get ammoInMag()  { return this.equipped?.ammoInMag  || 0; }
-  get ammoReserve(){ return this.equipped?.ammoReserve || 0; }
 }
 
 class WeaponInstance {
-  constructor(def, reserve = 0) {
-    this.def         = def;
-    this.id          = def.id;
-    this.ammoInMag   = def.magSize;
-    this.ammoReserve = reserve;
-    this.cooldownTimer  = 0;
-    this.isReloading    = false;
-    this.reloadTimer    = 0;
-  }
-
-  update(dt) {
-    if (this.cooldownTimer  > 0) this.cooldownTimer  -= dt;
-    if (this.isReloading) {
-      this.reloadTimer -= dt;
-      if (this.reloadTimer <= 0) this._finishReload();
-    }
-  }
-
-  canShoot() {
-    return !this.isReloading && this.cooldownTimer <= 0 && this.ammoInMag > 0;
-  }
-
-  shoot() {
-    if (!this.canShoot()) return false;
-    this.ammoInMag--;
-    this.cooldownTimer = this.def.cooldown;
-    return true;
-  }
-
-  startReload(available) {
-    this.isReloading = true;
-    this.reloadTimer = this.def.reloadTime;
-    this._reloadAvail = available;
-  }
-
-  _finishReload() {
-    const needed  = this.def.magSize - this.ammoInMag;
-    const take    = Math.min(needed, this._reloadAvail, this.ammoReserve);
-    this.ammoInMag  += take;
-    this.ammoReserve = Math.max(0, this.ammoReserve - take);
-    this.isReloading = false;
-    this.reloadTimer = 0;
-  }
-
-  addReserve(qty) {
-    const before = this.ammoReserve;
-    this.ammoReserve += qty;
-    return this.ammoReserve - before;
+  constructor(def, mag) {
+    this.def = def;
+    this.id  = def.id;
+    this.ammoInMag     = mag;
+    this.cooldownTimer = 0;
+    this.isReloading   = false;
+    this.reloadTimer   = 0;
   }
 }

@@ -59,6 +59,17 @@ export class SaveManager {
     return this.loadGame(latestSlot);
   }
 
+  /** Slot con il salvataggio più recente, o null */
+  latestSlot() {
+    let best = null, bestT = -1;
+    for (let i = 0; i < NUM_SLOTS; i++) {
+      const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
+      if (!raw) continue;
+      try { const d = JSON.parse(raw); if (d.timestamp > bestT) { bestT = d.timestamp; best = i; } } catch (e) {}
+    }
+    return best;
+  }
+
   /** Restituisce info sugli slot (per la UI "Carica") */
   getSlotsInfo() {
     return Array.from({ length: NUM_SLOTS }, (_, i) => {
@@ -122,7 +133,7 @@ export class SaveManager {
 
     // Carica stanza
     const roomId = data.roomId || 'train_wagon';
-    g.roomManager.loadRoom(roomId, data.player.x, data.player.y);
+    g.roomManager.loadRoom(roomId, data.player.x);
 
     // Ripristina player (DOPO loadRoom per avere la stanza giusta)
     g.player.deserialize(data.player);
