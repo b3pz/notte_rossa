@@ -2,8 +2,14 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>NOTTE ROSSA</title>
+  <link rel="icon" type="image/png" href="assets/ui/favicon.png">
+  <link rel="icon" href="assets/ui/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/ui/apple-touch-icon.png">
+  <meta name="theme-color" content="#080a0e">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/menu.css">
@@ -125,6 +131,37 @@
     </div>
 
     <!-- PROMPT INTERAZIONE -->
+    <!-- COMANDI TOUCH (solo telefono/tablet) -->
+    <div id="touch-controls" class="hidden">
+      <div class="tc-top">
+        <button class="tc-btn tc-small" id="tc-inv">ZAINO</button>
+        <button class="tc-btn tc-small" id="tc-map">MAPPA</button>
+        <button class="tc-btn tc-small" id="tc-pause">❚❚</button>
+      </div>
+      <div class="tc-left">
+        <div class="tc-row">
+          <button class="tc-btn tc-big" id="tc-left">◀</button>
+          <button class="tc-btn tc-big" id="tc-right">▶</button>
+        </div>
+        <div class="tc-row">
+          <button class="tc-btn tc-small" id="tc-run">CORRI</button>
+          <button class="tc-btn tc-small" id="tc-crouch">ACCOVACCIATI</button>
+        </div>
+      </div>
+      <div class="tc-right">
+        <div class="tc-row">
+          <button class="tc-btn tc-small" id="tc-light">TORCIA</button>
+          <button class="tc-btn tc-small tc-gun" id="tc-reload">RICARICA</button>
+        </div>
+        <div class="tc-row">
+          <button class="tc-btn tc-big tc-gun" id="tc-aim">MIRA</button>
+          <button class="tc-btn tc-big tc-gun tc-shoot" id="tc-shoot">SPARA</button>
+          <button class="tc-btn tc-big tc-use" id="tc-use">E</button>
+        </div>
+      </div>
+    </div>
+    <div id="rotate-hint">Ruota il telefono in orizzontale</div>
+
     <div id="interact-prompt" class="hidden">
       <span class="interact-key">[E]</span>
       <span id="interact-label">Esamina</span>
@@ -710,6 +747,96 @@ const PROPS = {
   }
 };
 
+/* ───── scene_manifest.js ───── */
+/* Generato da tools/slice_scene.py — NON modificare a mano */
+const SCENE = {
+  "door_wood": {
+    "file": "assets/sprites/cut/scene/door_wood.png",
+    "w": 187,
+    "h": 330
+  },
+  "door_wood_open": {
+    "file": "assets/sprites/cut/scene/door_wood_open.png",
+    "w": 181,
+    "h": 330
+  },
+  "door_metal": {
+    "file": "assets/sprites/cut/scene/door_metal.png",
+    "w": 195,
+    "h": 330
+  },
+  "door_metal_open": {
+    "file": "assets/sprites/cut/scene/door_metal_open.png",
+    "w": 318,
+    "h": 330
+  },
+  "door_glass": {
+    "file": "assets/sprites/cut/scene/door_glass.png",
+    "w": 187,
+    "h": 330
+  },
+  "door_glass_open": {
+    "file": "assets/sprites/cut/scene/door_glass_open.png",
+    "w": 193,
+    "h": 330
+  },
+  "door_security": {
+    "file": "assets/sprites/cut/scene/door_security.png",
+    "w": 191,
+    "h": 340
+  },
+  "door_security_open": {
+    "file": "assets/sprites/cut/scene/door_security_open.png",
+    "w": 358,
+    "h": 340
+  },
+  "locker": {
+    "file": "assets/sprites/cut/scene/locker.png",
+    "w": 80,
+    "h": 300
+  },
+  "locker_open": {
+    "file": "assets/sprites/cut/scene/locker_open.png",
+    "w": 137,
+    "h": 300
+  },
+  "locker_bent": {
+    "file": "assets/sprites/cut/scene/locker_bent.png",
+    "w": 81,
+    "h": 300
+  },
+  "locker_fallen": {
+    "file": "assets/sprites/cut/scene/locker_fallen.png",
+    "w": 159,
+    "h": 110
+  },
+  "electric_box": {
+    "file": "assets/sprites/cut/scene/electric_box.png",
+    "w": 155,
+    "h": 175
+  },
+  "radio_set": {
+    "file": "assets/sprites/cut/scene/radio_set.png",
+    "w": 138,
+    "h": 80
+  },
+  "payphone": {
+    "file": "assets/sprites/cut/scene/payphone.png",
+    "w": 98,
+    "h": 120
+  }
+};
+const UI_ICONS = {
+  "use": "assets/sprites/cut/ui/use.png",
+  "take": "assets/sprites/cut/ui/take.png",
+  "door": "assets/sprites/cut/ui/door.png",
+  "examine": "assets/sprites/cut/ui/examine.png",
+  "save": "assets/sprites/cut/ui/save.png",
+  "inventory": "assets/sprites/cut/ui/inventory.png",
+  "map": "assets/sprites/cut/ui/map.png",
+  "document": "assets/sprites/cut/ui/document.png"
+};
+
 /* ───── sprites.js ───── */
 /* =============================================
    NOTTE ROSSA — sprites.js
@@ -745,6 +872,8 @@ const SpriteLib = {
     }
     for (const f of Object.values(ICONS)) _img(f);
     for (const p of Object.values(PROPS)) _img(p.file);
+    for (const p of Object.values(SCENE)) _img(p.file);
+    for (const f of Object.values(UI_ICONS)) _img(f);
   },
 
   has(char, anim) {
@@ -815,6 +944,50 @@ const SpriteLib = {
     ctx.drawImage(im, cx - size / 2, cy - size / 2, size, size);
     ctx.restore();
   },
+
+  hasScene(name) { return !!SCENE[name]; },
+  sceneSize(name) { return SCENE[name] || null; },
+
+  /** Oggetto di scena (porta, armadietto…) con la base in (cx, footY) */
+  drawScene(ctx, name, cx, footY, scale = 1, flip = false, alpha = 1) {
+    const p = SCENE[name];
+    if (!p) return false;
+    const im = _img(p.file);
+    if (!_ready(im)) return false;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.translate(cx, footY);
+    ctx.scale(flip ? -scale : scale, scale);
+    ctx.drawImage(im, -p.w / 2, -p.h, p.w, p.h);
+    ctx.restore();
+    return true;
+  },
+
+  /** Icona d'interfaccia bianca (porta, esamina, raccogli…) centrata */
+  drawUi(ctx, name, cx, cy, size = 32, alpha = 1) {
+    const im = _img(UI_ICONS[name]);
+    if (!_ready(im)) return;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.drawImage(im, cx - size / 2, cy - size / 2, size, size);
+    ctx.restore();
+  },
+
+  /** Ombra di contatto morbida sul pavimento */
+  shadow(ctx, cx, footY, rx, alpha = 0.55) {
+    if (rx <= 1 || alpha <= 0) return;
+    const ry = rx * 0.22;
+    ctx.save();
+    ctx.translate(cx, footY);
+    ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    g.addColorStop(0.6, `rgba(0,0,0,${alpha * 0.55})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  },
 };
 
 /* ───── input.js ───── */
@@ -855,8 +1028,10 @@ class InputManager {
   }
 
   _bindEvents() {
+    this._tapped = {};
     window.addEventListener('keydown', e => {
       this.keys[e.code] = true;
+      this._tapped[e.code] = true;
       e.preventDefault && ['Tab','Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code) && e.preventDefault();
     });
     window.addEventListener('keyup', e => {
@@ -880,6 +1055,7 @@ class InputManager {
   /** Aggiorna lo stato precedente — chiamare una volta per frame DOPO aver letto */
   update() {
     this._prev = { ...this.keys };
+    this._tapped = {};
     this._mousePrev = { ...this.mouse };
   }
 
@@ -902,7 +1078,7 @@ class InputManager {
     for (const k of keys) {
       if (k === 'Mouse0') { if (this.mouse.left  && !this._mousePrev.left)  return true; continue; }
       if (k === 'Mouse1') { if (this.mouse.right && !this._mousePrev.right) return true; continue; }
-      if (this.keys[k] && !this._prev[k]) return true;
+      if ((this.keys[k] || this._tapped[k]) && !this._prev[k]) return true;
     }
     return false;
   }
@@ -918,7 +1094,7 @@ class InputManager {
   }
 
   /** Segna un tasto come già usato (non conta come "appena premuto") */
-  consume(code) { this._prev[code] = true; }
+  consume(code) { this._prev[code] = true; delete this._tapped[code]; }
 
   /** Blocca temporaneamente l'input (es. durante cutscene) */
   lock()   { this._locked = true; }
@@ -929,6 +1105,7 @@ class InputManager {
   flush() {
     this.keys = {};
     this._prev = {};
+    this._tapped = {};
     this.mouse.left = false;
     this.mouse.right = false;
   }
@@ -1661,6 +1838,7 @@ class Player {
     this.armed       = false;   // arma equipaggiata
     this.reloading   = false;
     this.shotTimer   = 0;       // >0 subito dopo uno sparo
+    this.aimHold     = 0;       // >0 dopo aver premuto spara: resta in mira
 
     // Animazione
     this.anim      = 'idle';
@@ -1699,6 +1877,7 @@ class Player {
     }
     if (this._hurtTimer > 0) this._hurtTimer -= dt;
     if (this.shotTimer  > 0) this.shotTimer  -= dt;
+    if (this.aimHold    > 0) this.aimHold    -= dt;
 
     if (!this.alive) {
       this.vx = 0;
@@ -1708,7 +1887,7 @@ class Player {
 
     if (!input.locked) {
       this.isCrouching = input.isDown('crouch');
-      this.isAiming    = this.armed && input.isDown('aim');
+      this.isAiming    = this.armed && (input.isDown('aim') || this.aimHold > 0);
       this._handleMovement(input);
       this._handleFlashlight(dt, input);
       this.isInteract  = input.justPressed('interact');
@@ -1873,6 +2052,7 @@ class Player {
   /* ── RENDER ── */
   draw(ctx) {
     const blink = this.alive && this.invulnerable && Math.floor(Date.now() / 90) % 2 === 0;
+    SpriteLib.shadow(ctx, this.centerX, this.footY, 60 * this.scale);
     const ok = SpriteLib.draw(ctx, 'player', this.anim, this.animFrame,
       this.centerX, this.footY, this.facingRight, { alpha: blink ? 0.45 : 1, scale: this.scale });
     if (!ok) this._drawPlaceholder(ctx);
@@ -2374,7 +2554,7 @@ class InventoryManager {
 /* ───── weapons.js ───── */
 /* =============================================
    NOTTE ROSSA — weapons.js
-   Pistola 9mm e fucile a pompa. Colpi in corsia unica.
+   Pistola 9mm e fucile a pompa. Colpi istantanei con mira assistita.
    ============================================= */
 
 const WEAPON_DEFS = {
@@ -2383,15 +2563,15 @@ const WEAPON_DEFS = {
     magSize: 8, damage: 34, pellets: 1, spread: 0,
     cooldown: 0.32, reloadTime: 1.5,
     ammoItem: 'ammo_pistol_small',
-    bulletSpeed: 1500, bulletRange: 1100, knock: 1,
+    bulletSpeed: 1500, bulletRange: 1100, knock: 1.6,
     shake: 5,
   },
   shotgun: {
     id: 'shotgun', name: 'Fucile a pompa',
-    magSize: 4, damage: 30, pellets: 4, spread: 14,
+    magSize: 4, damage: 26, pellets: 4, spread: 14,
     cooldown: 0.85, reloadTime: 2.4,
     ammoItem: 'ammo_shells',
-    bulletSpeed: 1300, bulletRange: 480, knock: 3,
+    bulletSpeed: 1300, bulletRange: 520, knock: 4,
     shake: 12,
   },
 };
@@ -2402,7 +2582,8 @@ class WeaponSystem {
     this.equipped = null;
     this.bullets  = [];
     this._flash   = 0;
-    this._mags    = {};   // colpi nel caricatore per arma, conservati quando si cambia arma
+    this._mags    = {};
+    this.particles = [];   // colpi nel caricatore per arma, conservati quando si cambia arma
   }
 
   equip(weaponId) {
@@ -2436,34 +2617,42 @@ class WeaponSystem {
         if (w.reloadTimer <= 0) this._finishReload();
       }
     }
-
-    const em = this.game.enemyManager;
+    // scie dei colpi (solo effetto visivo: il danno è istantaneo)
     for (let i = this.bullets.length - 1; i >= 0; i--) {
-      const b = this.bullets[i];
-      const step = b.vx * dt;
-      b.x += step;
-      b.travel += Math.abs(step);
-      if (b.travel > b.range || b.x < -50 || b.x > 1330) { this.bullets.splice(i, 1); continue; }
-
-      // Colpisce il primo nemico vivo attraversato (tutta l'altezza: corsia unica)
-      let hit = null;
-      for (const e of em?.enemies || []) {
-        if (!e.alive) continue;
-        if (b.x >= e.x && b.x <= e.x + e.width) {
-          if (!hit || Math.abs(e.centerX - b.x0) < Math.abs(hit.centerX - b.x0)) hit = e;
-        }
-      }
-      if (hit) {
-        // il fucile perde forza con la distanza
-        const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
-        hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
-        if (!hit.alive) em.onEnemyKilled(hit);
-        this.bullets.splice(i, 1);
-      }
+      this.bullets[i].life -= dt;
+      if (this.bullets[i].life <= 0) this.bullets.splice(i, 1);
+    }
+    // schizzi di sangue
+    const floor = this.game.roomManager?.current?.floorY ?? 700;
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const q = this.particles[i];
+      q.life -= dt;
+      if (q.y < floor) { q.vy += 1400 * dt; q.x += q.vx * dt; q.y += q.vy * dt; }
+      else { q.y = floor; q.vx = 0; q.vy = 0; }
+      if (q.life <= 0) this.particles.splice(i, 1);
     }
   }
 
-  shoot(fromX, fromY, dir) {
+  /**
+   * Nemico più vicino davanti al giocatore (direzione dir) entro range.
+   * Conta anche chi è già addosso (sovrapposto al giocatore).
+   */
+  findTarget(player, dir, range) {
+    const em = this.game.enemyManager;
+    const px = player.centerX;
+    let best = null, bestD = Infinity;
+    for (const e of em?.enemies || []) {
+      if (!e.alive) continue;
+      const near = dir > 0 ? e.x + e.width - px : px - e.x;   // bordo più lontano davanti
+      const far  = dir > 0 ? e.x - px : px - (e.x + e.width); // bordo più vicino
+      if (near < -10 || far > range) continue;
+      const d = Math.max(0, far);
+      if (d < bestD) { bestD = d; best = e; }
+    }
+    return best;
+  }
+
+  shoot(player) {
     const w = this.equipped;
     if (!w) return false;
     if (w.isReloading || w.cooldownTimer > 0) return false;
@@ -2477,20 +2666,45 @@ class WeaponSystem {
     w.ammoInMag--;
     w.cooldownTimer = w.def.cooldown;
 
+    const dir = player.facingRight ? 1 : -1;
+    const fromX = player.handX, fromY = player.handY;
+    const target = this.findTarget(player, dir, w.def.bulletRange);
+    let endX = fromX + dir * w.def.bulletRange;
+    if (target) {
+      const dist = Math.max(0, Math.abs(target.centerX - player.centerX) - target.width / 2);
+      // il fucile perde forza con la distanza
+      const falloff = w.def.pellets > 1 ? Math.max(0.35, 1 - dist / w.def.bulletRange) : 1;
+      const crit = Math.random() < 0.18;
+      const dmg = Math.round(w.def.damage * w.def.pellets * falloff * (crit ? 2 : 1));
+      const hx = target.centerX - dir * target.width * 0.2;
+      const hy = target.y + target.height * (crit ? 0.18 : 0.4);
+      target.takeDamage(dmg, dir * w.def.knock);
+      if (!target.alive) this.game.enemyManager.onEnemyKilled(target);
+      this._blood(hx, hy, dir, crit ? 22 : 12);
+      if (crit) this.game.ui?.showNotification('Colpo alla testa!', 900);
+      endX = hx;
+    }
     for (let p = 0; p < w.def.pellets; p++) {
-      this.bullets.push({
-        x: fromX, x0: fromX,
-        y: fromY + (p - (w.def.pellets - 1) / 2) * w.def.spread,
-        vx: dir * w.def.bulletSpeed,
-        damage: w.def.damage, range: w.def.bulletRange,
-        knock: w.def.knock, travel: 0, pellet: w.def.pellets > 1,
-      });
+      const off = (p - (w.def.pellets - 1) / 2) * w.def.spread;
+      this.bullets.push({ x0: fromX, y0: fromY, x1: endX, y1: fromY + off * (target ? 0.4 : 1) + (target ? (target.y + target.height * 0.4 - fromY) : 0), life: 0.07 });
     }
     this._flash = 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
     this.game.audio?.playSfx('shot');
     this.game.camera?.shake(w.def.shake, 0.12);
     return true;
+  }
+
+  _blood(x, y, dir, n) {
+    for (let i = 0; i < n; i++) {
+      this.particles.push({
+        x, y,
+        vx: dir * (60 + Math.random() * 260) + (Math.random() - 0.5) * 120,
+        vy: -120 - Math.random() * 320,
+        r: 1.5 + Math.random() * 2.5,
+        life: 1.2 + Math.random() * 1.5,
+      });
+    }
   }
 
   reload() {
@@ -2517,30 +2731,64 @@ class WeaponSystem {
   loadAmmo() { return 0; }
 
   draw(ctx) {
-    // Proiettili: scia sottile
+    // sangue
+    ctx.fillStyle = 'rgba(110,8,8,0.9)';
+    for (const q of this.particles) {
+      ctx.globalAlpha = Math.min(1, q.life);
+      ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // scie
     for (const b of this.bullets) {
-      const g = ctx.createLinearGradient(b.x - Math.sign(b.vx) * 40, 0, b.x, 0);
+      const g = ctx.createLinearGradient(b.x0, b.y0, b.x1, b.y1);
       g.addColorStop(0, 'rgba(255,220,140,0)');
-      g.addColorStop(1, 'rgba(255,230,160,0.9)');
+      g.addColorStop(1, `rgba(255,235,170,${Math.min(1, b.life * 14)})`);
       ctx.strokeStyle = g;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(b.x - Math.sign(b.vx) * 40, b.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b.x0, b.y0); ctx.lineTo(b.x1, b.y1); ctx.stroke();
     }
-    // Vampata
+    // vampata
     if (this._flash > 0) {
-      const r = 38;
+      const r = 42;
       const gr = ctx.createRadialGradient(this._flashX, this._flashY, 0, this._flashX, this._flashY, r);
       gr.addColorStop(0, 'rgba(255,240,190,0.95)');
       gr.addColorStop(0.4, 'rgba(255,170,60,0.6)');
       gr.addColorStop(1, 'rgba(255,120,20,0)');
       ctx.fillStyle = gr;
-      ctx.beginPath();
-      ctx.arc(this._flashX, this._flashY, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(this._flashX, this._flashY, r, 0, Math.PI * 2); ctx.fill();
     }
+  }
+
+  /** Mirino sul nemico agganciato (disegnato sopra il buio) */
+  drawAim(ctx) {
+    const p = this.game.player, w = this.equipped;
+    if (!w || !p.alive || !(p.isAiming || p.aimHold > 0)) return;
+    const dir = p.facingRight ? 1 : -1;
+    const t = this.findTarget(p, dir, w.def.bulletRange);
+    ctx.save();
+    if (t) {
+      const cx = t.centerX, cy = t.y + t.height * 0.4;
+      const r = 20 + Math.sin(Date.now() / 90) * 2;
+      ctx.strokeStyle = 'rgba(230,50,40,0.95)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - r - 8, cy); ctx.lineTo(cx - r + 6, cy);
+      ctx.moveTo(cx + r - 6, cy); ctx.lineTo(cx + r + 8, cy);
+      ctx.moveTo(cx, cy - r - 8); ctx.lineTo(cx, cy - r + 6);
+      ctx.moveTo(cx, cy + r - 6); ctx.lineTo(cx, cy + r + 8);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(230,50,40,0.25)';
+      ctx.beginPath(); ctx.moveTo(p.handX, p.handY); ctx.lineTo(cx, cy); ctx.stroke();
+    } else {
+      const g = ctx.createLinearGradient(p.handX, 0, p.handX + dir * 300, 0);
+      g.addColorStop(0, 'rgba(230,50,40,0.3)');
+      g.addColorStop(1, 'rgba(230,50,40,0)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(p.handX, p.handY); ctx.lineTo(p.handX + dir * 300, p.handY); ctx.stroke();
+    }
+    ctx.restore();
   }
 }
 
@@ -2567,7 +2815,7 @@ class WeaponInstance {
 const ENEMY_DEFS = {
   contaminato: {
     name: 'Contaminato', sprite: 'contaminato',
-    width: 80, height: 260, maxHp: 110,
+    width: 80, height: 260, maxHp: 100,
     speed: 55, chaseSpeed: 88,
     damage: 18, cooldown: 1.6, windup: 0.4, range: 95,
     vision: 520, stun: 0.35,
@@ -2798,7 +3046,7 @@ class Enemy {
   takeDamage(amount, knockDir = 0) {
     if (!this.alive) return;
     this.hp -= amount;
-    this.x += knockDir * 18 * this.scale;
+    this.x += knockDir * 22 * this.scale;
     if (this.state === AI_STATE.CEILING || this.state === AI_STATE.DROP) this._dropY = 0;
     if (this.hp <= 0) {
       this.hp = 0;
@@ -2877,6 +3125,9 @@ class Enemy {
       if (this.state === AI_STATE.STUNNED) opts.rotate = (this.facingRight ? -1 : 1) * 0.15;
     }
 
+    // ombra sul pavimento (il Crawler appeso la proietta lo stesso, più piccola)
+    const hang = this.state === AI_STATE.CEILING ? 1 : (this.state === AI_STATE.DROP ? Math.min(1, -this._dropY / (150 * this.scale)) : 0);
+    SpriteLib.shadow(ctx, this.centerX, this.footY, this.width * 0.62 * (1 - hang * 0.5), (this.alive ? 0.55 : 0.4) * (1 - hang * 0.5));
     const ok = SpriteLib.draw(ctx, s, this.anim, this.animFrame, this.centerX, footY, this.facingRight, opts);
     if (!ok) {
       ctx.fillStyle = this.alive ? '#3a2a24' : 'rgba(60,20,10,0.6)';
@@ -3875,7 +4126,7 @@ const ROOMS = {
     name: 'Atrio', chapter: 'Stazione', bg: BG + 'station_hall.png',
     light: 0.55, map: [2, 0], ambient: 'station_ambient',
     hotspots: [
-      { id: 'ticket_booth', x: 200, w: 220, label: 'Biglietteria', markY: 480,
+      { id: 'ticket_booth', x: 320, w: 130, label: 'Biglietteria', markY: 480,
         text: 'La biglietteria è chiusa. Il cassetto dei soldi è aperto e pieno.\nChi scappa non pensa ai soldi.' },
       { id: 'notice_board', x: 470, w: 120, label: 'Avviso affisso', icon: 'note', iconY: 470, doc: 'doc_ordinanza' },
       { id: 'locker_flashlight', x: 600, w: 110, label: 'Armadietto del personale', markY: 520,
@@ -3883,7 +4134,7 @@ const ROOMS = {
     ],
     doors: [
       { id: 'hall_to_platform', edge: 'left', label: 'Binario 1', target: 'station_platform', targetX: R },
-      { id: 'hall_to_storage', x: 60, w: 110, label: 'Porta DEPOSITO', target: 'station_storage', targetX: L + 40 },
+      { id: 'hall_to_storage', x: 175, w: 130, label: 'Porta DEPOSITO', target: 'station_storage', targetX: L + 40 },
       { id: 'hall_to_control', x: 730, w: 130, label: 'Scala mobile — Sala controllo', target: 'station_control', targetX: L,
         keyId: 'key_station', lockedText: 'In cima alla scala mobile c\'è una porta blindata.\n"SALA CONTROLLO — solo personale". Serve la chiave.' },
       { id: 'hall_to_exit', edge: 'right', label: 'Uscita', target: 'station_exit', targetX: L,
@@ -3911,7 +4162,7 @@ const ROOMS = {
         text: 'Il carrello è rovesciato. Sul pavimento, impronte scalze che vanno verso il buio.' },
     ],
     doors: [
-      { id: 'storage_to_hall', edge: 'left', label: 'Atrio', target: 'station_hall', targetX: 120 },
+      { id: 'storage_to_hall', edge: 'left', label: 'Atrio', target: 'station_hall', targetX: 200 },
       { id: 'storage_dark', edge: 'right', label: 'Corridoio buio', lockedText: 'Il corridoio finisce contro un muro di casse.', requires: [{ flag: 'never' }] },
     ],
     spawnX: L + 40,
@@ -3969,7 +4220,7 @@ const ROOMS = {
     ],
     doors: [
       { id: 'street_to_station', edge: 'left', label: 'Stazione', target: 'station_exit', targetX: 560 },
-      { id: 'street_to_apartment', x: 90, w: 130, label: 'Portone — Palazzo Conti', target: 'apartment', targetX: L },
+      { id: 'street_to_apartment', x: 150, w: 130, label: 'Portone — Palazzo Conti', target: 'apartment', targetX: L },
       { id: 'street_to_alley', x: 590, w: 120, label: 'Vicolo verso il San Rocco', target: 'city_alley', targetX: L },
       { id: 'street_to_shop', x: 1040, w: 140, label: 'Alimentari da Luigi', target: 'alimentari', targetX: L },
     ],
@@ -4019,7 +4270,7 @@ const ROOMS = {
       { id: 'apt_key', x: 1000, w: 120, label: 'Mensola della cucina', icon: 'key_hospital', iconY: 450, give: ['key_hospital', 'bandage'] },
     ],
     doors: [
-      { id: 'apt_to_street', edge: 'left', label: 'Via Ferrante', target: 'city_street', targetX: 150 },
+      { id: 'apt_to_street', edge: 'left', label: 'Via Ferrante', target: 'city_street', targetX: 180 },
       { id: 'apt_exit', x: 1150, w: 100, label: 'Uscita di sicurezza', lockedText: 'L\'uscita di sicurezza dà su un cortile murato. Non porta da nessuna parte.', requires: [{ flag: 'never' }] },
     ],
     enemies: [
@@ -4062,7 +4313,7 @@ const ROOMS = {
     ],
     doors: [
       { id: 'corr_to_alley', edge: 'left', label: 'Vicolo', target: 'city_alley', targetX: 640 },
-      { id: 'corr_to_ward', x: 160, w: 120, label: 'Degenze', target: 'hospital_ward', targetX: L,
+      { id: 'corr_to_ward', x: 240, w: 120, label: 'Degenze', target: 'hospital_ward', targetX: L,
         keyId: 'key_hospital', lockedText: 'Porta del reparto degenze. Chiusa a chiave.' },
       { id: 'corr_to_morgue', x: 590, w: 120, label: 'Scale — Obitorio (-1)', target: 'hospital_morgue', targetX: L,
         requires: [{ item: 'shotgun' }], failText: 'Le scale scendono verso l\'obitorio. Da laggiù arrivano dei versi, tanti.\nCon una pistola sola non scendi.' },
@@ -4081,7 +4332,7 @@ const ROOMS = {
     light: 0.45, map: [1, 2],
     props: [{ name: 'body_2', x: 1010, flip: true }],
     hotspots: [
-      { id: 'ward_locker', x: 90, w: 140, label: 'Armadietto della vigilanza', icon: 'shotgun', iconY: 520,
+      { id: 'ward_locker', x: 250, w: 140, label: 'Armadietto della vigilanza', icon: 'shotgun', iconY: 520,
         give: ['shotgun', ['ammo_shells', 8]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
       { id: 'ward_bed', x: 740, w: 220, label: 'Letto', markY: 560,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
@@ -4090,7 +4341,7 @@ const ROOMS = {
         text: 'Sul camice c\'è scritto GIULIA. Il badge è ancora appeso al taschino.' },
     ],
     doors: [
-      { id: 'ward_to_corr', edge: 'left', label: 'Corridoio', target: 'hospital_corridor', targetX: 220 },
+      { id: 'ward_to_corr', edge: 'left', label: 'Corridoio', target: 'hospital_corridor', targetX: 265 },
     ],
     enemies: [
       { id: 'ward_listener', type: 'listener', x: 620, idle: true, facingRight: true },
@@ -4430,6 +4681,60 @@ const FRAMING = {
   molo_finale:        [0.75, 656],
 };
 
+
+/* Aspetto delle porte.
+   'wood' | 'metal' | 'glass' | 'security' = porta disegnata (sprite)
+   'painted'  = il passaggio è già nello sfondo: solo segnalino
+   'passage'  = uscita laterale (strada, banchina, tunnel): cartello a freccia
+   Le uscite "edge" senza voce qui sono 'passage'; le altre 'painted'. */
+const DOOR_LOOK = {
+  wagon_left: 'metal',        wagon_to_platform: 'painted',
+  platform_to_wagon: 'passage', platform_to_hall: 'passage',
+  hall_to_platform: 'passage', hall_to_storage: 'metal', hall_to_control: 'painted', hall_to_exit: 'passage',
+  storage_to_hall: 'metal',   storage_dark: 'passage',
+  control_to_hall: 'security',
+  exit_to_hall: 'glass',      exit_to_city: 'painted',
+  street_to_station: 'passage', street_to_apartment: 'wood', street_to_alley: 'painted', street_to_shop: 'glass',
+  shop_to_street: 'glass',
+  apt_to_street: 'wood',      apt_exit: 'metal',
+  alley_to_street: 'passage', alley_to_hospital: 'metal',
+  corr_to_alley: 'metal',     corr_to_ward: 'wood', corr_to_morgue: 'painted', corr_to_surgery: 'security',
+  ward_to_corr: 'wood',
+  surg_to_corr: 'glass',
+  morgue_to_corr: 'metal',    morgue_to_metro: 'metal',
+  mi_to_morgue: 'metal',      mi_to_banchina: 'painted',
+  mb_to_mi: 'passage',        mb_to_tunnel: 'passage',
+  tunnel_to_mb: 'passage',    tunnel_to_gen: 'metal',
+  gen_to_tunnel: 'metal',     gen_to_maint: 'metal',
+  maint_to_gen: 'passage',    maint_to_safe: 'security',
+  safe_to_maint: 'passage',   safe_to_lab: 'passage',
+  li_to_safe: 'security',     li_to_corr: 'painted',
+  lc_to_li: 'glass',          lc_to_bio: 'painted', lc_to_server: 'glass',
+  bio_to_corr: 'glass',
+  server_to_lc: 'glass',      server_to_core: 'painted',
+  core_to_server: 'security', core_to_port: 'security',
+  port_to_core: 'passage',    port_to_pier: 'passage',
+  pier_to_port: 'passage',
+};
+
+/* Oggetti di scena disegnati sopra lo sfondo (dalle tavole in assets).
+   { name, x (centro), lift (px sopra i piedi, a scala 1), flip, openWhen: id hotspot → usa <name>_open } */
+const SCENERY = {
+  station_platform: [{ name: 'payphone', x: 1100, lift: 120 }],
+  station_hall:     [{ name: 'locker', x: 655, openWhen: 'locker_flashlight' }],
+  station_storage:  [{ name: 'locker_fallen', x: 1000 }],
+  station_control:  [{ name: 'radio_set', x: 620, lift: 95 }],
+  apartment:        [{ name: 'radio_set', x: 880, lift: 85 }],
+  hospital_ward:    [{ name: 'locker', x: 290, openWhen: 'ward_locker' }, { name: 'locker', x: 355 }],
+  metro_banchina:   [{ name: 'payphone', x: 620, lift: 110 }],
+  sala_generatori:  [{ name: 'electric_box', x: 1020, lift: 70 }],
+  stanza_manutenzione: [{ name: 'locker', x: 990, openWhen: 'maint_locker' }, { name: 'locker_bent', x: 1055 }],
+  safe_room:        [],
+};
+
+/* Scala di disegno delle porte: nelle inquadrature ravvicinate non devono uscire dallo schermo */
+function doorScale(room) { return Math.min(room.scale, 1.2) * 0.9; }
+
 // Completa i campi di default
 for (const [id, r] of Object.entries(ROOMS)) {
   const fr = FRAMING[id] || [1, FLOOR];
@@ -4445,6 +4750,21 @@ for (const [id, r] of Object.entries(ROOMS)) {
   r.npcs = r.npcs || [];
   r.props = r.props || [];
   r.enemies = r.enemies || [];
+  r.scenery = SCENERY[id] || [];
+  const ds = doorScale(r);
+  for (const d of r.doors) {
+    d.look = DOOR_LOOK[d.id] || (d.edge ? 'passage' : 'painted');
+    const spr = SCENE['door_' + d.look];
+    if (d.edge) {
+      // le uscite laterali diventano porte vere e proprie: ci si va sopra e si preme E
+      const sw = spr ? Math.round(spr.w * ds) : 110;
+      d.w = 110;
+      d.x = d.edge === 'left' ? 16 : ROOM_W - 16 - d.w;
+      d.cx = d.edge === 'left' ? 16 + sw / 2 : ROOM_W - 16 - sw / 2;
+    } else {
+      d.cx = d.x + d.w / 2;
+    }
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -4561,7 +4881,7 @@ class RoomManager {
       consider('hotspot', h, h.x, h.x + h.w);
     }
     for (const d of room.doors) {
-      if (d.edge || !this.visible(d)) continue;
+      if (!this.visible(d)) continue;
       consider('door', d, d.x, d.x + d.w);
     }
     for (const n of room.npcs) {
@@ -4575,6 +4895,25 @@ class RoomManager {
     return this.current?.doors.find(d => d.edge === side && this.visible(d)) || null;
   }
 
+  /** La porta si può attraversare adesso? (condizioni e chiave) */
+  doorPassable(d) {
+    if (!d.target) return false;
+    if (d.requires && !this.check(d.requires)) return false;
+    if (d.keyId && !this.isDoorOpen(d.id) && !this.game.inventory.hasItem(d.keyId)) return false;
+    return true;
+  }
+
+  /** Tipo di segnalino per un oggetto interattivo */
+  markerKind(kind, o) {
+    if (kind === 'door') return 'door';
+    if (kind === 'npc') return 'use';
+    if (o.event === 'open_save') return 'save';
+    if (o.doc) return 'document';
+    if (o.give?.length) return 'take';
+    if (o.event || o.requires) return 'use';
+    return 'examine';
+  }
+
   /* ── RENDER ── */
   drawBackground(ctx) {
     const room = this.current;
@@ -4586,74 +4925,153 @@ class RoomManager {
       ctx.fillStyle = '#07080b';
       ctx.fillRect(0, 0, ROOM_W, ROOM_H);
     }
-    // oggetti di scena
-    for (const pr of room.props) SpriteLib.drawProp(ctx, pr.name, pr.x, room.floorY + 18 * room.scale, pr.flip, 1, room.scale);
+    const sc = room.scale, fy = room.floorY;
+    // oggetti di scena (armadietti, telefoni, quadri elettrici…)
+    for (const o of room.scenery) {
+      const open = o.openWhen && this.isPicked(o.openWhen) && SpriteLib.hasScene(o.name + '_open');
+      const name = open ? o.name + '_open' : o.name;
+      const s = Math.min(sc, 1.3) * 0.88;
+      const foot = fy - 34 * sc - (o.lift || 0) * s;
+      if (!o.lift) SpriteLib.shadow(ctx, o.x, foot + 3, (SpriteLib.sceneSize(name)?.w || 80) * s * 0.6, 0.5);
+      SpriteLib.drawScene(ctx, name, o.x, foot, s, o.flip);
+    }
+    // cadaveri
+    for (const pr of room.props) {
+      SpriteLib.shadow(ctx, pr.x, fy + 10 * sc, 120 * sc, 0.5);
+      SpriteLib.drawProp(ctx, pr.name, pr.x, fy + 18 * sc, pr.flip, 1, sc);
+    }
     // personaggi non giocanti
     for (const n of room.npcs) {
       if (!this.visible(n)) continue;
       const anim = this.game.events.getFlag(`npc_${n.id}_anim`) || n.anim || 'idle';
-      SpriteLib.draw(ctx, n.char, anim, 0, n.x, room.floorY, n.facingRight, { scale: room.scale });
+      SpriteLib.shadow(ctx, n.x, fy, 62 * sc);
+      SpriteLib.draw(ctx, n.char, anim, 0, n.x, fy, n.facingRight, { scale: sc });
     }
   }
 
+  /** Porte disegnate e cartelli delle uscite */
   drawDoors(ctx) {
     const room = this.current;
     if (!room) return;
-    const t = Date.now() / 1000;
-    ctx.save();
-    ctx.font = '600 13px "Courier New", monospace';
-    ctx.textAlign = 'center';
+    const ds = doorScale(room), fy = room.floorY;
+    const opening = this.game._openingDoor;
     for (const d of room.doors) {
       if (!this.visible(d)) continue;
-      const blocked = d.requires && !this.check(d.requires);
-      const a = 0.35 + Math.sin(t * 2.5) * 0.15;
-      ctx.fillStyle = blocked ? `rgba(190,60,60,${a})` : `rgba(230,220,200,${a})`;
-      if (d.edge) {
-        const x = d.edge === 'left' ? 22 : ROOM_W - 22;
-        const y = room.floorY - 130;
-        ctx.beginPath();
-        if (d.edge === 'left') { ctx.moveTo(x - 8, y); ctx.lineTo(x + 8, y - 12); ctx.lineTo(x + 8, y + 12); }
-        else                   { ctx.moveTo(x + 8, y); ctx.lineTo(x - 8, y - 12); ctx.lineTo(x - 8, y + 12); }
-        ctx.fill();
+      const cx = d.cx;
+      if (SpriteLib.hasScene('door_' + d.look)) {
+        const open = opening === d.id;
+        const name = 'door_' + d.look + (open ? '_open' : '');
+        const foot = fy - 12 * room.scale;
+        // la porta aperta ha l'anta di lato: la allineo al telaio della chiusa
+        const closedW = SpriteLib.sceneSize('door_' + d.look).w * ds;
+        SpriteLib.shadow(ctx, cx, foot + 4, closedW * 0.55, 0.45);
+        const openW = SpriteLib.sceneSize(name).w * ds;
+        const ox = open ? (openW - closedW) / 2 * (d.edge === 'right' ? -1 : 1) : 0;
+        SpriteLib.drawScene(ctx, name, cx + ox, foot, ds, open && d.edge === 'right');
       }
     }
-    ctx.restore();
   }
 
-  drawInteractions(ctx) {
+  /** Segnalini sopra porte, oggetti e persone. Disegnati sopra il buio. */
+  drawMarkers(ctx, near) {
     const room = this.current;
     if (!room) return;
     const t = Date.now() / 1000;
+    const sc = room.scale, fy = room.floorY, ds = doorScale(room);
+    const badge = (kind, cx, cy, isNear, locked, label) => {
+      const pulse = 0.5 + 0.5 * Math.sin(t * 3 + cx * 0.02);
+      const r = isNear ? 24 : 17;
+      ctx.save();
+      ctx.globalAlpha = isNear ? 1 : 0.55 + pulse * 0.3;
+      ctx.fillStyle = locked ? 'rgba(70,10,10,0.8)' : 'rgba(10,10,12,0.72)';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = isNear ? 2.5 : 1.5;
+      ctx.strokeStyle = locked ? 'rgba(230,80,70,0.95)' : (isNear ? 'rgba(255,225,160,1)' : 'rgba(230,220,200,0.7)');
+      ctx.stroke();
+      SpriteLib.drawUi(ctx, kind, cx, cy, r * 1.35, 1);
+      if (locked) SpriteLib.drawIcon(ctx, 'padlock', cx + r * 0.8, cy + r * 0.7, r * 1.1, 1);
+      if (isNear && label) {
+        ctx.font = '600 15px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        const text = label;
+        const w = ctx.measureText(text).width + 34;
+        const ly = cy - r - 20;
+        ctx.fillStyle = 'rgba(8,8,10,0.82)';
+        ctx.fillRect(cx - w / 2, ly - 13, w, 24);
+        ctx.fillStyle = '#c0392b';
+        ctx.fillText('E', cx - w / 2 + 12, ly + 5);
+        ctx.fillStyle = '#eee4d0';
+        ctx.fillText(text, cx + 8, ly + 5);
+      }
+      ctx.restore();
+    };
+
+    // porte
+    for (const d of room.doors) {
+      if (!this.visible(d)) continue;
+      const isNear = near?.obj === d;
+      const locked = !this.doorPassable(d);
+      const cx = d.cx;
+      const spr = SpriteLib.sceneSize('door_' + d.look);
+      if (d.look === 'passage') {
+        // freccia sul pavimento verso l'uscita
+        const dir = d.edge === 'right' ? 1 : (d.edge === 'left' ? -1 : 0);
+        const ay = fy - 30 * sc;
+        const ax = cx;
+        ctx.save();
+        ctx.globalAlpha = isNear ? 0.95 : 0.45 + 0.25 * Math.sin(t * 3);
+        ctx.fillStyle = locked ? 'rgb(200,70,60)' : 'rgb(240,225,190)';
+        for (let k = 0; k < 3; k++) {
+          const x = cx + dir * (k * 18 - 18) + (dir === 0 ? (k - 1) * 18 : 0);
+          ctx.beginPath();
+          ctx.moveTo(x + dir * 9, ay);
+          ctx.lineTo(x - dir * 5, ay - 11);
+          ctx.lineTo(x - dir * 5, ay + 11);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      const top = spr ? fy - 12 * sc - spr.h * ds - 26 : (d.markY ?? fy - 330 * Math.min(sc, 1.2) * 0.9);
+      badge('door', cx, Math.max(40, top), isNear, locked, d.label);
+    }
+
+    // oggetti e punti da esaminare
     for (const h of room.hotspots) {
       if (this.isPicked(h.id) || !this.visible(h)) continue;
+      const isNear = near?.obj === h;
       const cx = h.x + h.w / 2;
+      const locked = h.requires && !this.check(h.requires);
       if (h.icon) {
-        const y = h.iconY ?? room.floorY - 40;
-        // alone
-        const g = ctx.createRadialGradient(cx, y, 0, cx, y, 46);
-        g.addColorStop(0, `rgba(255,235,190,${0.18 + Math.sin(t * 3 + cx) * 0.08})`);
+        // oggetto a terra: icona dell'oggetto con alone, sempre visibile
+        const y = h.iconY ?? fy - 40;
+        const g = ctx.createRadialGradient(cx, y, 0, cx, y, 50);
+        g.addColorStop(0, `rgba(255,235,190,${0.22 + Math.sin(t * 3 + cx) * 0.1 + (isNear ? 0.15 : 0)})`);
         g.addColorStop(1, 'rgba(255,235,190,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(cx - 46, y - 46, 92, 92);
-        SpriteLib.drawIcon(ctx, h.icon, cx, y, 46, 0.95);
+        ctx.fillRect(cx - 50, y - 50, 100, 100);
+        SpriteLib.drawIcon(ctx, h.icon, cx, y, isNear ? 56 : 46, 1);
+        if (isNear) badge(this.markerKind('hotspot', h), cx, y - 58, true, locked, h.label);
       } else {
-        // scintilla per "esamina"
-        const y = h.markY ?? room.floorY - 160;
-        const a = 0.35 + Math.max(0, Math.sin(t * 2.2 + cx * 0.01)) * 0.5;
-        ctx.fillStyle = `rgba(255,245,220,${a})`;
-        ctx.beginPath(); ctx.arc(cx, y, 3.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(255,245,220,${a * 0.25})`;
-        ctx.beginPath(); ctx.arc(cx, y, 10, 0, Math.PI * 2); ctx.fill();
+        const y = Math.max(40, h.markY ?? fy - 160);
+        badge(this.markerKind('hotspot', h), cx, y, isNear, locked, h.label);
       }
       if (this.game.debug) {
         ctx.strokeStyle = 'rgba(255,200,0,0.6)';
-        ctx.strokeRect(h.x, 300, h.w, room.floorY - 300);
+        ctx.strokeRect(h.x, 300, h.w, fy - 300);
       }
     }
+
+    // persone con cui parlare
+    for (const n of room.npcs) {
+      if (!this.visible(n)) continue;
+      const isNear = near?.obj === n;
+      badge('use', n.x, fy - 300 * sc, isNear, false, n.label);
+    }
+
     if (this.game.debug) {
-      for (const d of room.doors) if (!d.edge) {
+      for (const d of room.doors) {
         ctx.strokeStyle = 'rgba(80,200,120,0.7)';
-        ctx.strokeRect(d.x, 280, d.w, room.floorY - 280);
+        ctx.strokeRect(d.x, 280, d.w, fy - 280);
       }
     }
   }
@@ -4671,6 +5089,108 @@ class RoomManager {
         this.roomStates[id] = { ...this._freshState(), ...st };
       }
     }
+  }
+}
+
+/* ───── touch.js ───── */
+/* =============================================
+   NOTTE ROSSA — touch.js
+   Comandi a schermo per telefono e tablet.
+   I pulsanti "premono" i tasti della tastiera, così tutto il
+   resto del gioco (dialoghi, inventario, pausa) funziona uguale.
+   ============================================= */
+
+class TouchControls {
+  constructor(game) {
+    this.game = game;
+    this.enabled = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 ||
+      window.matchMedia?.('(pointer: coarse)').matches;
+    this.$root = document.getElementById('touch-controls');
+    if (!this.enabled || !this.$root) return;
+    document.body.classList.add('touch');
+    this._run = false;
+    this._crouch = false;
+
+    // tenere premuto
+    this._hold('tc-left',  'ArrowLeft');
+    this._hold('tc-right', 'ArrowRight');
+    this._hold('tc-shoot', 'TouchShoot');
+    this._hold('tc-aim',   'TouchAim');
+    // pressione singola (evento vero: lo sentono anche dialoghi e menu)
+    this._tap('tc-use',    'KeyE');
+    this._tap('tc-reload', 'KeyR');
+    this._tap('tc-light',  'KeyF');
+    this._tap('tc-inv',    'Tab');
+    this._tap('tc-map',    'KeyM');
+    this._tap('tc-pause',  'Escape');
+    // interruttori
+    this._toggle('tc-run',    'ShiftLeft', v => { this._run = v; });
+    this._toggle('tc-crouch', 'KeyC',      v => { this._crouch = v; });
+
+    const inp = game.input;
+    inp.bindings.shoot.push('TouchShoot');
+    inp.bindings.aim.push('TouchAim');
+  }
+
+  _btn(id) { return document.getElementById(id); }
+
+  _hold(id, code) {
+    const el = this._btn(id); if (!el) return;
+    // input.keys viene ricreato da flush(): va letto ogni volta
+    const down = e => { e.preventDefault(); this.game.input.keys[code] = true;  el.classList.add('on'); };
+    const up   = e => { e.preventDefault(); this.game.input.keys[code] = false; el.classList.remove('on'); };
+    el.addEventListener('touchstart', down, { passive: false });
+    el.addEventListener('touchend', up, { passive: false });
+    el.addEventListener('touchcancel', up, { passive: false });
+  }
+
+  _tap(id, code) {
+    const el = this._btn(id); if (!el) return;
+    el.addEventListener('touchstart', e => {
+      e.preventDefault();
+      el.classList.add('on');
+      document.dispatchEvent(new KeyboardEvent('keydown', { code, key: code, bubbles: true }));
+      setTimeout(() => {
+        document.dispatchEvent(new KeyboardEvent('keyup', { code, key: code, bubbles: true }));
+        el.classList.remove('on');
+      }, 90);
+    }, { passive: false });
+  }
+
+  _toggle(id, code, cb) {
+    const el = this._btn(id); if (!el) return;
+    el.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const v = !el.classList.contains('on');
+      el.classList.toggle('on', v);
+      this.game.input.keys[code] = v;
+      cb(v);
+    }, { passive: false });
+  }
+
+  show() { if (this.enabled) this.$root?.classList.remove('hidden'); }
+  hide() { this.$root?.classList.add('hidden'); }
+
+  /** Chiamato ogni frame: mostra solo i pulsanti che servono */
+  update() {
+    if (!this.enabled) return;
+    const g = this.game;
+    this.$root.classList.toggle('armed', !!g.weapon?.equipped);
+    this.$root.classList.toggle('overlay', g.ui.hasOpenOverlay() || g.paused);
+    // l'input.flush() delle transizioni cancella i tasti: ripristina gli interruttori
+    if (this._run) g.input.keys.ShiftLeft = true;
+    if (this._crouch) g.input.keys.KeyC = true;
+  }
+
+  /** Su telefono: schermo intero e orizzontale all'avvio della partita */
+  enterFullscreen() {
+    if (!this.enabled) return;
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    try {
+      const p = req?.call(el);
+      p?.then?.(() => screen.orientation?.lock?.('landscape').catch(() => {})).catch(() => {});
+    } catch (_) { /* non supportato: pazienza */ }
   }
 }
 
@@ -4698,7 +5218,6 @@ class Game {
     this._lastTime = 0;
     this._fpsAvg   = 60;
     this._rain     = [];
-    this._edgeMsgCd = 0;
 
     this._darkCanvas = document.createElement('canvas');
     this._darkCanvas.width = CANVAS_W;
@@ -4715,6 +5234,7 @@ class Game {
     this._resetState();
     this.dialogue = new DialogueManager(this);
     this.ui       = new UIManager(this);
+    this.touch    = new TouchControls(this);
     this.roomManager.preload();
 
     if (this.save.hasSaveData()) document.getElementById('btn-continua')?.removeAttribute('disabled');
@@ -4736,6 +5256,8 @@ class Game {
     this.events       = new EventManager(this);
     this._playTime    = 0;
     this._transitioning = false;
+    this._openingDoor = null;
+    this._near = null;
     this._lightFadeActive = false;
     this.paused = false;
     this._ended = false;
@@ -4749,8 +5271,8 @@ class Game {
   /* ══════════ MENU ══════════ */
   _bindMenuEvents() {
     const on = (id, fn) => document.getElementById(id)?.addEventListener('click', fn);
-    on('btn-nuova',    () => { this.audio.resume(); this._startNewGame(); });
-    on('btn-continua', () => { this.audio.resume(); this._continueGame(); });
+    on('btn-nuova',    () => { this.audio.resume(); this.touch.enterFullscreen(); this._startNewGame(); });
+    on('btn-continua', () => { this.audio.resume(); this.touch.enterFullscreen(); this._continueGame(); });
     on('btn-carica',   () => { this._showScreen('load-screen'); this._renderLoadSlots(); });
     on('btn-opzioni',  () => { this._showScreen('options-screen'); });
     on('btn-crediti',  () => this._showScreen('credits-screen'));
@@ -4827,6 +5349,7 @@ class Game {
     document.getElementById('main-menu-bg')?.classList.add('hidden');
     this.canvas.style.display = 'block';
     this.ui.showHUD();
+    this.touch.show();
     this.ui.toggleDebug(this.debug);
     if (startRoom) this.roomManager.loadRoom(startRoom);
     this._initRain();
@@ -4840,6 +5363,7 @@ class Game {
     const dt = Math.min((ts - this._lastTime) / 1000, 0.05);
     this._lastTime = ts;
     if (!this.running) return;
+    this.touch.update();
     this._fpsAvg = this._fpsAvg * 0.95 + (1 / Math.max(dt, 0.001)) * 0.05;
 
     if (this.paused || this.ui.hasOpenOverlay()) {
@@ -4855,7 +5379,6 @@ class Game {
 
   _update(dt) {
     const p = this.player, input = this.input;
-    if (this._edgeMsgCd > 0) this._edgeMsgCd -= dt;
 
     // stato che il giocatore deve conoscere
     p.hasFlashlight = this.inventory.hasItem('flashlight');
@@ -4865,10 +5388,17 @@ class Game {
     p.update(dt, input, this.collision);
     this.camera.update(dt);
 
-    // Armi
+    // Armi: basta premere spara (clic / Spazio). La mira si aggancia da sola
+    // al nemico più vicino; se c'è solo un nemico alle spalle ci si gira.
     if (p.alive && p.armed && !input.locked) {
-      if (p.isAiming && (input.justPressed('shoot') || (this.weapon.equipped.id === 'pistol' ? false : input.isDown('shoot')))) {
-        if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) p.shotTimer = 0.18;
+      const w = this.weapon.equipped;
+      const trigger = w.id === 'pistol' ? input.justPressed('shoot') : input.isDown('shoot');
+      if (trigger) {
+        const dir = p.facingRight ? 1 : -1;
+        const range = w.def.bulletRange;
+        if (!this.weapon.findTarget(p, dir, range) && this.weapon.findTarget(p, -dir, range)) p.facingRight = !p.facingRight;
+        p.aimHold = 0.45;
+        if (this.weapon.shoot(p)) p.shotTimer = 0.18;
       }
       if (input.justPressed('reload')) this.weapon.reload();
     }
@@ -4889,7 +5419,6 @@ class Game {
 
     if (!input.locked) {
       this._handleInteraction();
-      this._handleEdges();
       if (input.justPressed('inventory')) this.ui.openInventory();
       else if (input.justPressed('map'))  this.ui.openMap();
     } else {
@@ -4907,6 +5436,7 @@ class Game {
   /* ══════════ INTERAZIONI ══════════ */
   _handleInteraction() {
     const near = this.roomManager.nearest(this.player);
+    this._near = near;
     if (!near) { this.ui.hideInteractPrompt(); return; }
     this.ui.showInteractPrompt(near.obj.label);
     if (!this.player.isInteract) return;
@@ -4972,34 +5502,30 @@ class Game {
       if (d.lockedText) this.dialogue.show('', d.lockedText);
       return false;
     }
-    this._transitionToRoom(d.target, d.targetX);
+    // porta disegnata: si apre, poi si passa
+    if (SpriteLib.hasScene('door_' + d.look)) {
+      this._openingDoor = d.id;
+      this.input.lock();
+      this.ui.hideInteractPrompt();
+      this.audio.playSfx('door_open');
+      setTimeout(() => this._transitionToRoom(d.target, d.targetX, true), 380);
+    } else {
+      this._transitionToRoom(d.target, d.targetX);
+    }
     return true;
   }
 
-  _handleEdges() {
-    const p = this.player, input = this.input;
-    let side = null;
-    if (p.x <= 40 && input.isDown('moveLeft'))  side = 'left';
-    if (p.x + p.width >= CANVAS_W - 40 && input.isDown('moveRight')) side = 'right';
-    if (!side) return;
-    const d = this.roomManager.edgeDoor(side);
-    if (!d) return;
-    if (d.target && (!d.requires || this.roomManager.check(d.requires)) && (!d.keyId || this.roomManager.isDoorOpen(d.id) || this.inventory.hasItem(d.keyId))) {
-      this._tryDoor(d);
-    } else if (this._edgeMsgCd <= 0) {
-      this._edgeMsgCd = 1.5;
-      this._tryDoor(d);
-    }
-  }
-
-  _transitionToRoom(roomId, targetX) {
+  _transitionToRoom(roomId, targetX, soundPlayed = false) {
     if (this._transitioning) return;
     this._transitioning = true;
     this.input.lock();
     this.ui.hideInteractPrompt();
-    this.audio.playSfx('door_open');
+    if (!soundPlayed) this.audio.playSfx('door_open');
     this.ui.fadeOut(350, () => {
+      this._openingDoor = null;
+      this._near = null;
       this.weapon.bullets = [];
+      this.weapon.particles = [];
       this._lightFadeActive = false;
       this.roomManager.loadRoom(roomId, targetX);
       this._initRain();
@@ -5056,7 +5582,6 @@ class Game {
     this.camera.applyTransform(ctx);
     this.roomManager.drawBackground(ctx);
     this.roomManager.drawDoors(ctx);
-    this.roomManager.drawInteractions(ctx);
     this.enemyManager.draw(ctx);
     this.player.draw(ctx);
     this.weapon.draw(ctx);
@@ -5064,6 +5589,12 @@ class Game {
     this.camera.restoreTransform(ctx);
 
     this._drawDarkness(ctx, room);
+
+    // segnalini e mirino sopra il buio: si vedono sempre
+    this.camera.applyTransform(ctx);
+    if (!this.input.locked || this._openingDoor) this.roomManager.drawMarkers(ctx, this.input.locked ? null : this._near);
+    this.weapon.drawAim(ctx);
+    this.camera.restoreTransform(ctx);
     this._drawVignette(ctx);
     if (this.debug) {
       ctx.strokeStyle = 'rgba(80,160,255,0.7)';
@@ -5181,6 +5712,7 @@ class Game {
     this.dialogue.close();
     this.ui.resetOverlays();
     this.ui.hideHUD();
+    this.touch.hide();
     this.audio.stopAmbient(0.5);
     this.canvas.style.display = 'none';
     document.getElementById('main-menu-bg')?.classList.remove('hidden');
@@ -5203,6 +5735,7 @@ class Game {
     const total = Object.keys(DOCUMENTS).length;
     this.ui.fadeOut(1500, () => {
       this.running = false;
+      this.touch.hide();
       this.audio.stopAmbient(1);
       this.ui.showEnding({
         title: good ? 'FINALE — ALBA' : 'FINALE — NOTTE',

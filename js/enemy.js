@@ -10,7 +10,7 @@ import { SpriteLib } from './sprites.js';
 export const ENEMY_DEFS = {
   contaminato: {
     name: 'Contaminato', sprite: 'contaminato',
-    width: 80, height: 260, maxHp: 110,
+    width: 80, height: 260, maxHp: 100,
     speed: 55, chaseSpeed: 88,
     damage: 18, cooldown: 1.6, windup: 0.4, range: 95,
     vision: 520, stun: 0.35,
@@ -241,7 +241,7 @@ export class Enemy {
   takeDamage(amount, knockDir = 0) {
     if (!this.alive) return;
     this.hp -= amount;
-    this.x += knockDir * 18 * this.scale;
+    this.x += knockDir * 22 * this.scale;
     if (this.state === AI_STATE.CEILING || this.state === AI_STATE.DROP) this._dropY = 0;
     if (this.hp <= 0) {
       this.hp = 0;
@@ -320,6 +320,9 @@ export class Enemy {
       if (this.state === AI_STATE.STUNNED) opts.rotate = (this.facingRight ? -1 : 1) * 0.15;
     }
 
+    // ombra sul pavimento (il Crawler appeso la proietta lo stesso, più piccola)
+    const hang = this.state === AI_STATE.CEILING ? 1 : (this.state === AI_STATE.DROP ? Math.min(1, -this._dropY / (150 * this.scale)) : 0);
+    SpriteLib.shadow(ctx, this.centerX, this.footY, this.width * 0.62 * (1 - hang * 0.5), (this.alive ? 0.55 : 0.4) * (1 - hang * 0.5));
     const ok = SpriteLib.draw(ctx, s, this.anim, this.animFrame, this.centerX, footY, this.facingRight, opts);
     if (!ok) {
       ctx.fillStyle = this.alive ? '#3a2a24' : 'rgba(60,20,10,0.6)';

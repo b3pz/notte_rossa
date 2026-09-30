@@ -50,6 +50,7 @@ export class Player {
     this.armed       = false;   // arma equipaggiata
     this.reloading   = false;
     this.shotTimer   = 0;       // >0 subito dopo uno sparo
+    this.aimHold     = 0;       // >0 dopo aver premuto spara: resta in mira
 
     // Animazione
     this.anim      = 'idle';
@@ -88,6 +89,7 @@ export class Player {
     }
     if (this._hurtTimer > 0) this._hurtTimer -= dt;
     if (this.shotTimer  > 0) this.shotTimer  -= dt;
+    if (this.aimHold    > 0) this.aimHold    -= dt;
 
     if (!this.alive) {
       this.vx = 0;
@@ -97,7 +99,7 @@ export class Player {
 
     if (!input.locked) {
       this.isCrouching = input.isDown('crouch');
-      this.isAiming    = this.armed && input.isDown('aim');
+      this.isAiming    = this.armed && (input.isDown('aim') || this.aimHold > 0);
       this._handleMovement(input);
       this._handleFlashlight(dt, input);
       this.isInteract  = input.justPressed('interact');
@@ -262,6 +264,7 @@ export class Player {
   /* ── RENDER ── */
   draw(ctx) {
     const blink = this.alive && this.invulnerable && Math.floor(Date.now() / 90) % 2 === 0;
+    SpriteLib.shadow(ctx, this.centerX, this.footY, 60 * this.scale);
     const ok = SpriteLib.draw(ctx, 'player', this.anim, this.animFrame,
       this.centerX, this.footY, this.facingRight, { alpha: blink ? 0.45 : 1, scale: this.scale });
     if (!ok) this._drawPlaceholder(ctx);

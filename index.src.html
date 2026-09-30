@@ -2,8 +2,14 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>NOTTE ROSSA</title>
+  <link rel="icon" type="image/png" href="assets/ui/favicon.png">
+  <link rel="icon" href="assets/ui/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/ui/apple-touch-icon.png">
+  <meta name="theme-color" content="#080a0e">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/menu.css">
@@ -125,6 +131,37 @@
     </div>
 
     <!-- PROMPT INTERAZIONE -->
+    <!-- COMANDI TOUCH (solo telefono/tablet) -->
+    <div id="touch-controls" class="hidden">
+      <div class="tc-top">
+        <button class="tc-btn tc-small" id="tc-inv">ZAINO</button>
+        <button class="tc-btn tc-small" id="tc-map">MAPPA</button>
+        <button class="tc-btn tc-small" id="tc-pause">❚❚</button>
+      </div>
+      <div class="tc-left">
+        <div class="tc-row">
+          <button class="tc-btn tc-big" id="tc-left">◀</button>
+          <button class="tc-btn tc-big" id="tc-right">▶</button>
+        </div>
+        <div class="tc-row">
+          <button class="tc-btn tc-small" id="tc-run">CORRI</button>
+          <button class="tc-btn tc-small" id="tc-crouch">ACCOVACCIATI</button>
+        </div>
+      </div>
+      <div class="tc-right">
+        <div class="tc-row">
+          <button class="tc-btn tc-small" id="tc-light">TORCIA</button>
+          <button class="tc-btn tc-small tc-gun" id="tc-reload">RICARICA</button>
+        </div>
+        <div class="tc-row">
+          <button class="tc-btn tc-big tc-gun" id="tc-aim">MIRA</button>
+          <button class="tc-btn tc-big tc-gun tc-shoot" id="tc-shoot">SPARA</button>
+          <button class="tc-btn tc-big tc-use" id="tc-use">E</button>
+        </div>
+      </div>
+    </div>
+    <div id="rotate-hint">Ruota il telefono in orizzontale</div>
+
     <div id="interact-prompt" class="hidden">
       <span class="interact-key">[E]</span>
       <span id="interact-label">Esamina</span>

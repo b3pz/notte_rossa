@@ -35,8 +35,10 @@ export class InputManager {
   }
 
   _bindEvents() {
+    this._tapped = {};
     window.addEventListener('keydown', e => {
       this.keys[e.code] = true;
+      this._tapped[e.code] = true;
       e.preventDefault && ['Tab','Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code) && e.preventDefault();
     });
     window.addEventListener('keyup', e => {
@@ -60,6 +62,7 @@ export class InputManager {
   /** Aggiorna lo stato precedente — chiamare una volta per frame DOPO aver letto */
   update() {
     this._prev = { ...this.keys };
+    this._tapped = {};
     this._mousePrev = { ...this.mouse };
   }
 
@@ -82,7 +85,7 @@ export class InputManager {
     for (const k of keys) {
       if (k === 'Mouse0') { if (this.mouse.left  && !this._mousePrev.left)  return true; continue; }
       if (k === 'Mouse1') { if (this.mouse.right && !this._mousePrev.right) return true; continue; }
-      if (this.keys[k] && !this._prev[k]) return true;
+      if ((this.keys[k] || this._tapped[k]) && !this._prev[k]) return true;
     }
     return false;
   }
@@ -98,7 +101,7 @@ export class InputManager {
   }
 
   /** Segna un tasto come già usato (non conta come "appena premuto") */
-  consume(code) { this._prev[code] = true; }
+  consume(code) { this._prev[code] = true; delete this._tapped[code]; }
 
   /** Blocca temporaneamente l'input (es. durante cutscene) */
   lock()   { this._locked = true; }
@@ -109,6 +112,7 @@ export class InputManager {
   flush() {
     this.keys = {};
     this._prev = {};
+    this._tapped = {};
     this.mouse.left = false;
     this.mouse.right = false;
   }

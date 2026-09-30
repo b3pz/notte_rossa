@@ -7,6 +7,7 @@
    ============================================= */
 
 import { SPRITES, ICONS, PROPS } from './sprite_manifest.js';
+import { SCENE, UI_ICONS } from './scene_manifest.js';
 
 const _cache = {};
 
@@ -33,6 +34,8 @@ export const SpriteLib = {
     }
     for (const f of Object.values(ICONS)) _img(f);
     for (const p of Object.values(PROPS)) _img(p.file);
+    for (const p of Object.values(SCENE)) _img(p.file);
+    for (const f of Object.values(UI_ICONS)) _img(f);
   },
 
   has(char, anim) {
@@ -101,6 +104,50 @@ export const SpriteLib = {
     ctx.save();
     ctx.globalAlpha *= alpha;
     ctx.drawImage(im, cx - size / 2, cy - size / 2, size, size);
+    ctx.restore();
+  },
+
+  hasScene(name) { return !!SCENE[name]; },
+  sceneSize(name) { return SCENE[name] || null; },
+
+  /** Oggetto di scena (porta, armadietto…) con la base in (cx, footY) */
+  drawScene(ctx, name, cx, footY, scale = 1, flip = false, alpha = 1) {
+    const p = SCENE[name];
+    if (!p) return false;
+    const im = _img(p.file);
+    if (!_ready(im)) return false;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.translate(cx, footY);
+    ctx.scale(flip ? -scale : scale, scale);
+    ctx.drawImage(im, -p.w / 2, -p.h, p.w, p.h);
+    ctx.restore();
+    return true;
+  },
+
+  /** Icona d'interfaccia bianca (porta, esamina, raccogli…) centrata */
+  drawUi(ctx, name, cx, cy, size = 32, alpha = 1) {
+    const im = _img(UI_ICONS[name]);
+    if (!_ready(im)) return;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.drawImage(im, cx - size / 2, cy - size / 2, size, size);
+    ctx.restore();
+  },
+
+  /** Ombra di contatto morbida sul pavimento */
+  shadow(ctx, cx, footY, rx, alpha = 0.55) {
+    if (rx <= 1 || alpha <= 0) return;
+    const ry = rx * 0.22;
+    ctx.save();
+    ctx.translate(cx, footY);
+    ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    g.addColorStop(0.6, `rgba(0,0,0,${alpha * 0.55})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   },
 };
