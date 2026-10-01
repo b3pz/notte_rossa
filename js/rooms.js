@@ -277,6 +277,19 @@ export class RoomManager {
       } else if (o.type === 'lever') {
         const on = this.check({ flag: o.flag });
         SpriteLib.drawPropFit(ctx, on ? 'lever_on' : 'lever_off', o.x, o.y, o.h);
+      } else if (o.type === 'state') {
+        // stato alternativo dello sfondo (armadietto aperto, cassetta aperta...):
+        // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
+        const on = (o.picked && this.isPicked(o.picked)) || (o.flag && this.check({ flag: o.flag }));
+        if (!on) { o._t0 = 0; continue; }
+        const im = this._bgImage(o.src);
+        if (!im || !im.complete || !im.naturalWidth) continue;
+        if (!o._t0) o._t0 = t;
+        const k = im.naturalHeight / VIEW_H;
+        ctx.save();
+        ctx.globalAlpha *= Math.min(1, (t - o._t0) / 0.35);
+        ctx.drawImage(im, o.x * k, o.y * k, o.w * k, o.h * k, o.x, o.y, o.w, o.h);
+        ctx.restore();
       } else if (o.type === 'barricade') {
         const d = room.doors.find(d => d.id === o.door);
         if (!d) continue;

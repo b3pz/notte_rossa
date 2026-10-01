@@ -32,7 +32,7 @@ export const ROOMS = {
   /* ═══════════ CAPITOLO 1 — STAZIONE CENTRALE ═══════════ */
 
   train_wagon: {
-    name: 'Treno 847 — Vagone 4', bg: BG + 'train_wagon.png', scale: 1.35, floorY: 682,
+    name: 'Treno 847 — Vagone 4', bg: BG + 'train_wagon.png', keepEdges: true, scale: 1.35, floorY: 682,
     light: 0.5, map: [0, 0], ambient: 'train_idle', spawnX: 380,
     hotspots: [
       { id: 'window_wagon', x: 40, w: 200, label: 'Finestrino', markY: 300,
@@ -42,9 +42,9 @@ export const ROOMS = {
       { id: 'document_ticket', x: 470, w: 110, label: 'Biglietto a terra', icon: 'note', iconY: 650, doc: 'doc_ticket' },
     ],
     doors: [
-      { id: 'wagon_inner', x: 590, w: 80, top: 300, label: 'Vagone 3',
+      { id: 'wagon_inner', x: 805, w: 80, top: 260, bottom: 470, label: 'Vagone 3', noSprite: true,
         lockedText: 'La porta verso il vagone 3 è bloccata.\nDall\'altra parte qualcosa sta grattando.', requires: NEVER },
-      { id: 'wagon_to_platform', x: 1010, w: 200, top: 120, label: 'Scendi — Binario 1', target: 'station_platform' },
+      { id: 'wagon_to_platform', x: 1310, w: 330, top: 130, bottom: 680, label: 'Scendi — Binario 1', target: 'station_platform', noSprite: true },
     ],
   },
 
@@ -497,7 +497,7 @@ export const ROOMS = {
         text: 'Nella porta del terminale è infilata una chiavetta. "R-0 / dati completi — E.F."' },
     ],
     doors: [
-      { id: 'bio_to_corr', x: 570, w: 140, top: 230, label: 'Corridoio', target: 'lab_corridoio' },
+      { id: 'bio_to_corr', x: 560, w: 160, top: 230, bottom: 470, label: 'Corridoio', target: 'lab_corridoio', noSprite: true },
     ],
     enemies: [
       { id: 'bio_cr', type: 'crawler', x: 860, ceiling: true },

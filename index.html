@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v1.3</div>
+      <div class="menu-version">v1.4</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -109,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v1.3</p>
+        <p class="dim">Survival horror 2D — v1.4</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -206,7 +206,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 1.3</div>
+        <div class="pause-version">versione 1.4</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
@@ -4310,7 +4310,7 @@ const ROOMS = {
   /* ═══════════ CAPITOLO 1 — STAZIONE CENTRALE ═══════════ */
 
   train_wagon: {
-    name: 'Treno 847 — Vagone 4', bg: BG + 'train_wagon.png', scale: 1.35, floorY: 682,
+    name: 'Treno 847 — Vagone 4', bg: BG + 'train_wagon.png', keepEdges: true, scale: 1.35, floorY: 682,
     light: 0.5, map: [0, 0], ambient: 'train_idle', spawnX: 380,
     hotspots: [
       { id: 'window_wagon', x: 40, w: 200, label: 'Finestrino', markY: 300,
@@ -4320,9 +4320,9 @@ const ROOMS = {
       { id: 'document_ticket', x: 470, w: 110, label: 'Biglietto a terra', icon: 'note', iconY: 650, doc: 'doc_ticket' },
     ],
     doors: [
-      { id: 'wagon_inner', x: 590, w: 80, top: 300, label: 'Vagone 3',
+      { id: 'wagon_inner', x: 805, w: 80, top: 260, bottom: 470, label: 'Vagone 3', noSprite: true,
         lockedText: 'La porta verso il vagone 3 è bloccata.\nDall\'altra parte qualcosa sta grattando.', requires: NEVER },
-      { id: 'wagon_to_platform', x: 1010, w: 200, top: 120, label: 'Scendi — Binario 1', target: 'station_platform' },
+      { id: 'wagon_to_platform', x: 1310, w: 330, top: 130, bottom: 680, label: 'Scendi — Binario 1', target: 'station_platform', noSprite: true },
     ],
   },
 
@@ -4775,7 +4775,7 @@ const ROOMS = {
         text: 'Nella porta del terminale è infilata una chiavetta. "R-0 / dati completi — E.F."' },
     ],
     doors: [
-      { id: 'bio_to_corr', x: 570, w: 140, top: 230, label: 'Corridoio', target: 'lab_corridoio' },
+      { id: 'bio_to_corr', x: 560, w: 160, top: 230, bottom: 470, label: 'Corridoio', target: 'lab_corridoio', noSprite: true },
     ],
     enemies: [
       { id: 'bio_cr', type: 'crawler', x: 860, ceiling: true },
@@ -5142,6 +5142,19 @@ class RoomManager {
       } else if (o.type === 'lever') {
         const on = this.check({ flag: o.flag });
         SpriteLib.drawPropFit(ctx, on ? 'lever_on' : 'lever_off', o.x, o.y, o.h);
+      } else if (o.type === 'state') {
+        // stato alternativo dello sfondo (armadietto aperto, cassetta aperta...):
+        // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
+        const on = (o.picked && this.isPicked(o.picked)) || (o.flag && this.check({ flag: o.flag }));
+        if (!on) { o._t0 = 0; continue; }
+        const im = this._bgImage(o.src);
+        if (!im || !im.complete || !im.naturalWidth) continue;
+        if (!o._t0) o._t0 = t;
+        const k = im.naturalHeight / VIEW_H;
+        ctx.save();
+        ctx.globalAlpha *= Math.min(1, (t - o._t0) / 0.35);
+        ctx.drawImage(im, o.x * k, o.y * k, o.w * k, o.h * k, o.x, o.y, o.w, o.h);
+        ctx.restore();
       } else if (o.type === 'barricade') {
         const d = room.doors.find(d => d.id === o.door);
         if (!d) continue;
