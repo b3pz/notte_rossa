@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v1.1</div>
+      <div class="menu-version">v1.2</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -109,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v1.1</p>
+        <p class="dim">Survival horror 2D — v1.2</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -206,7 +206,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 1.1</div>
+        <div class="pause-version">versione 1.2</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
@@ -4657,113 +4657,111 @@ const ROOMS = {
   },
 
   metro_tunnel: {
-    name: 'Tunnel Linea 3', bg: BG + 'metro_tunnel.png', scale: 0.85, floorY: 668,
-    light: 0.22, map: [2, 4],
-    props: [{ name: 'body_6', x: 360 }],
+    name: 'Tunnel Linea 3', bg: BGV2 + 'metro_tunnel.png', layoutW: 2617, keepEdges: true, scale: 0.92, floorY: 600,
+    light: 0.3, map: [2, 4],
+    props: [{ name: 'body_0', x: 720 }],
     hotspots: [
-      { id: 'tunnel_notebook', x: 290, w: 160, label: 'Il soldato', icon: 'note', iconY: 620,
+      { id: 'tunnel_notebook', x: 630, w: 180, label: 'Il soldato', icon: 'note', iconY: 575,
         doc: 'doc_taccuino', give: [['ammo_pistol_small', 16]] },
     ],
     doors: [
-      { id: 'tunnel_to_mb', x: 0, w: 140, top: 300, label: 'Banchina B', target: 'metro_banchina' },
-      { id: 'tunnel_to_gen', x: 690, w: 110, top: 260, label: 'Avanti nel buio — Sala tecnica', target: 'sala_generatori' },
+      { id: 'tunnel_to_mb', x: 0, w: 150, top: 160, bottom: 600, label: 'Banchina B', target: 'metro_banchina', noSprite: true },
+      { id: 'tunnel_to_gen', x: 2350, w: 180, top: 290, bottom: 590, label: 'Porta di servizio — Sala tecnica', target: 'sala_generatori', noSprite: true },
     ],
     enemies: [
-      { id: 'tun_cr1', type: 'crawler', x: 560, ceiling: true },
-      { id: 'tun_cr2', type: 'crawler', x: 1000, patrol: [900, 1150] },
+      { id: 'tun_cr1', type: 'crawler', x: 1100, ceiling: true },
+      { id: 'tun_cr2', type: 'crawler', x: 1750, patrol: [1500, 2000] },
     ],
   },
 
   sala_generatori: {
-    name: 'Sala generatori', bg: BG + 'sala_generatori.png', scale: 0.90, floorY: 668,
+    name: 'Sala generatori', bg: BGV2 + 'sala_generatori.png', layoutW: 2732, keepEdges: true, scale: 0.85, floorY: 650,
     light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4],
-    overlays: [{ type: 'lever', x: 1020, y: 390, h: 60, flag: 'power_on' }],
     hotspots: [
-      { id: 'generator', x: 120, w: 340, label: 'Generatore di emergenza', markY: 380, event: 'start_generator',
+      { id: 'generator', x: 520, w: 680, label: 'Generatore di emergenza', markY: 330, event: 'start_generator',
         requires: [{ item: 'fuse' }], failText: 'Il vano del fusibile principale è vuoto.\nSenza un fusibile da 30A non parte.',
         hideIf: { flag: 'power_on' } },
-      { id: 'gen_manual', x: 480, w: 90, label: 'Manuale a terra', icon: 'note', iconY: 600, doc: 'doc_manuale' },
-      { id: 'gen_panel', x: 820, w: 180, label: 'Quadri elettrici', markY: 360,
+      { id: 'gen_panel', x: 1300, w: 430, label: 'Quadri elettrici', markY: 430,
         text: 'LINEA 3 — LABORATORIO — RIFUGIO. Tutto spento.', hideIf: { flag: 'power_on' } },
+      { id: 'gen_manual', x: 1860, w: 140, label: 'Manuale a terra', icon: 'note', iconY: 615, doc: 'doc_manuale' },
     ],
     doors: [
-      { id: 'gen_to_tunnel', x: 0, w: 100, top: 260, label: 'Tunnel', target: 'metro_tunnel' },
-      { id: 'gen_to_maint', x: 680, w: 100, top: 260, label: 'Officina', target: 'stanza_manutenzione' },
+      { id: 'gen_to_tunnel', x: 40, w: 270, top: 280, bottom: 690, label: 'Tunnel', target: 'metro_tunnel', noSprite: true },
+      { id: 'gen_to_maint', x: 2140, w: 150, top: 380, bottom: 610, label: 'Officina', target: 'stanza_manutenzione', noSprite: true },
     ],
     enemies: [
-      { id: 'gen_tec', type: 'tecnico', x: 900, patrol: [820, 1150] },
-      { id: 'gen_run', type: 'corridore', x: 1150, facingRight: false, showIf: { flag: 'power_on' } },
+      { id: 'gen_tec', type: 'tecnico', x: 1500, patrol: [1300, 1800] },
+      { id: 'gen_run', type: 'corridore', x: 2450, facingRight: false, showIf: { flag: 'power_on' } },
     ],
   },
 
   stanza_manutenzione: {
-    name: 'Officina', bg: BG + 'stanza_manutenzione.png', scale: 1.20, floorY: 682,
-    light: 0.5, map: [4, 4],
+    name: 'Officina', bg: BGV2 + 'stanza_manutenzione.png', layoutW: 1672, keepEdges: true, scale: 1.26, floorY: 670,
+    light: 0.55, map: [4, 4],
     hotspots: [
-      { id: 'maint_bench', x: 520, w: 360, label: 'Banco da lavoro', icon: 'note', iconY: 440,
+      { id: 'maint_bench', x: 700, w: 510, label: 'Banco da lavoro', icon: 'note', iconY: 440,
         doc: 'doc_officina', give: [['ammo_shells', 8]] },
-      { id: 'maint_locker', x: 940, w: 160, label: 'Armadietto 7', icon: 'card', iconY: 420, give: ['card'] },
+      { id: 'maint_locker', x: 1345, w: 110, label: 'Armadietto 7', icon: 'card', iconY: 400, give: ['card'] },
     ],
     doors: [
-      { id: 'maint_to_gen', x: 0, w: 120, top: 240, label: 'Sala generatori', target: 'sala_generatori' },
-      { id: 'maint_to_safe', x: 230, w: 230, top: 120, label: 'Porta blindata — Rifugio', target: 'safe_room',
+      { id: 'maint_to_gen', x: 55, w: 145, top: 115, bottom: 680, label: 'Sala generatori', target: 'sala_generatori', noSprite: true },
+      { id: 'maint_to_safe', x: 320, w: 300, top: 130, bottom: 600, label: 'Porta blindata — Rifugio', target: 'safe_room', noSprite: true,
         requires: [{ flag: 'power_on' }], failText: 'Porta blindata a comando elettrico. Senza corrente non si apre.' },
     ],
     enemies: [
-      { id: 'maint_listener', type: 'listener', x: 760, idle: true, facingRight: false },
+      { id: 'maint_listener', type: 'listener', x: 1100, idle: true, facingRight: false },
     ],
   },
 
   safe_room: {
-    name: 'Il rifugio di Elena', bg: BGP + 'safe_room.png', scale: 2.10, floorY: 710,
-    light: 0.8, map: [5, 4], safe: true,
-    overlays: [{ type: 'neon', x: 690, y: 30, w: 160 }],
+    name: 'Il rifugio di Elena', bg: BGV2 + 'safe_room.png', layoutW: 1303, keepEdges: true, scale: 1.3, floorY: 680,
+    light: 0.85, map: [5, 4], safe: true,
     hotspots: [
-      { id: 'safe_shelf', x: 190, w: 280, label: 'Scaffale', markY: 470,
+      { id: 'safe_shelf', x: 265, w: 270, label: 'Scaffale', markY: 400,
         give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
-      { id: 'safe_recorder', x: 560, w: 160, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 372, event: 'elena_tape_2' },
-      { id: 'safe_radio', x: 760, w: 200, label: 'Radio di Elena [SALVA]', markY: 330, event: 'open_save' },
+      { id: 'safe_radio', x: 640, w: 120, label: 'Radio di Elena [SALVA]', markY: 400, event: 'open_save' },
+      { id: 'safe_recorder', x: 780, w: 130, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 370, event: 'elena_tape_2' },
     ],
     doors: [
-      { id: 'safe_to_maint', x: 0, w: 120, top: 150, label: 'Officina', target: 'stanza_manutenzione' },
-      { id: 'safe_to_lab', x: 1000, w: 160, top: 80, label: 'Laboratorio', target: 'lab_ingresso',
-        keyId: 'card', lockedText: 'Dietro l\'armadio c\'è la porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
+      { id: 'safe_to_maint', x: 45, w: 160, top: 110, bottom: 690, label: 'Officina', target: 'stanza_manutenzione', noSprite: true },
+      { id: 'safe_to_lab', x: 1170, w: 120, top: 185, bottom: 680, label: 'Laboratorio', target: 'lab_ingresso', noSprite: true,
+        keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
     ],
   },
 
   /* ═══════════ CAPITOLO 5 — LABORATORIO ROSSO ═══════════ */
 
   lab_ingresso: {
-    name: 'Laboratorio — Ingresso', bg: BGP + 'lab_ingresso.png', scale: 1.20, floorY: 676,
-    light: 0.55, map: [0, 5],
+    name: 'Laboratorio — Ingresso', bg: BGV2 + 'lab_ingresso.png', layoutW: 1559, keepEdges: true, scale: 1.15, floorY: 640,
+    light: 0.6, map: [0, 5],
     hotspots: [
-      { id: 'lab_papers', x: 180, w: 160, label: 'Fogli a terra', markY: 600,
+      { id: 'lab_papers', x: 1150, w: 260, label: 'Fogli a terra', markY: 600,
         text: 'Moduli di evacuazione. Tutti firmati "Dir. Amati". Nessuno compilato.' },
     ],
     doors: [
-      { id: 'li_to_safe', x: 0, w: 120, top: 150, label: 'Rifugio', target: 'safe_room' },
-      { id: 'li_to_corr', x: 400, w: 380, top: 120, label: 'Porta a doppia anta', target: 'lab_corridoio' },
+      { id: 'li_to_safe', x: 110, w: 205, top: 200, bottom: 595, label: 'Rifugio', target: 'safe_room', noSprite: true },
+      { id: 'li_to_corr', x: 665, w: 375, top: 210, bottom: 595, label: 'Progetto Rosso — Porta a doppia anta', target: 'lab_corridoio', noSprite: true },
     ],
     enemies: [
-      { id: 'li_tec', type: 'tecnico', x: 950, patrol: [880, 1150] },
+      { id: 'li_tec', type: 'tecnico', x: 1350, patrol: [1200, 1500] },
     ],
   },
 
   lab_corridoio: {
-    name: 'Laboratorio — Corridoio', bg: BGP + 'lab_corridoio.png', scale: 1.05, floorY: 670,
-    light: 0.55, map: [1, 5],
+    name: 'Laboratorio — Corridoio', bg: BGV2 + 'lab_corridoio.png', layoutW: 2587, keepEdges: true, scale: 1.15, floorY: 640,
+    light: 0.6, map: [1, 5],
     hotspots: [
-      { id: 'lc_log', x: 200, w: 160, label: 'Registro accessi', icon: 'note', iconY: 470, doc: 'doc_accessi' },
-      { id: 'lc_bench', x: 900, w: 200, label: 'Bancone', markY: 420, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
+      { id: 'lc_log', x: 335, w: 60, label: 'Registro accessi', icon: 'note', iconY: 390, doc: 'doc_accessi' },
+      { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
     ],
     doors: [
-      { id: 'lc_to_li', x: 0, w: 110, top: 160, label: 'Ingresso', target: 'lab_ingresso' },
-      { id: 'lc_to_bio', x: 580, w: 110, top: 230, label: 'Laboratorio biologico', target: 'lab_biologico' },
-      { id: 'lc_to_server', x: 1170, w: 110, top: 160, label: 'Sala server', target: 'sala_server' },
+      { id: 'lc_to_li', x: 110, w: 215, top: 200, bottom: 595, label: 'Ingresso', target: 'lab_ingresso', noSprite: true },
+      { id: 'lc_to_bio', x: 1115, w: 215, top: 200, bottom: 595, label: 'Laboratorio biologico', target: 'lab_biologico', noSprite: true },
+      { id: 'lc_to_server', x: 2345, w: 215, top: 195, bottom: 595, label: 'Sala server', target: 'sala_server', noSprite: true },
     ],
     enemies: [
-      { id: 'lc_inf', type: 'infermiere', x: 420, patrol: [360, 540] },
-      { id: 'lc_run', type: 'corridore', x: 1000, idle: true, facingRight: false },
+      { id: 'lc_inf', type: 'infermiere', x: 700, patrol: [500, 950] },
+      { id: 'lc_run', type: 'corridore', x: 2100, idle: true, facingRight: false },
     ],
   },
 
@@ -4786,80 +4784,83 @@ const ROOMS = {
   },
 
   sala_server: {
-    name: 'Sala server', bg: BGP + 'sala_server.png', scale: 1.10, floorY: 672,
-    light: 0.5, map: [3, 5],
+    name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
+    light: 0.55, map: [3, 5],
+    overlays: [{ type: 'monitor', x: 920, y: 316, w: 105, h: 74 }],
     hotspots: [
-      { id: 'server_doc', x: 180, w: 120, label: 'Stampa sul pavimento', icon: 'note', iconY: 630, doc: 'doc_classificato' },
-      { id: 'server_upload', x: 830, w: 140, label: 'Terminale di trasmissione', markY: 420, event: 'upload_data',
+      { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },
+      { id: 'server_upload', x: 895, w: 160, label: 'Terminale di trasmissione', markY: 300, event: 'upload_data',
         requires: [{ item: 'usb' }], failText: 'Il terminale chiede un supporto con i dati da trasmettere.',
         hideIf: { flag: 'data_sent' } },
     ],
     doors: [
-      { id: 'server_to_lc', x: 0, w: 130, top: 120, label: 'Corridoio', target: 'lab_corridoio' },
-      { id: 'server_to_core', x: 520, w: 240, top: 200, label: 'Camera centrale', target: 'camera_centrale',
+      { id: 'server_to_lc', x: 55, w: 135, top: 190, bottom: 660, label: 'Corridoio', target: 'lab_corridoio', noSprite: true },
+      { id: 'server_to_core', x: 610, w: 225, top: 255, bottom: 580, label: 'Camera centrale', target: 'camera_centrale', noSprite: true,
         requires: [{ flag: 'data_sent' }], failText: 'Porta stagna. Sul display: "APERTURA SOLO DA TERMINALE".' },
     ],
     enemies: [
-      { id: 'server_listener', type: 'listener', x: 1000, patrol: [900, 1180] },
+      { id: 'server_listener', type: 'listener', x: 1150, patrol: [1000, 1300] },
     ],
   },
 
   camera_centrale: {
-    name: 'Camera centrale', bg: BGP + 'camera_centrale.png', scale: 1.00, floorY: 664,
-    light: 0.6, map: [4, 5],
+    name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650,
+    light: 0.62, map: [4, 5],
     npcs: [
-      { id: 'elena', char: 'elena', x: 880, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
+      { id: 'elena', char: 'elena', x: 930, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
     ],
     hotspots: [
-      { id: 'core_letter', x: 840, w: 120, label: 'Una lettera e una chiave', icon: 'note', iconY: 620, doc: 'doc_lettera_elena',
+      { id: 'core_tank', x: 610, w: 200, label: 'La vasca', markY: 330,
+        text: 'Un cilindro pieno di liquido rosso. Dentro, qualcosa si muove ancora.' },
+      { id: 'core_letter', x: 870, w: 120, label: 'Una lettera e una chiave', icon: 'note', iconY: 630, doc: 'doc_lettera_elena',
         give: ['key_rusty'], showIf: { flag: 'elena_gone' } },
     ],
     doors: [
-      { id: 'core_to_server', x: 0, w: 130, top: 200, label: 'Sala server', target: 'sala_server',
+      { id: 'core_to_server', x: 85, w: 125, top: 300, bottom: 620, label: 'Sala server', target: 'sala_server', noSprite: true,
         requires: [{ notFlag: 'core_alarm' }], failText: 'La porta stagna si è sigillata alle tue spalle.' },
-      { id: 'core_to_port', x: 1150, w: 130, top: 200, label: 'Galleria verso il porto', target: 'porto',
-        requires: [{ flag: 'elena_talked' }], failText: 'Un portellone chiuso. Elena ha il comando.' },
+      { id: 'core_to_port', x: 1175, w: 175, top: 285, bottom: 610, label: 'Galleria verso il porto', target: 'porto', noSprite: true,
+        requires: [{ flag: 'elena_talked' }], failText: 'Il portellone è aperto, ma oltre c\'è una griglia chiusa. Elena ha il comando.' },
     ],
     enemies: [
-      { id: 'core_run1', type: 'corridore', x: 140, facingRight: true, showIf: { flag: 'core_alarm' } },
-      { id: 'core_run2', type: 'contaminato', x: 260, facingRight: true, showIf: { flag: 'core_alarm' } },
+      { id: 'core_run1', type: 'corridore', x: 260, facingRight: true, showIf: { flag: 'core_alarm' } },
+      { id: 'core_run2', type: 'contaminato', x: 380, facingRight: true, showIf: { flag: 'core_alarm' } },
     ],
   },
 
   /* ═══════════ CAPITOLO 6 — IL PORTO ═══════════ */
 
   porto: {
-    name: 'Porto commerciale', bg: BGP + 'porto.png', scale: 0.70, floorY: 652,
-    light: 0.5, map: [0, 6], ambient: 'rain_heavy', rain: true,
-    props: [{ name: 'body_5', x: 520 }],
+    name: 'Porto commerciale', bg: BGV2 + 'porto.png', layoutW: 2261, keepEdges: true, scale: 0.78, floorY: 630,
+    light: 0.55, map: [0, 6], ambient: 'rain_heavy', rain: true,
+    props: [{ name: 'body_5', x: 1200 }],
     hotspots: [
-      { id: 'port_container', x: 300, w: 200, label: 'Container aperto', markY: 480,
+      { id: 'port_container', x: 840, w: 160, label: 'Container aperto', markY: 330,
         give: [['ammo_shells', 8], 'medikit_small'] },
     ],
     doors: [
-      { id: 'port_to_core', x: 0, w: 120, top: 380, label: 'Galleria', target: 'camera_centrale',
+      { id: 'port_to_core', x: 100, w: 280, top: 280, bottom: 600, label: 'Galleria', target: 'camera_centrale', noSprite: true,
         requires: NEVER, failText: 'La galleria è crollata dietro di te.' },
-      { id: 'port_to_pier', x: 1160, w: 120, top: 380, label: 'Molo 4', target: 'molo_finale' },
+      { id: 'port_to_pier', x: 2080, w: 160, top: 380, bottom: 630, label: 'Molo 4', target: 'molo_finale', noSprite: true },
     ],
     enemies: [
-      { id: 'port_c1', type: 'tecnico', x: 700, patrol: [600, 900] },
-      { id: 'port_run', type: 'corridore', x: 1080, facingRight: false },
-      { id: 'port_c2', type: 'contaminato', x: 950, patrol: [850, 1100] },
+      { id: 'port_c1', type: 'tecnico', x: 650, patrol: [500, 900] },
+      { id: 'port_c2', type: 'contaminato', x: 1350, patrol: [1150, 1550] },
+      { id: 'port_run', type: 'corridore', x: 1800, facingRight: false },
     ],
   },
 
   molo_finale: {
-    name: 'Molo 4', bg: BGP + 'molo_finale.png', scale: 0.75, floorY: 656,
-    light: 0.5, map: [1, 6], ambient: 'rain_heavy', rain: true,
+    name: 'Molo 4', bg: BGV2 + 'molo_finale.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 650,
+    light: 0.55, map: [1, 6], ambient: 'rain_heavy', rain: true,
     hotspots: [
-      { id: 'the_boat', x: 360, w: 160, label: 'Bitta — il gozzo di papà', markY: 450, event: 'ending',
+      { id: 'the_boat', x: 90, w: 520, label: 'Bitta — il gozzo di papà', markY: 430, event: 'ending',
         requires: [{ item: 'key_rusty' }], failText: 'Alla bitta è legato il gozzo di papà, con una catena e un lucchetto.' },
     ],
     doors: [
-      { id: 'pier_to_port', x: 1160, w: 120, top: 380, label: 'Porto', target: 'porto' },
+      { id: 'pier_to_port', x: 1180, w: 109, top: 300, bottom: 640, label: 'Porto', target: 'porto', noSprite: true },
     ],
     enemies: [
-      { id: 'pier_l', type: 'listener', x: 760, idle: true, facingRight: false },
+      { id: 'pier_l', type: 'listener', x: 900, idle: true, facingRight: false },
     ],
   },
 };
