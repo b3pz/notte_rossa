@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v0.9</div>
+      <div class="menu-version">v1.0</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -109,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v0.9</p>
+        <p class="dim">Survival horror 2D — v1.0</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -206,7 +206,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 0.9</div>
+        <div class="pause-version">versione 1.0</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
@@ -4379,47 +4379,42 @@ const ROOMS = {
   },
 
   station_storage: {
-    name: 'Servizi tecnici', bg: BG + 'station_storage.png', scale: 1.15, floorY: 670,
-    light: 0.38, map: [1, 1], ambient: 'room_hum',
-    props: [{ name: 'body_6', x: 690, flip: true }],
+    name: 'Servizi tecnici', bg: BGV2 + 'station_storage.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 600,
+    light: 0.5, map: [1, 1], ambient: 'room_hum',
+    props: [{ name: 'body_1', x: 350 }],
     hotspots: [
-      { id: 'document_note_storage', x: 330, w: 80, label: 'Foglio sul quadro', icon: 'note', iconY: 330, doc: 'doc_storage_note' },
-      { id: 'shelf_pistol', x: 420, w: 110, label: 'Armadio B3', icon: 'pistol', iconY: 420,
-        give: ['pistol', ['ammo_pistol_small', 32]], event: 'got_pistol' },
-      { id: 'crate_key', x: 540, w: 80, label: 'Cassetta rossa', icon: 'key_station', iconY: 640, give: ['key_station'] },
-      { id: 'guard_body', x: 630, w: 140, label: 'La guardia', markY: 600,
+      { id: 'guard_body', x: 285, w: 130, label: 'La guardia', markY: 560,
         give: ['bandage', ['ammo_pistol_small', 10]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
-      { id: 'cart_storage', x: 880, w: 130, label: 'Carrello delle pulizie', markY: 430,
+      { id: 'document_note_storage', x: 425, w: 90, label: 'Foglio sul quadro', icon: 'note', iconY: 300, doc: 'doc_storage_note' },
+      { id: 'shelf_pistol', x: 545, w: 145, label: 'Armadio B3', icon: 'pistol', iconY: 400,
+        give: ['pistol', ['ammo_pistol_small', 32]], event: 'got_pistol' },
+      { id: 'cart_storage', x: 695, w: 70, label: 'Carrello delle pulizie', markY: 470,
         text: 'Sul pavimento, impronte scalze che vanno verso il buio.' },
+      { id: 'crate_key', x: 770, w: 105, label: 'Cassetta rossa', icon: 'key_station', iconY: 290, give: ['key_station'] },
     ],
     doors: [
-      { id: 'storage_to_platform', x: 110, w: 190, top: 90, label: 'Binario 1', target: 'station_platform' },
-      { id: 'storage_dark', x: 580, w: 60, top: 300, label: 'Corridoio buio',
+      { id: 'storage_to_platform', x: 85, w: 175, top: 200, bottom: 545, label: 'Binario 1', target: 'station_platform', noSprite: true },
+      { id: 'storage_dark', x: 940, w: 220, top: 190, bottom: 560, label: 'Corridoio buio', noSprite: true,
         lockedText: 'Il corridoio finisce contro un muro di casse.', requires: NEVER },
     ],
   },
 
   station_control: {
-    name: 'Sala controllo', bg: BG + 'station_control.png', scale: 1.25, floorY: 682,
-    light: 0.7, map: [3, 0], ambient: 'electronics_hum', safe: true,
+    name: 'Sala controllo', bg: BGV2 + 'station_control.png', layoutW: 1472, keepEdges: true, scale: 1.42, floorY: 665,
+    light: 0.72, map: [3, 0], ambient: 'electronics_hum', safe: true,
     npcs: [
-      { id: 'carmine', char: 'carmine', x: 330, anim: 'scared', facingRight: true, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
-    ],
-    overlays: [
-      { type: 'monitor', x: 1063, y: 350, w: 44, h: 36 },
-      { type: 'monitor', x: 384, y: 393, w: 50, h: 40 },
-      { type: 'lever', x: 1160, y: 460, h: 70, flag: 'shutter_open' },
+      { id: 'carmine', char: 'carmine', x: 800, anim: 'scared', facingRight: false, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
     ],
     hotspots: [
-      { id: 'emergency_radio', x: 120, w: 110, label: 'Radio d\'emergenza [SALVA]', markY: 370, event: 'open_save' },
-      { id: 'control_monitor', x: 990, w: 130, label: 'Monitor', markY: 330,
+      { id: 'emergency_radio', x: 290, w: 170, label: 'Radio d\'emergenza [SALVA]', markY: 360, event: 'open_save' },
+      { id: 'doc_turni', x: 530, w: 90, label: 'Registro di movimento', icon: 'note', iconY: 440, doc: 'doc_turni' },
+      { id: 'control_monitor', x: 965, w: 230, label: 'Mappa della rete', markY: 230,
         text: 'La mappa della rete ferroviaria.\nTutte le linee attorno a Porto Salvo sono rosse.' },
-      { id: 'doc_turni', x: 580, w: 110, label: 'Registro di movimento', icon: 'note', iconY: 395, doc: 'doc_turni' },
-      { id: 'shutter_lever', x: 1140, w: 130, label: 'Leva della serranda', markY: 440, event: 'open_shutter',
+      { id: 'shutter_lever', x: 1220, w: 220, label: 'Leva della serranda', markY: 380, event: 'open_shutter',
         requires: [{ flag: 'carmine_talked' }], failText: 'Un pannello con decine di leve. Meglio chiedere al ferroviere.' },
     ],
     doors: [
-      { id: 'control_to_hall', x: 0, w: 100, top: 280, label: 'Scala — Atrio', target: 'station_hall' },
+      { id: 'control_to_hall', x: 95, w: 140, top: 150, bottom: 665, label: 'Scala — Atrio', target: 'station_hall', noSprite: true },
     ],
   },
 
