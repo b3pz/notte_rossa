@@ -28,6 +28,13 @@ def load_rgba(path):
         lab, _ = ndimage.label(white)
         border = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
         bg = np.isin(lab, list(border))
+        # zone bianche chiuse (tra le gambe, sotto un braccio): bianco quasi puro e non minuscole
+        pure = (im[..., 0] > 236) & (im[..., 1] > 236) & (im[..., 2] > 236)
+        for i, sl in enumerate(ndimage.find_objects(lab), 1):
+            if i in border or sl is None: continue
+            reg = lab[sl] == i
+            if reg.sum() > 60 and pure[sl][reg].mean() > 0.8:
+                bg[sl] |= reg
         im[bg, 3] = 0
     return im.astype(np.uint8)
 
@@ -196,6 +203,11 @@ RECOVER = [
     ('luca_hurt.png',         [0, 1],                         'player_hurt.png',         250),
     ('luca_shotgun_walk.png', [0, 1, 2, 3, 4, 5],             'player_walk_shotgun.png', 266, True),
     ('luca_wounded.png',      [0, 1, 2, 3],                   'player_wounded.png',      255),
+    ('carmine_talk_new.png',  [0, 1, 2, 1],                   'carmine_talk.png',        266),
+    ('carmine_talk_new.png',  [0],                            'carmine_idle.png',        266),
+    ('carmine_check_new.png', [0, 1],                         'carmine_check.png',       266),
+    ('carmine_scared_new.png', [0, 1],                        'carmine_scared.png',      262),
+    ('contaminato_hurt_new.png', [0, 1],                      'contaminato_hurt.png',    250),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 

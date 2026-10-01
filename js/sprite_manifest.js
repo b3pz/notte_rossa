@@ -149,8 +149,8 @@ export const SPRITES = {
       },
       "hurt": {
         "file": "assets/sprites/cut/contaminato_hurt.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 6,
         "loop": false
       },
       "dead": {
@@ -308,25 +308,25 @@ export const SPRITES = {
       "idle": {
         "file": "assets/sprites/cut/carmine_idle.png",
         "frames": 1,
-        "fps": 3,
+        "fps": 1,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/carmine_talk.png",
         "frames": 4,
-        "fps": 5,
+        "fps": 2,
         "loop": true
       },
       "check": {
         "file": "assets/sprites/cut/carmine_check.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 1,
         "loop": true
       },
       "scared": {
         "file": "assets/sprites/cut/carmine_scared.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 2,
         "loop": true
       }
     }

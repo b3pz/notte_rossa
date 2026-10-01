@@ -72,7 +72,6 @@ SPRITES = [
     ('luca', 'luca_torch_idle', 2, "standing still holding a flashlight pointed forward at chest height, the light beam is NOT drawn"),
     ('luca', 'luca_interact', 4, "bending down to pick something up from the floor (2 poses), then reaching forward to open a locker door (2 poses)"),
     ('luca', 'luca_crouch_idle', 2, "crouching still, low and silent, looking forward"),
-    ('luca', 'luca_hide', 2, "crouched and pressed against a wall, covering his mouth with one hand, hiding"),
     # A2 — Carmine
     ('carmine', 'carmine_idle', 4, "standing near a radio desk, nervous idle, shifting his weight"),
     ('carmine', 'carmine_check', 4, "looking at a clipboard and fiddling with a radio handset"),
