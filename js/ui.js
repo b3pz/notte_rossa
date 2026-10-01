@@ -57,6 +57,13 @@ export class UIManager {
     on('btn-pause-map',  () => { g.togglePause(); this.openMap(); });
     on('btn-pause-docs', () => { g.togglePause(); this.openDocsList(); });
     on('btn-pause-menu', () => g.returnToMenu());
+    on('btn-pause-opts', () => {
+      const scr = $('options-screen');
+      scr.classList.add('active', 'in-game');
+      const back = $('btn-opts-back');
+      const done = () => { scr.classList.remove('active', 'in-game'); back.removeEventListener('click', done, true); };
+      back.addEventListener('click', done, true);
+    });
 
     on('btn-go-load', () => g.restartFromDeath());
     on('btn-go-menu', () => { this.hideGameOver(); g.returnToMenu(); });

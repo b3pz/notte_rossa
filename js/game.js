@@ -137,6 +137,13 @@ export class Game {
         this.audio.setVolume(cat === 'amb' ? 'ambient' : cat, parseInt(slider.value) / 100);
       });
     });
+    const br = document.getElementById('opt-bright'), brv = document.getElementById('opt-bright-val');
+    try { const v = localStorage.getItem('nr_brightness'); if (v) { this.brightness = +v / 100; if (br) { br.value = v; brv.textContent = v; } } } catch (e) {}
+    br?.addEventListener('input', () => {
+      brv.textContent = br.value;
+      this.brightness = +br.value / 100;
+      try { localStorage.setItem('nr_brightness', br.value); } catch (e) {}
+    });
     document.getElementById('opt-debug')?.addEventListener('change', e => {
       this.debug = e.target.checked;
       this.ui.toggleDebug(this.debug);
@@ -576,7 +583,9 @@ export class Game {
 
   /** Buio della stanza con "buco" di luce attorno al giocatore e cono della torcia */
   _drawDarkness(ctx, room) {
-    const dark = Math.max(0, Math.min(0.95, (1 - (room.lightLevel ?? 0.5)) * 0.9));
+    // luminosità regolabile nelle opzioni (1 = normale)
+    const bright = this.brightness ?? 1.25;
+    const dark = Math.max(0, Math.min(0.9, (1 - (room.lightLevel ?? 0.5)) * 0.62 / bright));
     if (dark <= 0.01) return;
     const oc = this._darkCtx, p = this.player, cam = this.camera;
     const sx = (p.centerX - cam.x) * cam.zoom;
@@ -633,7 +642,7 @@ export class Game {
     const danger = this.player.healthState === 'DANGER';
     const vg = ctx.createRadialGradient(CANVAS_W / 2, CANVAS_H / 2, CANVAS_H * 0.35, CANVAS_W / 2, CANVAS_H / 2, CANVAS_H * 0.95);
     vg.addColorStop(0, 'rgba(0,0,0,0)');
-    vg.addColorStop(1, danger ? `rgba(90,0,0,${0.55 + Math.sin(Date.now() * 0.004) * 0.12})` : 'rgba(0,0,0,0.6)');
+    vg.addColorStop(1, danger ? `rgba(90,0,0,${0.55 + Math.sin(Date.now() * 0.004) * 0.12})` : `rgba(0,0,0,${0.42 / (this.brightness ?? 1.25)})`);
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
   }

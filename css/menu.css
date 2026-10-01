@@ -456,3 +456,28 @@ body.touch #map-side { flex-basis: 30vw; }
 body.touch #map-side .ms-place { font-size: 20px; }
 body.touch #map-side li, body.touch #map-side .ms-obj { font-size: 15px; }
 body.touch #map-screen .map-title { display: none; }
+
+#options-screen.in-game { z-index: 150; background: rgba(4,5,8,0.9); }
+input[type=range] { accent-color: #c0152a; }
+
+/* ── DIALOGHI AL CENTRO, come sottotitoli ── */
+#dialogue-box {
+  left: 50% !important; right: auto !important; bottom: 28px !important;
+  transform: translateX(-50%);
+  width: min(880px, 86vw);
+  border: 1px solid rgba(192,21,42,0.55) !important;
+  border-top: 2px solid rgba(192,21,42,0.85) !important;
+  background: rgba(6,6,9,0.9) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  padding: 16px 28px 18px !important;
+  text-align: center;
+}
+#dialogue-speaker { text-align: center; }
+#dialogue-text { font-size: 18px !important; line-height: 1.55 !important; }
+#dialogue-continue { position: static !important; display: block; text-align: center; margin-top: 6px; }
+body.touch #dialogue-box { bottom: 14px !important; width: min(900px, 78vw); max-height: 46vh; }
+body.touch #dialogue-text { font-size: 20px !important; }
+body.touch #dialogue-box { width: min(760px, 70vw); padding: 10px 22px 12px !important; }
+body.touch #dialogue-text { font-size: 18px !important; }
+body.touch #dialogue-continue { font-size: 0 !important; }
+body.touch #dialogue-continue::after { content: 'tocca per continuare ▼'; font-size: 12px; letter-spacing: .1em; }

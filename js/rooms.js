@@ -83,10 +83,23 @@ export class RoomManager {
       r.width = Math.max(VIEW_W, Math.round(im.naturalWidth * VIEW_H / im.naturalHeight));
       if (r.layoutW !== r.width) this._rescaleLayout(r, r.width / r.layoutW);
     }
+    for (const r of Object.values(ROOMS)) if (r.bg === src) this._pullFromEdges(r);
     if (this.current?.bg === src) {
       this.game.camera.setBounds(0, 0, this.current.width, VIEW_H);
       this.respawnEnemies();
     }
+  }
+
+  /** Niente da usare schiacciato contro i bordi: almeno 150 px dentro la stanza */
+  _pullFromEdges(r) {
+    if (r._edgesFixed) return;
+    r._edgesFixed = true;
+    const m = 150;
+    for (const h of r.hotspots) {
+      if (h.x < m) h.x = m;
+      if (h.x + h.w > r.width - m) h.x = Math.max(m, r.width - m - h.w);
+    }
+    for (const n of r.npcs) n.x = Math.max(m, Math.min(r.width - m, n.x));
   }
 
   _rescaleLayout(r, k) {
@@ -207,7 +220,8 @@ export class RoomManager {
   /** Rettangolo della porta disegnata (piedi sul pavimento, centrata sull'uscita) */
   doorRect(d, room = this.current) {
     const h = Math.round(310 * room.scale), w = Math.round(h * 0.62);
-    const cx = Math.max(w / 2 + 6, Math.min(room.width - w / 2 - 6, d.x + d.w / 2));
+    const m = w / 2 + 70;   // porte un po' dentro la stanza, non schiacciate sul bordo
+    const cx = Math.max(m, Math.min(room.width - m, d.x + d.w / 2));
     return { x: cx - w / 2, y: room.floorY - h + 4 * room.scale, w, h, cx };
   }
 

@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v0.5</div>
+      <div class="menu-version">v0.6</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -92,6 +92,11 @@
           <span id="opt-amb-val">60</span>
         </div>
         <div class="option-row">
+          <label>LUMINOSITÀ</label>
+          <input type="range" id="opt-bright" min="70" max="200" value="125">
+          <span id="opt-bright-val">125</span>
+        </div>
+        <div class="option-row">
           <label>DEBUG (F1)</label>
           <input type="checkbox" id="opt-debug">
         </div>
@@ -104,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v0.5</p>
+        <p class="dim">Survival horror 2D — v0.6</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -201,11 +206,12 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 0.5</div>
+        <div class="pause-version">versione 0.6</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
         <button class="menu-btn" id="btn-pause-docs">DOCUMENTI</button>
+        <button class="menu-btn" id="btn-pause-opts">OPZIONI</button>
         <button class="menu-btn" id="btn-pause-menu">TORNA AL MENU</button>
       </div>
     </div>
@@ -3768,6 +3774,13 @@ class UIManager {
     on('btn-pause-map',  () => { g.togglePause(); this.openMap(); });
     on('btn-pause-docs', () => { g.togglePause(); this.openDocsList(); });
     on('btn-pause-menu', () => g.returnToMenu());
+    on('btn-pause-opts', () => {
+      const scr = $('options-screen');
+      scr.classList.add('active', 'in-game');
+      const back = $('btn-opts-back');
+      const done = () => { scr.classList.remove('active', 'in-game'); back.removeEventListener('click', done, true); };
+      back.addEventListener('click', done, true);
+    });
 
     on('btn-go-load', () => g.restartFromDeath());
     on('btn-go-menu', () => { this.hideGameOver(); g.returnToMenu(); });
@@ -4921,10 +4934,23 @@ class RoomManager {
       r.width = Math.max(VIEW_W, Math.round(im.naturalWidth * VIEW_H / im.naturalHeight));
       if (r.layoutW !== r.width) this._rescaleLayout(r, r.width / r.layoutW);
     }
+    for (const r of Object.values(ROOMS)) if (r.bg === src) this._pullFromEdges(r);
     if (this.current?.bg === src) {
       this.game.camera.setBounds(0, 0, this.current.width, VIEW_H);
       this.respawnEnemies();
     }
+  }
+
+  /** Niente da usare schiacciato contro i bordi: almeno 150 px dentro la stanza */
+  _pullFromEdges(r) {
+    if (r._edgesFixed) return;
+    r._edgesFixed = true;
+    const m = 150;
+    for (const h of r.hotspots) {
+      if (h.x < m) h.x = m;
+      if (h.x + h.w > r.width - m) h.x = Math.max(m, r.width - m - h.w);
+    }
+    for (const n of r.npcs) n.x = Math.max(m, Math.min(r.width - m, n.x));
   }
 
   _rescaleLayout(r, k) {
@@ -5045,7 +5071,8 @@ class RoomManager {
   /** Rettangolo della porta disegnata (piedi sul pavimento, centrata sull'uscita) */
   doorRect(d, room = this.current) {
     const h = Math.round(310 * room.scale), w = Math.round(h * 0.62);
-    const cx = Math.max(w / 2 + 6, Math.min(room.width - w / 2 - 6, d.x + d.w / 2));
+    const m = w / 2 + 70;   // porte un po' dentro la stanza, non schiacciate sul bordo
+    const cx = Math.max(m, Math.min(room.width - m, d.x + d.w / 2));
     return { x: cx - w / 2, y: room.floorY - h + 4 * room.scale, w, h, cx };
   }
 
@@ -5762,6 +5789,13 @@ class Game {
         this.audio.setVolume(cat === 'amb' ? 'ambient' : cat, parseInt(slider.value) / 100);
       });
     });
+    const br = document.getElementById('opt-bright'), brv = document.getElementById('opt-bright-val');
+    try { const v = localStorage.getItem('nr_brightness'); if (v) { this.brightness = +v / 100; if (br) { br.value = v; brv.textContent = v; } } } catch (e) {}
+    br?.addEventListener('input', () => {
+      brv.textContent = br.value;
+      this.brightness = +br.value / 100;
+      try { localStorage.setItem('nr_brightness', br.value); } catch (e) {}
+    });
     document.getElementById('opt-debug')?.addEventListener('change', e => {
       this.debug = e.target.checked;
       this.ui.toggleDebug(this.debug);
@@ -6201,7 +6235,9 @@ class Game {
 
   /** Buio della stanza con "buco" di luce attorno al giocatore e cono della torcia */
   _drawDarkness(ctx, room) {
-    const dark = Math.max(0, Math.min(0.95, (1 - (room.lightLevel ?? 0.5)) * 0.9));
+    // luminosità regolabile nelle opzioni (1 = normale)
+    const bright = this.brightness ?? 1.25;
+    const dark = Math.max(0, Math.min(0.9, (1 - (room.lightLevel ?? 0.5)) * 0.62 / bright));
     if (dark <= 0.01) return;
     const oc = this._darkCtx, p = this.player, cam = this.camera;
     const sx = (p.centerX - cam.x) * cam.zoom;
@@ -6258,7 +6294,7 @@ class Game {
     const danger = this.player.healthState === 'DANGER';
     const vg = ctx.createRadialGradient(CANVAS_W / 2, CANVAS_H / 2, CANVAS_H * 0.35, CANVAS_W / 2, CANVAS_H / 2, CANVAS_H * 0.95);
     vg.addColorStop(0, 'rgba(0,0,0,0)');
-    vg.addColorStop(1, danger ? `rgba(90,0,0,${0.55 + Math.sin(Date.now() * 0.004) * 0.12})` : 'rgba(0,0,0,0.6)');
+    vg.addColorStop(1, danger ? `rgba(90,0,0,${0.55 + Math.sin(Date.now() * 0.004) * 0.12})` : `rgba(0,0,0,${0.42 / (this.brightness ?? 1.25)})`);
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
   }
