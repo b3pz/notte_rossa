@@ -219,6 +219,9 @@ export class RoomManager {
 
   /** Rettangolo della porta disegnata (piedi sul pavimento, centrata sull'uscita) */
   doorRect(d, room = this.current) {
+    if (d.noSprite && d.top !== undefined) {
+      return { x: d.x, y: d.top, w: d.w, h: room.floorY - d.top, cx: d.x + d.w / 2 };
+    }
     const h = Math.round(310 * room.scale), w = Math.round(h * 0.62);
     const m = w / 2 + 70;   // porte un po' dentro la stanza, non schiacciate sul bordo
     const cx = Math.max(m, Math.min(room.width - m, d.x + d.w / 2));

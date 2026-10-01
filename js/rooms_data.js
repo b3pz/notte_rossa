@@ -24,6 +24,7 @@
 
 const BG  = 'assets/backgrounds/';
 const BGP = 'assets/backgrounds/provvisori/';
+const BGV2 = 'assets/backgrounds/v2/';   // nuovi sfondi laterali
 const NEVER = [{ flag: 'never' }];
 
 export const ROOMS = {
@@ -48,26 +49,27 @@ export const ROOMS = {
   },
 
   station_platform: {
-    name: 'Binario 1', bg: BG + 'station_platform.png', scale: 1.10, floorY: 670,
-    light: 0.55, darkFlag: 'lights_out', darkLight: 0.28, map: [1, 0], ambient: 'station_ambient',
-    props: [{ name: 'body_0', x: 520 }],
+    // NUOVO SFONDO LATERALE (v2): porte disegnate nello sfondo, coordinate in pixel reali
+    name: 'Binario 1', bg: BGV2 + 'station_platform.png', layoutW: 2587, scale: 0.9, floorY: 548,
+    light: 0.7, darkFlag: 'lights_out', darkLight: 0.42, map: [1, 0], ambient: 'station_ambient',
+    props: [{ name: 'body_0', x: 760 }],
     hotspots: [
-      { id: 'body_conductor', x: 430, w: 180, label: 'Il capotreno', markY: 600,
+      { id: 'body_conductor', x: 660, w: 200, label: 'Il capotreno', markY: 500,
         text: 'Il capotreno. Ha la gola aperta.\nIl fischietto è ancora stretto nella mano.' },
-      { id: 'platform_sign', x: 760, w: 120, label: 'Tabellone', markY: 250,
+      { id: 'platform_sign', x: 880, w: 210, label: 'Orario arrivi e partenze', markY: 245,
         text: '22:47 — CIRCOLAZIONE SOSPESA\nPer informazioni rivolgersi al personale.' },
-      { id: 'public_phone', x: 1100, w: 160, label: 'Cabina telefonica', markY: 330, event: 'phone_answer',
+      { id: 'public_phone', x: 2390, w: 160, label: 'Telefono pubblico', markY: 360, event: 'phone_answer',
         showIf: { flag: 'phone_ringing' } },
     ],
     doors: [
-      { id: 'platform_to_wagon', x: 40, w: 220, top: 260, label: 'Treno 847', target: 'train_wagon' },
-      { id: 'platform_to_hall', x: 600, w: 130, top: 300, label: 'Verso l\'atrio', target: 'station_hall',
+      { id: 'platform_to_wagon', x: 290, w: 130, top: 278, label: 'Treno 847', target: 'train_wagon', noSprite: true },
+      { id: 'platform_to_hall', x: 1351, w: 291, top: 207, label: 'Atrio', target: 'station_hall', noSprite: true,
         requires: [{ notFlag: 'phone_ringing' }], failText: 'Il telefono continua a squillare. Sembra che stia chiamando te.' },
-      { id: 'platform_to_storage', x: 960, w: 110, top: 200, label: 'Servizi tecnici', target: 'station_storage',
+      { id: 'platform_to_storage', x: 1925, w: 151, top: 270, label: 'Servizi tecnici', target: 'station_storage', noSprite: true,
         requires: [{ notFlag: 'phone_ringing' }], failText: 'Il telefono continua a squillare. Sembra che stia chiamando te.' },
     ],
     enemies: [
-      { id: 'platform_ferroviere', type: 'ferroviere', x: 120, facingRight: true, showIf: { flag: 'intro_complete' } },
+      { id: 'platform_ferroviere', type: 'ferroviere', x: 330, facingRight: true, showIf: { flag: 'intro_complete' } },
     ],
   },
 
