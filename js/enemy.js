@@ -393,8 +393,31 @@ export class EnemyManager {
 
   /** Chiamato da WeaponSystem quando un nemico muore */
   onEnemyKilled(e) {
+    if (e._dropped) return;
+    e._dropped = true;
     this.game.roomManager?.markEnemyKilled(e.key);
+    this._maybeDrop(e);
     this.game.events?.onEnemyKilled?.(e);
+  }
+
+  /** A volte un nemico abbattuto lascia munizioni (più facile se sei a corto) */
+  _maybeDrop(e) {
+    const g = this.game, inv = g.inventory, rm = g.roomManager, room = rm.current;
+    if (!room) return;
+    const hasShotgun = inv.hasItem('shotgun');
+    const low9 = inv.countItem('ammo_pistol_small') + (g.weapon._mags?.pistol ?? 0) < 12;
+    const lowSh = hasShotgun && inv.countItem('ammo_shells') < 6;
+    const chance = (low9 || lowSh) ? 0.8 : 0.4;
+    if (Math.random() > chance) return;
+    const shells = hasShotgun && (lowSh || Math.random() < 0.35);
+    this._dropN = (this._dropN || 0) + 1;
+    const x = Math.max(40, Math.min(room.width - 120, e.centerX - 40));
+    room.hotspots.push({
+      id: `drop_${room.id}_${this._dropN}_${Date.now() % 100000}`, x, w: 80,
+      label: shells ? 'Cartucce' : 'Munizioni 9mm', icon: shells ? 'ammo_shells' : 'ammo_pistol',
+      iconY: room.floorY - 18 * room.scale, give: [[shells ? 'ammo_shells' : 'ammo_pistol_small', shells ? 4 : 8]],
+      dropped: true,
+    });
   }
 
   draw(ctx) {

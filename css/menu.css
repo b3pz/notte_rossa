@@ -367,15 +367,7 @@ body.touch #hud-room { display: none; }
 body.touch .mm-controls { display: none; }
 @media (max-height: 560px) { .mm-controls { display: none; } }
 
-/* dialoghi compatti su schermi bassi (telefono in orizzontale) */
-@media (max-height: 500px) {
-  #dialogue-box { padding: 8px 22px 10px; min-height: 0; background: linear-gradient(0deg, rgba(0,0,0,0.92), rgba(0,0,0,0.7)); }
-  #dialogue-text { font-size: 12.5px !important; line-height: 1.45 !important; }
-  #dialogue-speaker { margin-bottom: 2px !important; font-size: 10px; }
-  #dialogue-continue { font-size: 10px; }
-  #hud-objective { padding: 5px 9px; }
-  #hud-objective-text { font-size: 11px; }
-}
+
 
 body.tc-dialog #tc-hint, body.tc-dialog #tc-action { display: none !important; }
 
@@ -401,3 +393,66 @@ body.touch .overlay-close { padding: 10px 16px; font-size: 13px; }
 }
 
 .pause-version { text-align:center; font-size:10px; letter-spacing:.2em; color:var(--text-dim); margin:-6px 0 10px; }
+
+/* ════════ TELEFONO: TUTTO PIÙ GRANDE ════════ */
+body.touch #dialogue-box { padding: 12px 28px 14px; min-height: 0; max-height: 40vh; overflow-y: auto; }
+body.touch #dialogue-speaker { font-size: 14px !important; margin-bottom: 4px !important; }
+body.touch #dialogue-text { font-size: 19px !important; line-height: 1.45 !important; letter-spacing: 0.02em; }
+body.touch #dialogue-continue { font-size: 13px; }
+body.touch #hud-objective { padding: 7px 12px; max-width: 58vw; }
+body.touch #hud-objective .obj-label { font-size: 11px; }
+body.touch #hud-objective-text { font-size: 16px; line-height: 1.35; }
+body.touch #notification { font-size: 17px !important; padding: 12px 22px !important; }
+body.touch #notification-text { font-size: 17px !important; }
+body.touch #hud-health-status, body.touch #hud-battery-pct, body.touch .hud-label { font-size: 13px !important; }
+body.touch #hud-health-bar, body.touch #hud-battery-bar { height: 8px !important; width: 150px !important; }
+body.touch #hud-ammo { font-size: 30px !important; }
+body.touch #hud-ammo-icon { width: 36px; height: 36px; }
+body.touch #hud-flashlight { padding: 8px 12px; border: 1px solid rgba(235,226,214,.3); background: rgba(0,0,0,.4); border-radius: 8px; }
+
+/* tasti */
+body.touch #tc-top button { width: 60px !important; height: 60px !important; }
+body.touch #tc-top svg { width: 30px; height: 30px; }
+body.touch #tc-action { width: 104px !important; height: 104px !important; bottom: 22px; border-width: 3px; }
+body.touch #tc-action svg { width: 46px; height: 46px; }
+body.touch #tc-ring { width: 160px; height: 160px; margin: -80px 0 0 -80px; }
+body.touch #tc-knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
+body.touch #tc-hint { font-size: 15px; max-width: 76vw; padding: 9px 16px; }
+
+/* menu */
+body.touch .menu-btn { font-size: 16px !important; padding: 13px 20px !important; }
+body.touch .item-action-btn { font-size: 15px; padding: 12px 18px; min-height: 46px; }
+body.touch #item-detail-name { font-size: 17px; }
+body.touch #item-detail-desc { font-size: 15px; line-height: 1.5; }
+body.touch #doc-body { font-size: 17px !important; line-height: 1.6 !important; }
+body.touch #doc-title { font-size: 18px !important; }
+body.touch .doc-row { font-size: 16px; padding: 14px; }
+body.touch .inv-title, body.touch .map-title, body.touch .pause-title { font-size: 17px !important; }
+body.touch .inv-hint { display: none; }
+body.touch .inv-slot .slot-name { font-size: 10px !important; }
+body.touch .inv-slot .slot-qty { font-size: 14px !important; }
+body.touch .overlay-close { font-size: 15px !important; padding: 12px 18px !important; min-height: 48px; }
+body.touch #main-menu .title-notte, body.touch #main-menu .title-rossa { font-size: 64px; }
+body.touch #main-menu .menu-btn { font-size: 18px !important; padding: 12px 18px !important; }
+body.touch #main-menu .menu-subtitle { font-size: 14px; }
+
+/* ── MAPPA ── */
+#map-screen .map-panel { width: min(96vw, 1500px); max-height: 94vh; padding: 18px 20px; background: #0b0a09; }
+.map-body { display: flex; gap: 18px; align-items: stretch; width: 100%; }
+#map-canvas { flex: 1 1 auto; width: 0; min-width: 0; height: auto; max-height: 80vh; aspect-ratio: 16 / 9; object-fit: contain;
+  border: none !important; background: none !important; box-shadow: 0 10px 40px rgba(0,0,0,.7); transform: rotate(-0.4deg); }
+#map-side { flex: 0 0 250px; color: #e6dccb; font-family: "Courier New", monospace; overflow-y: auto; }
+#map-side .ms-label { font-size: 11px; letter-spacing: .3em; color: #c0152a; }
+#map-side .ms-place { font: bold 20px Georgia, serif; margin: 4px 0 10px; }
+#map-side ul { list-style: none; padding: 0; margin: 0; }
+#map-side li { font-size: 14px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+#map-side li span { display: inline-block; width: 20px; color: #c0152a; }
+#map-side li.unknown { color: #6f675c; }
+#map-side li.here { color: #fff; font-weight: bold; }
+#map-side .ms-obj { font-size: 14px; line-height: 1.45; margin-top: 4px; }
+#map-side .ms-legend { margin-top: 16px; font-size: 11px; color: #8d8578; line-height: 1.6; }
+body.touch #map-screen .map-panel { padding: 8px 10px; }
+body.touch #map-side { flex-basis: 30vw; }
+body.touch #map-side .ms-place { font-size: 20px; }
+body.touch #map-side li, body.touch #map-side .ms-obj { font-size: 15px; }
+body.touch #map-screen .map-title { display: none; }

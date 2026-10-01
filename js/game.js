@@ -60,6 +60,7 @@ export class Game {
     this.input.lockCheck = () => !!(this._intro || this._deathShown || this._ended || this._transitioning || this.paused
       || this.dialogue?.isActive() || this.events?.isRunning() || this.ui?.hasOpenOverlay() || this.editor?.on);
     this.touch    = new TouchControls(this);
+    this._handleResize();
     this.roomManager.preload();
 
     if (this.save.hasSaveData()) document.getElementById('btn-continua')?.removeAttribute('disabled');
@@ -243,6 +244,12 @@ export class Game {
       return;
     }
 
+    // munizioni lasciate dai nemici: si raccolgono passandoci sopra
+    const rr = this.roomManager.current;
+    if (rr && !input.locked) for (const h of rr.hotspots) {
+      if (!h.dropped || this.roomManager.isPicked(h.id)) continue;
+      if (Math.abs(p.centerX - (h.x + h.w / 2)) < 50 * rr.scale) this._useHotspot(h);
+    }
     this.roomManager._near = input.locked ? null : this.roomManager.nearest(p);
     if (!input.locked) {
       this._handleInteraction();
@@ -304,8 +311,8 @@ export class Game {
     }
     for (const d of r.doors) {
       if (!rm.visible(d)) continue;
-      const top = (d.top ?? r.floorY - 330 * r.scale) - 30;
-      if (wx > d.x - 10 && wx < d.x + d.w + 10 && wy > top && wy < r.floorY + 30) return { kind: 'door', obj: d };
+      const dr = rm.doorRect(d, r);
+      if (wx > dr.x - 20 && wx < dr.x + dr.w + 20 && wy > dr.y - 40 && wy < r.floorY + 40) return { kind: 'door', obj: d };
     }
     return null;
   }
@@ -318,7 +325,8 @@ export class Game {
     if (!a) return;
     if (this.input.locked || !p.alive) { this.autoWalk = null; v.moveLeft = v.moveRight = false; return; }
     const o = a.obj, sc = this.roomManager.current.scale;
-    const x0 = a.kind === 'npc' ? o.x - 60 * sc : o.x, x1 = a.kind === 'npc' ? o.x + 60 * sc : o.x + o.w;
+    let x0 = a.kind === 'npc' ? o.x - 60 * sc : o.x, x1 = a.kind === 'npc' ? o.x + 60 * sc : o.x + o.w;
+    if (a.kind === 'door') { const dr = this.roomManager.doorRect(o); x0 = dr.x; x1 = dr.x + dr.w; }
     const target = Math.max(x0 + 10, Math.min(x1 - 10, p.centerX));
     const dx = target - p.centerX;
     if (Math.abs(dx) <= 6) {
@@ -534,7 +542,7 @@ export class Game {
     const t = this._target;
     if (!t || !t.alive) return;
     const cx = t.centerX, cy = t.y + t.height * 0.4;
-    const r = 18 + Math.sin(Date.now() / 120) * 2;
+    const r = (18 + Math.sin(Date.now() / 120) * 2) * (this.uiScale || 1);
     ctx.save();
     ctx.strokeStyle = 'rgba(230,40,50,0.85)';
     ctx.lineWidth = 2;
@@ -660,6 +668,10 @@ export class Game {
     const scale = Math.min(wrapper.clientWidth / CANVAS_W, wrapper.clientHeight / CANVAS_H);
     this.canvas.style.width  = Math.floor(CANVAS_W * scale) + 'px';
     this.canvas.style.height = Math.floor(CANVAS_H * scale) + 'px';
+    // scritte e indicatori disegnati nella scena: compensano il rimpicciolimento
+    // (su un telefono la scena è mostrata a ~metà: senza questo diventano illeggibili)
+    const touch = document.body.classList.contains('touch');
+    this.uiScale = Math.min(touch ? 2.6 : 1.6, Math.max(1, (touch ? 1.1 : 0.8) / scale));
   }
 
   /* ══════════ PAUSA / MENU / FINALE ══════════ */

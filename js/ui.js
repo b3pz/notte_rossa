@@ -7,6 +7,7 @@
 import { HEALTH_STATE } from './player.js';
 import { SpriteLib } from './sprites.js';
 import { INV_SLOTS } from './inventory.js';
+import { drawCityMap, placeOfRoom } from './citymap.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -262,34 +263,30 @@ export class UIManager {
   _renderMap() {
     const canvas = $('map-canvas');
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const rm = this.game.roomManager;
-    const rows = ['Stazione', '', 'Città', 'Ospedale', 'Sotterranei', 'Laboratorio', 'Porto'];
-    const nodeW = 118, nodeH = 42, gapX = 12, gapY = 22, left = 130, top = 20;
-
-    ctx.font = '11px "Courier New", monospace';
-    ctx.textBaseline = 'middle';
-    rows.forEach((r, i) => {
-      ctx.fillStyle = '#6a6058';
-      ctx.fillText(r.toUpperCase(), 12, top + i * (nodeH + gapY) + nodeH / 2);
-    });
-    for (const [id, room] of Object.entries(rm.roomData)) {
-      const mp = room.mapPos;
-      if (!mp) continue;
-      const st = rm.roomStates[id];
-      const x = left + mp.col * (nodeW + gapX), y = top + mp.row * (nodeH + gapY);
-      const here = rm.current?.id === id;
-      ctx.fillStyle = st?.visited ? (room.safe ? '#16261c' : '#1c2230') : '#0c0e12';
-      ctx.fillRect(x, y, nodeW, nodeH);
-      ctx.strokeStyle = here ? '#c0152a' : (st?.visited ? '#4a5870' : '#22252c');
-      ctx.lineWidth = here ? 2 : 1;
-      ctx.strokeRect(x + 0.5, y + 0.5, nodeW - 1, nodeH - 1);
-      ctx.fillStyle = st?.visited ? '#b8b0a4' : '#34383f';
-      const label = st?.visited ? room.name : '???';
-      this._wrapText(ctx, label, x + 6, y + nodeH / 2, nodeW - 12);
-    }
-    ctx.fillStyle = '#6a6058';
-    ctx.fillText('verde = zona sicura (radio)    rosso = sei qui', left, canvas.height - 14);
+    const g = this.game, rm = g.roomManager;
+    const draw = () => {
+      if (this.$mapScreen.classList.contains('hidden')) return;
+      drawCityMap(ctx, canvas.width, canvas.height, {
+        rooms: rm.roomData, states: rm.roomStates, currentRoom: rm.current?.id,
+        objective: this._objText || '', hasMap: g.inventory.hasItem('city_map'), t: performance.now() / 1000,
+      });
+      requestAnimationFrame(draw);
+    };
+    draw();
+    // elenco delle stanze del luogo in cui ti trovi
+    const place = placeOfRoom(rm.current?.id);
+    const side = $('map-side');
+    if (!side) return;
+    const rows = (place?.rooms || []).map(id => {
+      const r = rm.roomData[id], st = rm.roomStates[id];
+      const cls = id === rm.current?.id ? 'here' : st?.visited ? 'seen' : 'unknown';
+      const mark = id === rm.current?.id ? '●' : st?.visited ? '✓' : '·';
+      return `<li class="${cls}"><span>${mark}</span>${st?.visited ? r.name : '— inesplorato —'}</li>`;
+    }).join('');
+    side.innerHTML = `<div class="ms-label">SEI QUI</div><div class="ms-place">${place?.name || '—'}</div>
+      <ul>${rows}</ul>
+      <div class="ms-label" style="margin-top:14px">OBIETTIVO</div><div class="ms-obj">${this._objText || ''}</div>
+      <div class="ms-legend"><b style="color:#a3121f">✕</b> obiettivo &nbsp; <b style="color:#a3121f">●</b> sei qui &nbsp; <span style="color:#a3121f">- - -</span> sotterraneo</div>`;
   }
 
   _wrapText(ctx, text, x, cy, maxW) {

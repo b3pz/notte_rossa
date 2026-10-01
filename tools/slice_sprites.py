@@ -194,6 +194,8 @@ ICON_SIZE = 96
 SCENE_PROPS = {
   'barricade_closed': ('cut', (9, 114, 70, 204), 1),
   'barricade_broken': ('cut', (74, 114, 133, 204), 1),
+  'door_ajar':        ('cut', (135, 111, 198, 207), 1),
+  'door_open':        ('cut', (197, 111, 260, 207), 1),
   'lever_off':        ('cut', (522, 143, 571, 181), 1),
   'lever_on':         ('cut', (662, 120, 710, 181), 1),
   'monitor_static':   ('raw', (278, 222, 515, 257), 6),
@@ -450,7 +452,25 @@ def main():
             im = Image.fromarray(sub, 'RGB').convert('RGBA')
         im.save(os.path.join(prop_dir, f'{name}.png'))
         props[name] = {'file': f'assets/sprites/cut/props/{name}.png', 'w': im.width, 'h': im.height, 'frames': nf}
-    print(f'oggetti di scena: {len(SCENE_PROPS)}')
+    # porta chiusa: cornice della porta aperta + battente (dalla socchiusa) steso nel vano
+    op = np.array(Image.open(os.path.join(prop_dir, 'door_open.png')).convert('RGBA'))
+    aj = np.array(Image.open(os.path.join(prop_dir, 'door_ajar.png')).convert('RGBA'))
+    h, w = op.shape[:2]
+    lum = op[..., :3].astype(int).sum(axis=2)
+    dark = (lum < 75) & (op[..., 3] > 0)
+    ys, xs = np.nonzero(dark)
+    x0, x1 = int(np.percentile(xs, 2)), int(np.percentile(xs, 98))
+    y0, y1 = int(np.percentile(ys, 2)), h - 3
+    # il battente della socchiusa: colonne chiare a sinistra del vano scuro
+    alum = aj[..., :3].astype(int).sum(axis=2)
+    cols = [x for x in range(aj.shape[1]) if (alum[y0:y1, x] > 120).mean() > 0.6]
+    px0, px1 = min(cols[3:] or cols), max([c for c in cols if c < aj.shape[1] * 0.6])
+    panel = Image.fromarray(aj[y0:y1, px0:px1 + 1]).resize((x1 - x0 + 1, y1 - y0), Image.LANCZOS)
+    closed = Image.fromarray(op.copy())
+    closed.paste(panel, (x0, y0), panel)
+    closed.save(os.path.join(prop_dir, 'door_closed.png'))
+    props['door_closed'] = {'file': 'assets/sprites/cut/props/door_closed.png', 'w': w, 'h': h, 'frames': 1}
+    print(f'oggetti di scena: {len(SCENE_PROPS) + 1}')
 
     js = ('/* Generato da tools/slice_sprites.py — NON modificare a mano */\n'
           'export const SPRITES = ' + json.dumps(manifest, indent=2) + ';\n'

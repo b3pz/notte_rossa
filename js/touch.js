@@ -80,6 +80,11 @@ export class TouchControls {
     return g.running && !g._ended && !g.paused && !g.editor?.on;
   }
 
+  /** In gioco e senza menu aperti: mostra i comandi */
+  _showControls() {
+    return this._playing() && !this.game.ui.hasOpenOverlay();
+  }
+
   _bind() {
     const canvas = this.game.canvas;
     const opts = { passive: false };
@@ -186,7 +191,8 @@ export class TouchControls {
 
   _sync() {
     const g = this.game, playing = this._playing();
-    document.body.classList.toggle('tc-playing', playing);
+    document.body.classList.toggle('tc-playing', this._showControls());
+    if (playing && !this._hintTimer) this._hintTimer = setTimeout(() => this.$hint.classList.add('gone'), 9000);
     document.body.classList.toggle('tc-dialog', !!g.dialogue?.isActive());
     if (!playing) return;
     const near = g.roomManager?._near;

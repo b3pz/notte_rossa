@@ -17,10 +17,10 @@ export const ITEMS = {
 
   // ── Munizioni (la quantità raccolta è ammoCount) ──
   ammo_pistol_small: { id: 'ammo_pistol_small', name: 'Munizioni 9mm', icon: 'ammo_pistol', type: 'ammo',
-    ammoCount: 8, stackable: true, maxStack: 64,
+    ammoCount: 12, stackable: true, maxStack: 99,
     description: 'Proiettili 9mm Luger. [R] per ricaricare.' },
   ammo_shells: { id: 'ammo_shells', name: 'Cartucce cal.12', icon: 'ammo_shells', type: 'ammo',
-    ammoCount: 4, stackable: true, maxStack: 32,
+    ammoCount: 6, stackable: true, maxStack: 48,
     description: 'Cartucce per il fucile a pompa.' },
 
   // ── Cure ──

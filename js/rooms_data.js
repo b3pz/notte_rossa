@@ -100,10 +100,10 @@ export const ROOMS = {
     hotspots: [
       { id: 'document_note_storage', x: 330, w: 80, label: 'Foglio sul quadro', icon: 'note', iconY: 330, doc: 'doc_storage_note' },
       { id: 'shelf_pistol', x: 420, w: 110, label: 'Armadio B3', icon: 'pistol', iconY: 420,
-        give: ['pistol', ['ammo_pistol_small', 16]], event: 'got_pistol' },
+        give: ['pistol', ['ammo_pistol_small', 32]], event: 'got_pistol' },
       { id: 'crate_key', x: 540, w: 80, label: 'Cassetta rossa', icon: 'key_station', iconY: 640, give: ['key_station'] },
       { id: 'guard_body', x: 630, w: 140, label: 'La guardia', markY: 600,
-        give: ['bandage'], text: 'Una guardia giurata. Nella tasca: delle bende.' },
+        give: ['bandage', ['ammo_pistol_small', 10]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
       { id: 'cart_storage', x: 880, w: 130, label: 'Carrello delle pulizie', markY: 430,
         text: 'Sul pavimento, impronte scalze che vanno verso il buio.' },
     ],
@@ -146,7 +146,7 @@ export const ROOMS = {
       { id: 'exit_map', x: 160, w: 110, label: 'Piantina a terra', icon: 'city_map', iconY: 640, give: ['city_map'],
         text: 'Qualcuno ha cerchiato in rosso l\'Ospedale San Rocco, a tre isolati da qui.' },
       { id: 'police_body', x: 920, w: 170, label: 'Il poliziotto', markY: 600,
-        give: [['ammo_pistol_small', 8]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
+        give: [['ammo_pistol_small', 16]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
     ],
     doors: [
       { id: 'exit_to_hall', x: 0, w: 110, top: 220, label: 'Atrio', target: 'station_hall' },
@@ -165,7 +165,7 @@ export const ROOMS = {
     props: [{ name: 'body_3', x: 760, flip: true }],
     hotspots: [
       { id: 'car_glovebox', x: 420, w: 150, label: 'Auto con la portiera aperta', markY: 490,
-        give: ['battery'], text: 'Nel cassetto del cruscotto: batterie e un rosario.' },
+        give: ['battery', ['ammo_pistol_small', 12]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
     ],
     doors: [
       { id: 'street_to_station', x: 0, w: 110, top: 300, label: 'Stazione', target: 'station_exit' },
@@ -190,7 +190,7 @@ export const ROOMS = {
       { id: 'shop_crowbar', x: 760, w: 90, label: 'Dietro il bancone', icon: 'crowbar', iconY: 500, give: ['crowbar'] },
       { id: 'shop_safe', x: 860, w: 110, label: 'Cassaforte sotto la cassa', icon: 'padlock', iconY: 470,
         requires: [{ flag: 'knows_safe_code' }], failText: 'Una cassaforte a combinazione. Quattro cifre.\nNon la conosci.',
-        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 8]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
+        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 16]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
       { id: 'shop_batteries', x: 1060, w: 180, label: 'Frigoriferi', markY: 400, give: ['battery'],
         text: 'I frigo sono spenti. Tra le bottiglie qualcuno ha nascosto delle batterie.' },
     ],
@@ -234,7 +234,7 @@ export const ROOMS = {
     hotspots: [
       { id: 'alley_woman', x: 240, w: 170, label: 'Una donna', markY: 600,
         text: 'Una donna in cappotto. La borsa è ancora a tracolla. Dentro, solo le chiavi di casa.' },
-      { id: 'alley_dumpster', x: 700, w: 160, label: 'Cassonetto', markY: 470, give: [['ammo_pistol_small', 8]],
+      { id: 'alley_dumpster', x: 700, w: 160, label: 'Cassonetto', markY: 470, give: [['ammo_pistol_small', 16]],
         text: 'Qualcuno ha buttato una scatola di munizioni ancora piena. O l\'ha nascosta.' },
     ],
     doors: [
@@ -256,7 +256,7 @@ export const ROOMS = {
     props: [{ name: 'body_2', x: 820 }],
     hotspots: [
       { id: 'hosp_cart', x: 370, w: 90, label: 'Carrello medicazioni', icon: 'note', iconY: 420,
-        give: ['bandage'], doc: 'doc_cartella' },
+        give: ['bandage', ['ammo_pistol_small', 12]], doc: 'doc_cartella' },
     ],
     doors: [
       { id: 'corr_to_alley', x: 90, w: 120, top: 110, label: 'Vicolo', target: 'city_alley' },
@@ -279,7 +279,7 @@ export const ROOMS = {
     props: [{ name: 'body_2', x: 990, flip: true }],
     hotspots: [
       { id: 'ward_locker', x: 140, w: 120, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 430,
-        give: ['shotgun', ['ammo_shells', 8]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
+        give: ['shotgun', ['ammo_shells', 16]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
       { id: 'ward_notes', x: 380, w: 160, label: 'Cartellina sul letto', icon: 'note', iconY: 470, doc: 'doc_ricerca_elena' },
       { id: 'ward_bed', x: 720, w: 140, label: 'Letto', markY: 470,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
@@ -320,7 +320,7 @@ export const ROOMS = {
     props: [{ name: 'body_7', x: 260 }],
     hotspots: [
       { id: 'morgue_report', x: 520, w: 240, label: 'Tavolo autoptico', icon: 'note', iconY: 420,
-        doc: 'doc_autopsia', give: [['ammo_shells', 4]] },
+        doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
       { id: 'morgue_drawer', x: 860, w: 180, label: 'Celle frigorifere', markY: 420,
         text: 'Una cella è aperta. Vuota. Il lenzuolo è sul pavimento.' },
     ],
@@ -359,7 +359,7 @@ export const ROOMS = {
     props: [{ name: 'body_5', x: 860 }],
     hotspots: [
       { id: 'mb_train', x: 180, w: 250, label: 'Carrozze abbandonate', markY: 380,
-        give: ['medikit_small'], text: 'Tra i sedili una borsa da infermiera. Dentro, un kit medico.' },
+        give: ['medikit_small', ['ammo_pistol_small', 12]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
       { id: 'mb_phone', x: 560, w: 100, label: 'Colonnina SOS [SALVA]', markY: 380, event: 'open_save' },
       { id: 'mb_log', x: 780, w: 160, label: 'Il capotreno', icon: 'note', iconY: 610, doc: 'doc_registro_metro' },
     ],
@@ -379,7 +379,7 @@ export const ROOMS = {
     props: [{ name: 'body_6', x: 360 }],
     hotspots: [
       { id: 'tunnel_notebook', x: 290, w: 160, label: 'Il soldato', icon: 'note', iconY: 620,
-        doc: 'doc_taccuino', give: [['ammo_pistol_small', 8]] },
+        doc: 'doc_taccuino', give: [['ammo_pistol_small', 16]] },
     ],
     doors: [
       { id: 'tunnel_to_mb', x: 0, w: 140, top: 300, label: 'Banchina B', target: 'metro_banchina' },
@@ -418,7 +418,7 @@ export const ROOMS = {
     light: 0.5, map: [4, 4],
     hotspots: [
       { id: 'maint_bench', x: 520, w: 360, label: 'Banco da lavoro', icon: 'note', iconY: 440,
-        doc: 'doc_officina', give: [['ammo_shells', 4]] },
+        doc: 'doc_officina', give: [['ammo_shells', 8]] },
       { id: 'maint_locker', x: 940, w: 160, label: 'Armadietto 7', icon: 'card', iconY: 420, give: ['card'] },
     ],
     doors: [
@@ -437,7 +437,7 @@ export const ROOMS = {
     overlays: [{ type: 'neon', x: 690, y: 30, w: 160 }],
     hotspots: [
       { id: 'safe_shelf', x: 190, w: 280, label: 'Scaffale', markY: 470,
-        give: ['medikit_small', ['ammo_shells', 4], ['ammo_pistol_small', 8]] },
+        give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
       { id: 'safe_recorder', x: 560, w: 160, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 372, event: 'elena_tape_2' },
       { id: 'safe_radio', x: 760, w: 200, label: 'Radio di Elena [SALVA]', markY: 330, event: 'open_save' },
     ],
@@ -471,7 +471,7 @@ export const ROOMS = {
     light: 0.55, map: [1, 5],
     hotspots: [
       { id: 'lc_log', x: 200, w: 160, label: 'Registro accessi', icon: 'note', iconY: 470, doc: 'doc_accessi' },
-      { id: 'lc_bench', x: 900, w: 200, label: 'Bancone', markY: 420, give: ['painkillers'] },
+      { id: 'lc_bench', x: 900, w: 200, label: 'Bancone', markY: 420, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
     ],
     doors: [
       { id: 'lc_to_li', x: 0, w: 110, top: 160, label: 'Ingresso', target: 'lab_ingresso' },
@@ -551,7 +551,7 @@ export const ROOMS = {
     props: [{ name: 'body_5', x: 520 }],
     hotspots: [
       { id: 'port_container', x: 300, w: 200, label: 'Container aperto', markY: 480,
-        give: [['ammo_shells', 4], 'medikit_small'] },
+        give: [['ammo_shells', 8], 'medikit_small'] },
     ],
     doors: [
       { id: 'port_to_core', x: 0, w: 120, top: 380, label: 'Galleria', target: 'camera_centrale',

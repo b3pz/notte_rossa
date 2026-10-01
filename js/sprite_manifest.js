@@ -461,6 +461,18 @@ export const PROPS = {
     "h": 90,
     "frames": 1
   },
+  "door_ajar": {
+    "file": "assets/sprites/cut/props/door_ajar.png",
+    "w": 59,
+    "h": 92,
+    "frames": 1
+  },
+  "door_open": {
+    "file": "assets/sprites/cut/props/door_open.png",
+    "w": 59,
+    "h": 92,
+    "frames": 1
+  },
   "lever_off": {
     "file": "assets/sprites/cut/props/lever_off.png",
     "w": 49,
@@ -484,5 +496,11 @@ export const PROPS = {
     "w": 257,
     "h": 44,
     "frames": 6
+  },
+  "door_closed": {
+    "file": "assets/sprites/cut/props/door_closed.png",
+    "w": 59,
+    "h": 92,
+    "frames": 1
   }
 };

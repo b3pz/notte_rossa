@@ -100,7 +100,7 @@ def main():
                 prev_room = room()
                 res = pg.evaluate(f'''() => {{ const g = window._notteRossa; const d = g.roomManager.current.doors.find(d => d.id === '{arg}');
                     if (!d) return 'MANCANTE in ' + g.roomManager.current.id;
-                    if (!d.edge) {{ g.player.x = d.x + d.w/2 - g.player.width/2;
+                    if (!d.edge) {{ g.player.x = g.roomManager.doorRect(d).cx - g.player.width/2;
                       const n = g.roomManager.nearest(g.player); if (!n || n.obj !== d) return 'NON È IL PIÙ VICINO: ' + (n && n.obj.id); }}
                     return g._tryDoor(d) ? 'ok' : 'bloccata'; }}''')
                 time.sleep(0.9)
@@ -109,7 +109,7 @@ def main():
                     chk = pg.evaluate(f'''() => {{ const g = window._notteRossa, r = g.roomManager.current;
                         const back = r.doors.find(d => d.target === '{{FROM}}');
                         if (!back) return 'nessuna porta di ritorno';
-                        const dx = Math.abs(g.player.centerX - (back.x + back.w/2));
+                        const dx = Math.abs(g.player.centerX - g.roomManager.doorRect(back).cx);
                         return dx < 40 ? 'ok' : 'arrivo lontano dalla porta ' + back.id + ' (' + Math.round(dx) + 'px)'; }}'''.replace('{FROM}', prev_room))
                     if chk != 'ok' and not (arg == 'port_to_pier' or arg == 'core_to_port'): res = chk
             elif kind == 'npc':

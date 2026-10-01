@@ -6,7 +6,7 @@
 const WEAPON_DEFS = {
   pistol: {
     id: 'pistol', name: 'Pistola 9mm',
-    magSize: 8, damage: 34, pellets: 1, spread: 0,
+    magSize: 10, damage: 36, pellets: 1, spread: 0,
     cooldown: 0.32, reloadTime: 1.5,
     ammoItem: 'ammo_pistol_small',
     bulletSpeed: 1500, bulletRange: 1100, knock: 1,

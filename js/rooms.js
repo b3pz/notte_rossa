@@ -128,11 +128,11 @@ export class RoomManager {
     p.setScale(def.scale);
     let x = spawnX;
     let back = fromRoom ? this.doorTo(def, fromRoom) : null;
-    if (back) x = back.x + back.w / 2 - p.width / 2;
+    if (back) x = this.doorRect(back, def).cx - p.width / 2;
     if (x === undefined || x === null) x = def.spawnX ?? 80;
     p.x = Math.max(10, Math.min(def.width - 10 - p.width, x));
     p.y = def.floorY - p.height;
-    if (back) p.facingRight = (back.x + back.w / 2) < def.width / 2;
+    if (back) p.facingRight = this.doorRect(back, def).cx < def.width / 2;
     else if (spawnX !== undefined) p.facingRight = spawnX < def.width / 2;
 
     const cam = this.game.camera;
@@ -180,7 +180,7 @@ export class RoomManager {
       if (d < bestD) { bestD = d; best = { kind, obj }; }
     };
     for (const h of room.hotspots) if (!this.isPicked(h.id) && this.visible(h)) consider('hotspot', h, h.x, h.x + h.w);
-    for (const d of room.doors) if (this.visible(d)) consider('door', d, d.x, d.x + d.w);
+    for (const d of room.doors) if (this.visible(d)) { const r = this.doorRect(d, room); consider('door', d, r.x, r.x + r.w); }
     for (const n of room.npcs) if (this.visible(n)) consider('npc', n, n.x - 70 * room.scale, n.x + 70 * room.scale);
     return best;
   }
@@ -194,12 +194,36 @@ export class RoomManager {
     else { ctx.fillStyle = '#07080b'; ctx.fillRect(0, 0, room.width, VIEW_H); }
 
     this._drawOverlays(ctx, room);
+    this._drawDoorSprites(ctx, room);
     for (const pr of room.props) SpriteLib.drawProp(ctx, pr.name, pr.x, room.floorY + 18 * room.scale, pr.flip, 1, room.scale);
     for (const n of room.npcs) {
       if (!this.visible(n)) continue;
       const anim = this.game.events.getFlag(`npc_${n.id}_anim`) || n.anim || 'idle';
       SpriteLib.drawShadow(ctx, n.x, room.floorY - 2 * room.scale, 105 * room.scale, 0.6);
       SpriteLib.draw(ctx, n.char, anim, 0, n.x, room.floorY, n.facingRight, { scale: room.scale });
+    }
+  }
+
+  /** Rettangolo della porta disegnata (piedi sul pavimento, centrata sull'uscita) */
+  doorRect(d, room = this.current) {
+    const h = Math.round(310 * room.scale), w = Math.round(h * 0.62);
+    const cx = Math.max(w / 2 + 6, Math.min(room.width - w / 2 - 6, d.x + d.w / 2));
+    return { x: cx - w / 2, y: room.floorY - h + 4 * room.scale, w, h, cx };
+  }
+
+  /** Porte vere disegnate nella scena: chiusa / socchiusa / aperta quando sei vicino */
+  _drawDoorSprites(ctx, room) {
+    const barricaded = new Set(room.overlays.filter(o => o.type === 'barricade').map(o => o.door));
+    for (const d of room.doors) {
+      if (!this.visible(d) || barricaded.has(d.id) || d.noSprite) continue;
+      const r = this.doorRect(d, room);
+      const locked = this.doorLocked(d);
+      const name = locked ? 'door_closed' : (this._near?.obj === d ? 'door_open' : 'door_ajar');
+      SpriteLib.drawShadow(ctx, r.cx, room.floorY, r.w * 1.2, 0.45);
+      ctx.save();
+      ctx.filter = 'brightness(0.78) contrast(1.05)';
+      SpriteLib.drawPropBox(ctx, name, r.x, r.y, r.w, r.h, 1);
+      ctx.restore();
     }
   }
 
@@ -225,9 +249,10 @@ export class RoomManager {
       } else if (o.type === 'barricade') {
         const d = room.doors.find(d => d.id === o.door);
         if (!d) continue;
-        const top = d.top ?? room.floorY - 330 * room.scale;
+        const r = this.doorRect(d, room);
         const open = this.isDoorOpen(d.id);
-        SpriteLib.drawPropBox(ctx, open ? 'barricade_broken' : 'barricade_closed', d.x, top, d.w, room.floorY - top, open ? 0.85 : 1);
+        SpriteLib.drawShadow(ctx, r.cx, room.floorY, r.w * 1.2, 0.45);
+        SpriteLib.drawPropBox(ctx, open ? 'barricade_broken' : 'barricade_closed', r.x, r.y, r.w, r.h, 1);
       }
     }
   }
@@ -252,18 +277,18 @@ export class RoomManager {
       const isNear = near?.obj === d;
       // passaggi che non portano da nessuna parte: niente freccia, solo un segno da esaminare
       if (d.requires?.some?.(c => c.flag === 'never')) {
-        const mx = d.x + d.w / 2, my = (d.top ?? room.floorY - 330 * sc) + 40 * sc;
+        const dr = this.doorRect(d, room), mx = dr.cx, my = dr.y + dr.h * 0.45;
         const a = 0.4 + Math.max(0, Math.sin(t * 2.4 + mx * 0.01)) * 0.4;
         ctx.strokeStyle = `rgba(255,245,220,${a})`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(mx, my, isNear ? 9 : 6, 0, Math.PI * 2); ctx.stroke();
         continue;
       }
       const dir = this.doorDir(d, room);
-      const cx = d.x + d.w / 2;
+      const cx = this.doorRect(d, room).cx;
       const fy = room.floorY - 14 * sc;
       const col = locked ? [215, 60, 70] : [245, 236, 220];
       const base = isNear ? 0.95 : 0.55;
-      const size = Math.max(14, 22 * Math.min(1.4, sc));
+      const size = Math.max(14, 22 * Math.min(1.4, sc)) * (this.game.uiScale || 1) * 0.8;
       ctx.save();
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.lineWidth = Math.max(3, 4.5 * Math.min(1.3, sc));
@@ -310,7 +335,7 @@ export class RoomManager {
       const isNear = near?.obj === h;
       if (h.icon) {
         const y = h.iconY ?? room.floorY - 30 * sc;
-        const size = Math.max(40, 56 * sc) * (isNear ? 1.12 : 1);
+        const size = Math.max(40, 56 * sc) * (isNear ? 1.12 : 1) * Math.sqrt(this.game.uiScale || 1);
         const g = ctx.createRadialGradient(cx, y, 0, cx, y, size);
         g.addColorStop(0, `rgba(255,230,170,${(isNear ? 0.35 : 0.18) + Math.sin(t * 3 + cx) * 0.06})`);
         g.addColorStop(1, 'rgba(255,230,170,0)');
@@ -347,7 +372,7 @@ export class RoomManager {
     if (!room || !n || this.game.input.locked) return;
     const o = n.obj;
     let cx, y;
-    if (n.kind === 'door')      { cx = o.x + o.w / 2; y = room.floorY - 70 * Math.max(0.8, room.scale); }
+    if (n.kind === 'door')      { const r = this.doorRect(o, room); cx = r.cx; y = r.y - 22; }
     else if (n.kind === 'npc')  { cx = o.x; y = room.floorY - 300 * room.scale; }
     else { cx = o.x + o.w / 2; y = (o.icon ? (o.iconY ?? room.floorY) - 50 * Math.max(0.8, room.scale) : (o.markY ?? room.floorY - 160) - 26); }
     const verb = n.kind === 'door' ? (o.requires?.some?.(c => c.flag === 'never') ? 'Esamina' : this.doorLocked(o) ? 'Chiuso' : { left: '◄ Vai', right: 'Vai ►', up: '▲ Entra' }[this.doorDir(o, room)])
@@ -355,25 +380,26 @@ export class RoomManager {
               : (o.give?.length ? 'Raccogli' : o.doc ? 'Leggi' : 'Esamina');
     const label = `${verb}: ${n.kind === 'door' ? o.label : o.label}`;
     ctx.save();
-    ctx.font = '600 14px "Courier New", monospace';
+    const k = this.game.uiScale || 1;
+    ctx.font = `600 ${Math.round(14 * k)}px "Courier New", monospace`;
     ctx.textBaseline = 'middle';
     const tw = ctx.measureText(label).width;
-    const w = tw + 52, h = 28;
+    const w = tw + 52 * k, h = 28 * k;
     const x = Math.max(this.game.camera.x + 6, Math.min(this.game.camera.x + VIEW_W - w - 6, cx - w / 2));
-    y = Math.max(20, y);
+    y = Math.max(h / 2 + 8, y);
     ctx.fillStyle = 'rgba(8,8,10,0.88)';
     ctx.fillRect(x, y - h / 2, w, h);
     ctx.strokeStyle = 'rgba(192,21,42,0.8)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x + 0.5, y - h / 2 + 0.5, w - 1, h - 1);
     ctx.fillStyle = '#c0152a';
-    ctx.fillRect(x + 6, y - 9, 22, 18);
+    ctx.fillRect(x + 6 * k, y - 9 * k, 22 * k, 18 * k);
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
-    ctx.fillText('E', x + 17, y + 1);
+    ctx.fillText(document.body.classList.contains('touch') ? '●' : 'E', x + 17 * k, y + 1);
     ctx.textAlign = 'left';
     ctx.fillStyle = '#efe6d8';
-    ctx.fillText(label, x + 38, y + 1);
+    ctx.fillText(label, x + 38 * k, y + 1);
     ctx.restore();
   }
 
