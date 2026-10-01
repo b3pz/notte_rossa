@@ -276,7 +276,7 @@ export const SPRITES = {
     }
   },
   "carmine": {
-    "cellW": 165,
+    "cellW": 321,
     "cellH": 282,
     "humanH": 280,
     "anims": {
@@ -288,8 +288,8 @@ export const SPRITES = {
       },
       "talk": {
         "file": "assets/sprites/cut/carmine_talk.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 4,
+        "fps": 5,
         "loop": true
       },
       "check": {
