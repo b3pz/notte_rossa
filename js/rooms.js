@@ -242,12 +242,36 @@ export class RoomManager {
     return { x: cx - w / 2, y: fy - h + 4 * room.scale, w, h, cx, foot: fy };
   }
 
-  /** Porte vere disegnate nella scena: chiusa / socchiusa / aperta quando sei vicino */
+  /** Porte DIETRO il giocatore (disegnate in drawBackground) */
   _drawDoorSprites(ctx, room) {
     const barricaded = new Set(room.overlays.filter(o => o.type === 'barricade').map(o => o.door));
+    const playerFootY = this.game?.player?.footY ?? 0;
     for (const d of room.doors) {
       if (!this.visible(d) || barricaded.has(d.id) || d.noSprite) continue;
       const r = this.doorRect(d, room);
+      // Disegna solo le porte dietro il giocatore (footY minore)
+      if (r.foot >= playerFootY) continue;
+      const locked = this.doorLocked(d);
+      const name = locked ? 'door_closed' : (this._near?.obj === d ? 'door_open' : 'door_ajar');
+      SpriteLib.drawShadow(ctx, r.cx, r.foot, r.w * 1.2, 0.45);
+      ctx.save();
+      ctx.filter = 'brightness(0.78) contrast(1.05)';
+      SpriteLib.drawPropBox(ctx, name, r.x, r.y, r.w, r.h, 1);
+      ctx.restore();
+    }
+  }
+
+  /** Porte DAVANTI al giocatore (disegnate dopo il giocatore nel render loop) */
+  drawFrontDoors(ctx) {
+    const room = this.current;
+    if (!room) return;
+    const barricaded = new Set(room.overlays.filter(o => o.type === 'barricade').map(o => o.door));
+    const playerFootY = this.game?.player?.footY ?? 0;
+    for (const d of room.doors) {
+      if (!this.visible(d) || barricaded.has(d.id) || d.noSprite) continue;
+      const r = this.doorRect(d, room);
+      // Disegna solo le porte davanti al giocatore (footY maggiore o uguale)
+      if (r.foot < playerFootY) continue;
       const locked = this.doorLocked(d);
       const name = locked ? 'door_closed' : (this._near?.obj === d ? 'door_open' : 'door_ajar');
       SpriteLib.drawShadow(ctx, r.cx, r.foot, r.w * 1.2, 0.45);

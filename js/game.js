@@ -528,12 +528,22 @@ export class Game {
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
     if (!room) return;
 
-    // mondo
+    // mondo — ordine di profondità per layering corretto
     this.camera.applyTransform(ctx);
+
+    // 1. Sfondo + porte basse (dietro il giocatore)
     this.roomManager.drawBackground(ctx);
+
+    // 2. Nemici e armi (sotto il giocatore per y)
     this.enemyManager.draw(ctx);
+
+    // 3. Giocatore (in base alla sua Y per depth-sorting)
     this.player.draw(ctx);
     this.weapon.draw(ctx);
+
+    // 4. Porte alte / overlay frontali (davanti al giocatore per y)
+    this.roomManager.drawFrontDoors(ctx);
+
     this.camera.restoreTransform(ctx);
 
     // atmosfera (spazio schermo)
