@@ -225,6 +225,9 @@ RECOVER = [
     ('listener_listen_new.png',  [1],                         'listener_idle.png',       264),
     ('listener_alert_new.png',   [0, 1],                      'listener_alert.png',      266),
     ('listener_run_new.png',     [0, 1, 2, 3, 4, 5],          'listener_run.png',        268, True),
+    ('listener_attack_new.png',  [0, 1, 2, 3],                'listener_attack.png',     264, True),
+    ('listener_hurt_new.png',    [0, 1],                      'listener_hurt.png',       258),
+    ('listener_dead_new.png',    [0, 1, 2, 3],                'listener_dead.png',       264),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 

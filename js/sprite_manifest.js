@@ -290,14 +290,20 @@ export const SPRITES = {
       },
       "attack": {
         "file": "assets/sprites/cut/listener_attack.png",
-        "frames": 1,
-        "fps": 3,
-        "loop": true
+        "frames": 4,
+        "fps": 8,
+        "loop": false
       },
       "hurt": {
         "file": "assets/sprites/cut/listener_hurt.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 6,
+        "loop": false
+      },
+      "dead": {
+        "file": "assets/sprites/cut/listener_dead.png",
+        "frames": 4,
+        "fps": 5,
         "loop": false
       }
     }
