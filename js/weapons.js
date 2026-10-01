@@ -112,7 +112,7 @@ export class WeaponSystem {
     if (!w) return false;
     if (w.isReloading || w.cooldownTimer > 0) return false;
     if (w.ammoInMag <= 0) {
-      this.game.audio?.playSfx('door_locked');
+      this.game.audio?.playSfx('dry_fire');
       if (this.ammoReserve > 0) this.reload();
       else this.game.ui?.showNotification('Caricatore vuoto.');
       w.cooldownTimer = 0.4;
@@ -132,7 +132,7 @@ export class WeaponSystem {
     }
     this._flash = 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
-    this.game.audio?.playSfx('shot');
+    this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_shot' : 'shot');
     this.game.camera?.shake(w.def.shake, 0.12);
     return true;
   }
@@ -146,7 +146,7 @@ export class WeaponSystem {
     }
     w.isReloading = true;
     w.reloadTimer = w.def.reloadTime;
-    this.game.audio?.playSfx('reload');
+    this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_pump' : 'reload');
   }
 
   _finishReload() {

@@ -16,6 +16,7 @@
    hotspots: { id, x, w, label, markY, icon, iconY, give, doc, text,
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
+   ambient:  suono in loop (assets/audio/<id>.mp3), steps: concrete|wet|metal|tile
    props:    { name, x, flip }
    overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
    enemies:  { id, type, x, patrol, ceiling, idle, facingRight, showIf, hideIf }
@@ -33,7 +34,7 @@ export const ROOMS = {
 
   train_wagon: {
     name: 'Treno 847 — Vagone 4', bg: BGV2 + 'train_wagon.png', layoutW: 1400, keepEdges: true, scale: 1.25, floorY: 660,
-    light: 0.6, map: [0, 0], ambient: 'train_idle', spawnX: 420,
+    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal',
     hotspots: [
       { id: 'window_wagon', x: 555, w: 245, label: 'Finestrino', markY: 290,
         text: 'Pioggia. Il binario 1 di Porto Salvo è deserto.\nNessun capotreno, nessun annuncio.' },
@@ -56,7 +57,7 @@ export const ROOMS = {
     scale: 0.74, floorY: 540,
     floorLine: [[300, 500], [1319, 592]],          // linea dei piedi (segue il marciapiede)
     scaleLine: [[300, 0.70], [1319, 0.84]],        // più vicino alla telecamera = più grande
-    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet',
     props: [{ name: 'body_0', x: 890 }],
     hotspots: [
       { id: 'body_conductor', x: 820, w: 150, label: 'Il capotreno', markY: 520,
@@ -82,7 +83,7 @@ export const ROOMS = {
     // NUOVO SFONDO LATERALE (v2)
     name: 'Atrio', bg: BGV2 + 'station_hall.png', layoutW: 2782, keepEdges: true,
     scale: 0.92, floorY: 640,
-    light: 0.72, map: [2, 0], ambient: 'station_ambient',
+    light: 0.72, map: [2, 0], ambient: 'station_ambient', steps: 'tile',
     hotspots: [
       { id: 'ticket_booth', x: 660, w: 320, label: 'Biglietteria', markY: 360, give: ['flashlight', 'battery'],
         text: 'La biglietteria è chiusa. Dalla fessura della serranda si vede il cassetto dei soldi, aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
@@ -107,7 +108,7 @@ export const ROOMS = {
 
   station_storage: {
     name: 'Servizi tecnici', bg: BGV2 + 'station_storage.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 600,
-    light: 0.5, map: [1, 1], ambient: 'room_hum',
+    light: 0.5, map: [1, 1], ambient: 'room_hum', steps: 'tile',
     props: [{ name: 'body_1', x: 350 }],
     hotspots: [
       { id: 'guard_body', x: 285, w: 130, label: 'La guardia', markY: 560,
@@ -131,7 +132,7 @@ export const ROOMS = {
 
   station_control: {
     name: 'Sala controllo', bg: BGV2 + 'station_control.png', layoutW: 1472, keepEdges: true, scale: 1.42, floorY: 665,
-    light: 0.72, map: [3, 0], ambient: 'electronics_hum', safe: true,
+    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete',
     npcs: [
       { id: 'carmine', char: 'carmine', x: 800, anim: 'scared', facingRight: false, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
     ],
@@ -150,7 +151,7 @@ export const ROOMS = {
 
   station_exit: {
     name: 'Uscita della stazione', bg: BGV2 + 'station_exit.png', layoutW: 1360, keepEdges: true, scale: 1.12, floorY: 668,
-    light: 0.6, map: [4, 0], ambient: 'rain_heavy',
+    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_1', x: 1170 }],
     hotspots: [
       { id: 'exit_map', x: 290, w: 190, label: 'Piantina a terra', icon: 'city_map', iconY: 655, give: ['city_map'],
@@ -173,7 +174,7 @@ export const ROOMS = {
 
   city_street: {
     name: 'Via Ferrante', bg: BGV2 + 'city_street.png', layoutW: 2587, keepEdges: true, scale: 0.85, floorY: 625,
-    light: 0.55, map: [0, 2], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_3', x: 1060, flip: true }],
     hotspots: [
       { id: 'car_glovebox', x: 1700, w: 110, label: 'Cinquecento con la portiera aperta', markY: 520,
@@ -193,7 +194,7 @@ export const ROOMS = {
 
   alimentari: {
     name: 'Alimentari da Luigi', bg: BGV2 + 'alimentari.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.6, map: [1, 2],
+    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile',
     props: [{ name: 'body_3', x: 420 }],
     hotspots: [
       { id: 'shop_crowbar', x: 215, w: 110, label: 'Dietro il bancone', icon: 'crowbar', iconY: 480, give: ['crowbar'] },
@@ -221,7 +222,7 @@ export const ROOMS = {
 
   apartment: {
     name: 'Palazzo Conti — Int. 4', bg: BGV2 + 'apartment.png', layoutW: 1418, keepEdges: true, scale: 1.32, floorY: 682,
-    light: 0.55, map: [2, 2],
+    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete',
     overlays: [{ type: 'monitor', x: 404, y: 474, w: 92, h: 74 }],
     hotspots: [
       { id: 'apt_diary', x: 40, w: 260, label: 'Diario sul divano', icon: 'note', iconY: 520, doc: 'doc_diario_giulia',
@@ -244,7 +245,7 @@ export const ROOMS = {
 
   city_alley: {
     name: 'Vicolo dei Pescatori', bg: BGV2 + 'city_alley.png', layoutW: 1388, keepEdges: true, scale: 1.1, floorY: 645,
-    light: 0.5, map: [3, 2], ambient: 'rain_heavy', rain: true,
+    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_4', x: 560 }],
     hotspots: [
       { id: 'alley_woman', x: 470, w: 180, label: 'Una donna', markY: 610,
@@ -267,7 +268,7 @@ export const ROOMS = {
 
   hospital_corridor: {
     name: 'San Rocco — Corridoio', bg: BGV2 + 'hospital_corridor.png', layoutW: 2711, keepEdges: true, scale: 1.08, floorY: 655,
-    light: 0.55, map: [0, 3], ambient: 'hospital_hum',
+    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile',
     props: [{ name: 'body_2', x: 2170 }],
     hotspots: [
       { id: 'hosp_cart', x: 1040, w: 240, label: 'Carrello medicazioni', icon: 'note', iconY: 455,
@@ -290,7 +291,7 @@ export const ROOMS = {
 
   hospital_ward: {
     name: 'Degenze — 2° piano', bg: BGV2 + 'hospital_ward.png', layoutW: 2701, keepEdges: true, scale: 1.32, floorY: 685,
-    light: 0.5, map: [1, 3],
+    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile',
     props: [{ name: 'body_2', x: 2060, flip: true }],
     hotspots: [
       { id: 'ward_locker', x: 420, w: 180, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 420,
@@ -315,7 +316,7 @@ export const ROOMS = {
 
   hospital_surgery: {
     name: 'Sala operatoria', bg: BGV2 + 'hospital_surgery.png', layoutW: 1451, keepEdges: true, scale: 1.22, floorY: 670,
-    light: 0.62, map: [2, 3], safe: true,
+    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile',
     hotspots: [
       { id: 'surg_terminal', x: 270, w: 190, label: 'Terminale [SALVA]', markY: 380, event: 'open_save' },
       { id: 'surg_table', x: 580, w: 420, label: 'Tavolo operatorio', markY: 450,
@@ -334,7 +335,7 @@ export const ROOMS = {
 
   hospital_morgue: {
     name: 'Obitorio', bg: BGV2 + 'hospital_morgue.png', layoutW: 1360, keepEdges: true, scale: 1.15, floorY: 655,
-    light: 0.45, map: [3, 3],
+    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile',
     hotspots: [
       { id: 'morgue_report', x: 260, w: 350, label: 'Tavolo autoptico', icon: 'note', iconY: 430,
         doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
@@ -355,7 +356,7 @@ export const ROOMS = {
 
   metro_ingresso: {
     name: 'Metro — Ingresso', bg: BGV2 + 'metro_ingresso.png', layoutW: 1592, keepEdges: true, scale: 1.1, floorY: 660,
-    light: 0.55, map: [0, 4],
+    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile',
     hotspots: [
       { id: 'metro_notice', x: 305, w: 155, label: 'Avviso', icon: 'note', iconY: 360, doc: 'doc_avviso_metro' },
       { id: 'metro_turnstiles', x: 470, w: 270, label: 'Tornelli', markY: 450,
@@ -374,7 +375,7 @@ export const ROOMS = {
 
   metro_banchina: {
     name: 'Metro — Banchina B', bg: BGV2 + 'metro_banchina.png', layoutW: 3047, keepEdges: true, scale: 0.98, floorY: 665,
-    light: 0.5, map: [1, 4],
+    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete',
     props: [{ name: 'body_5', x: 1900 }],
     hotspots: [
       { id: 'mb_train', x: 1380, w: 140, label: 'Carrozze abbandonate', markY: 470,
@@ -394,7 +395,7 @@ export const ROOMS = {
 
   metro_tunnel: {
     name: 'Tunnel Linea 3', bg: BGV2 + 'metro_tunnel.png', layoutW: 2617, keepEdges: true, scale: 0.92, floorY: 600,
-    light: 0.3, map: [2, 4],
+    light: 0.3, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete',
     props: [{ name: 'body_0', x: 720 }],
     hotspots: [
       { id: 'tunnel_notebook', x: 630, w: 180, label: 'Il soldato', icon: 'note', iconY: 575,
@@ -412,7 +413,7 @@ export const ROOMS = {
 
   sala_generatori: {
     name: 'Sala generatori', bg: BGV2 + 'sala_generatori.png', layoutW: 2732, keepEdges: true, scale: 0.85, floorY: 650,
-    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4],
+    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal',
     hotspots: [
       { id: 'generator', x: 520, w: 680, label: 'Generatore di emergenza', markY: 330, event: 'start_generator',
         requires: [{ item: 'fuse' }], failText: 'Il vano del fusibile principale è vuoto.\nSenza un fusibile da 30A non parte.',
@@ -436,7 +437,7 @@ export const ROOMS = {
 
   stanza_manutenzione: {
     name: 'Officina', bg: BGV2 + 'stanza_manutenzione.png', layoutW: 1672, keepEdges: true, scale: 1.26, floorY: 670,
-    light: 0.55, map: [4, 4],
+    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete',
     hotspots: [
       { id: 'maint_bench', x: 700, w: 510, label: 'Banco da lavoro', icon: 'note', iconY: 440,
         doc: 'doc_officina', give: [['ammo_shells', 8]] },
@@ -457,7 +458,7 @@ export const ROOMS = {
 
   safe_room: {
     name: 'Il rifugio di Elena', bg: BGV2 + 'safe_room.png', layoutW: 1303, keepEdges: true, scale: 1.3, floorY: 680,
-    light: 0.85, map: [5, 4], safe: true,
+    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete',
     hotspots: [
       { id: 'safe_shelf', x: 265, w: 270, label: 'Scaffale', markY: 400,
         give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
@@ -478,7 +479,7 @@ export const ROOMS = {
 
   lab_ingresso: {
     name: 'Laboratorio — Ingresso', bg: BGV2 + 'lab_ingresso.png', layoutW: 1559, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [0, 5],
+    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'lab_papers', x: 1150, w: 260, label: 'Fogli a terra', markY: 600,
         text: 'Moduli di evacuazione. Tutti firmati "Dir. Amati". Nessuno compilato.' },
@@ -494,7 +495,7 @@ export const ROOMS = {
 
   lab_corridoio: {
     name: 'Laboratorio — Corridoio', bg: BGV2 + 'lab_corridoio.png', layoutW: 2587, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [1, 5],
+    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'lc_log', x: 335, w: 60, label: 'Registro accessi', icon: 'note', iconY: 390, doc: 'doc_accessi' },
       { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
@@ -512,7 +513,7 @@ export const ROOMS = {
 
   lab_biologico: {
     name: 'Laboratorio biologico', bg: BGV2 + 'lab_biologico.png', layoutW: 1257, keepEdges: true, scale: 1.02, floorY: 640,
-    light: 0.55, map: [2, 5],
+    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'bio_cabinet', x: 245, w: 165, label: 'Vetrina dei reagenti', markY: 330,
         text: 'Flaconi etichettati "R-0", tutti vuoti. Qualcuno li ha svuotati in fretta.' },
@@ -532,7 +533,7 @@ export const ROOMS = {
 
   sala_server: {
     name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.55, map: [3, 5],
+    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal',
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
       { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
@@ -555,7 +556,7 @@ export const ROOMS = {
 
   camera_centrale: {
     name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650,
-    light: 0.62, map: [4, 5],
+    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal',
     npcs: [
       { id: 'elena', char: 'elena', x: 930, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
     ],
@@ -581,7 +582,7 @@ export const ROOMS = {
 
   porto: {
     name: 'Porto commerciale', bg: BGV2 + 'porto.png', layoutW: 2261, keepEdges: true, scale: 0.78, floorY: 630,
-    light: 0.55, map: [0, 6], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
     props: [{ name: 'body_5', x: 1200 }],
     hotspots: [
       { id: 'port_container', x: 840, w: 160, label: 'Container aperto', markY: 330,
@@ -601,7 +602,7 @@ export const ROOMS = {
 
   molo_finale: {
     name: 'Molo 4', bg: BGV2 + 'molo_finale.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 650,
-    light: 0.55, map: [1, 6], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
     hotspots: [
       { id: 'the_boat', x: 90, w: 520, label: 'Bitta — il gozzo di papà', markY: 430, event: 'ending',
         requires: [{ item: 'key_rusty' }], failText: 'Alla bitta è legato il gozzo di papà, con una catena e un lucchetto.' },

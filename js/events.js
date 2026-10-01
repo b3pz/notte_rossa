@@ -102,7 +102,7 @@ export class EventManager {
     ]});
 
     R('open_shutter', { once: true, actions: [
-      { type: 'sfx', id: 'door_open' },
+      { type: 'sfx', id: 'shutter_open' },
       { type: 'shake', power: 6, time: 0.6 },
       narr('Un tonfo metallico dal piano di sotto. La serranda dell\'uscita si alza.'),
       { type: 'set_flag', flag: 'shutter_open' },
@@ -136,11 +136,12 @@ export class EventManager {
     R('start_generator', { once: true, actions: [
       { type: 'take', item: 'fuse' },
       narr('Inserisci il fusibile e abbassi la leva di avvio.'),
-      { type: 'sfx', id: 'door_locked' },
+      { type: 'sfx', id: 'generator_start' },
       { type: 'shake', power: 10, time: 1.2 },
       { type: 'wait', sec: 1.2 },
       { type: 'set_flag', flag: 'power_on' },
       { type: 'set_light', value: 0.75 },
+      { type: 'ambient', id: 'generator_loop' },
       narr('Il generatore si avvia con un ruggito. Le luci si accendono, una dopo l\'altra, fino al laboratorio.'),
       { type: 'respawn' },
       narr('Il rumore ha svegliato qualcosa.'),
@@ -163,10 +164,11 @@ export class EventManager {
     R('upload_data', { once: true, actions: [
       { type: 'take', item: 'usb' },
       narr('Inserisci la chiavetta. Sul monitor: TRASMISSIONE IN CORSO...'),
+      { type: 'sfx', id: 'data_upload' },
       { type: 'wait', sec: 1.0 },
       narr('12%... 57%... 100%.\nDESTINATARI: ISS Roma — OMS Ginevra — Istituto Pasteur. INVIO COMPLETATO.'),
       { type: 'set_flag', flag: 'data_sent' },
-      { type: 'sfx', id: 'door_open' },
+      { type: 'sfx', id: 'door_metal' },
       narr('La porta stagna della camera centrale si sblocca.'),
     ]});
 
@@ -191,6 +193,7 @@ export class EventManager {
       { type: 'respawn' },
       { type: 'fade_in', ms: 900 },
       { type: 'shake', power: 5, time: 0.8 },
+      { type: 'sfx', id: 'alarm' },
       narr('Un allarme. Le porte stagne si sigillano. Dalla sala server sta arrivando qualcosa.'),
       narr('Dove c\'era Elena, sul tavolo: una lettera e una chiave.'),
     ]});
@@ -202,6 +205,7 @@ export class EventManager {
     ]});
 
     R('ending', { once: true, actions: [
+      { type: 'sfx', id: 'boat_engine' },
       narr('Sciogli la catena. Il motore del gozzo tossisce, poi parte.'),
       { type: 'ending' },
     ]});
@@ -257,6 +261,7 @@ export class EventManager {
       case 'wait':        await this._wait(a.sec); break;
       case 'set_flag':    this.setFlag(a.flag, a.value ?? true); break;
       case 'sfx':         g.audio.playSfx(a.id); break;
+      case 'ambient':     g.audio.playAmbient(a.id); break;
       case 'ring': {
         const tick = () => {
           if (!this.getFlag('phone_ringing')) return;
@@ -269,7 +274,7 @@ export class EventManager {
       case 'lights_fade': g.startLightFade(a.duration); break;
       case 'set_light':   if (g.roomManager.current) g.roomManager.current.lightLevel = a.value; break;
       case 'title':       g.showCinematicTitle(a.duration); break;
-      case 'chapter':     g.ui.showChapter(a.text); await this._wait(2.6); break;
+      case 'chapter':     g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text); await this._wait(2.6); break;
       case 'respawn':     g.roomManager.respawnEnemies(); break;
       case 'spawn': {
         const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scaleAt(a.x) });

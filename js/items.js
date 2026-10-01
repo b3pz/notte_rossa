@@ -9,7 +9,7 @@ export const ITEMS = {
     description: 'Torcia a LED. [F] per accenderla. Consuma batteria e rende più facile essere visti.',
     equippable: true },
   pistol: { id: 'pistol', name: 'Pistola 9mm', icon: 'pistol', type: 'weapon', weaponId: 'pistol',
-    description: 'Pistola di servizio della Polfer. Caricatore da 8 colpi.', equippable: true },
+    description: 'Pistola di servizio della Polfer. Caricatore da 10 colpi.', equippable: true },
   shotgun: { id: 'shotgun', name: 'Fucile a pompa', icon: 'shotgun', type: 'weapon', weaponId: 'shotgun',
     description: 'Fucile della vigilanza dell\'ospedale. Devastante da vicino, inutile da lontano.', equippable: true },
   crowbar: { id: 'crowbar', name: 'Piede di porco', icon: 'crowbar', type: 'tool',

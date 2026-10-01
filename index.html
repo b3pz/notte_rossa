@@ -25,7 +25,7 @@
     <!-- SFONDO DEL MENU (resta dietro alle schermate di menu) -->
     <div id="main-menu-bg">
       <div class="mm-photo"></div>
-      <img class="mm-figure" src="assets/sprites/cut/player_idle.png" alt="">
+      <img class="mm-figure" src="assets/ui/menu_figure.png" alt="">
       <div class="mm-redlight"></div>
       <div class="mm-shade"></div>
       <div class="rain-overlay"></div>
@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v1.7</div>
+      <div class="menu-version">v1.8</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -109,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v1.7</p>
+        <p class="dim">Survival horror 2D — v1.8</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -206,7 +206,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 1.7</div>
+        <div class="pause-version">versione 1.8</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
@@ -1295,7 +1295,32 @@ class InputManager {
    NOTTE ROSSA — audio.js
    AudioManager: musica, ambiente, effetti, passi
    Usa Web Audio API con fallback HTML5
+
+   I file vanno in assets/audio/<id>.mp3 (elenco in SOUND_IDS).
+   Se un file manca il gioco usa un suono sintetico di riserva
+   (effetti) o il silenzio (ambienti e musica): si possono
+   aggiungere un po' alla volta.
    ============================================= */
+
+const SOUND_IDS = [
+  // interfaccia
+  'ui_click', 'ui_confirm', 'pickup', 'paper', 'chapter_sting',
+  // giocatore
+  'step_concrete', 'step_wet', 'step_metal', 'step_tile', 'step_run', 'hurt', 'heartbeat',
+  'flashlight_click',
+  // armi
+  'shot', 'shotgun_shot', 'reload', 'shotgun_pump', 'dry_fire',
+  // porte e oggetti
+  'door_open', 'door_locked', 'door_metal', 'shutter_open', 'locker_open', 'safe_open',
+  'phone_ring', 'generator_start', 'data_upload', 'boat_engine', 'alarm',
+  // nemici
+  'enemy_groan', 'enemy_alert', 'enemy_attack', 'enemy_death', 'crawler_drop', 'listener_shriek', 'runner_scream',
+  // ambienti (in loop)
+  'train_idle', 'station_ambient', 'room_hum', 'electronics_hum', 'rain_heavy', 'rain_indoor',
+  'hospital_hum', 'morgue_cold', 'metro_drip', 'tunnel_wind', 'generator_loop', 'lab_hum', 'harbor_waves',
+  // musica
+  'music_menu', 'music_ending',
+];
 
 class AudioManager {
   constructor() {
@@ -1344,28 +1369,35 @@ class AudioManager {
     }
   }
 
-  /** Carica un file audio (ritorna Promise) */
+  /** Carica tutti i suoni presenti in assets/audio/ (quelli mancanti restano di riserva).
+      tools/build.py scrive qui l'elenco dei file che esistono davvero: così non si
+      chiedono file mancanti (e la console resta pulita). */
+  preloadAll(base = 'assets/audio/') {
+    const present = [];
+    for (const id of SOUND_IDS) if (!present || present.includes(id)) this.load(id, `${base}${id}.mp3`);
+  }
+
+  /** Carica un file audio (ritorna Promise). Da file:// fetch non funziona: si usa un elemento <audio>. */
   async load(id, url) {
     if (this._sounds[id]) return;
     try {
       const res = await fetch(url);
+      if (!res.ok) throw new Error(res.status);
       const buf = await res.arrayBuffer();
       this._sounds[id] = await this._ctx.decodeAudioData(buf);
     } catch (e) {
-      // Silenzioso: il file non esiste ancora, crea buffer sintetico
-      this._sounds[id] = this._makeSynthBuffer(id);
+      await new Promise(done => {
+        const el = new Audio();
+        el.preload = 'auto';
+        el.addEventListener('canplaythrough', () => { this._sounds[id] = { el }; done(); }, { once: true });
+        el.addEventListener('error', () => done(), { once: true });
+        el.src = url;
+      });
     }
   }
 
-  /** Crea buffer sintetico placeholder (silenzio o tono) */
-  _makeSynthBuffer(id) {
-    if (!this._ctx) return null;
-    const sampleRate = this._ctx.sampleRate;
-    const duration   = 1;
-    const buf = this._ctx.createBuffer(1, sampleRate * duration, sampleRate);
-    // Silenzio
-    return buf;
-  }
+  /** Volume effettivo di una categoria (per i suoni riprodotti con <audio>) */
+  _elVol(cat, v = 1) { return this._muted ? 0 : Math.max(0, Math.min(1, (this._volumes[cat] ?? 0.7) * v)); }
 
   /** Genera tono sintetico (usato per placeholder sfx) */
   _makeTone(freq = 440, duration = 0.1, type = 'sine') {
@@ -1388,6 +1420,12 @@ class AudioManager {
     if (!this._ctx) return;
     const buf = this._sounds[id];
     if (!buf) { this._playPlaceholderSfx(id); return; }
+    if (buf.el) {
+      const el = buf.el.cloneNode();
+      el.volume = this._elVol('sfx', volume);
+      el.play().catch(() => {});
+      return;
+    }
     const src  = this._ctx.createBufferSource();
     const gain = this._ctx.createGain();
     src.buffer = buf;
@@ -1406,6 +1444,14 @@ class AudioManager {
       'hurt':        () => this._makeTone(100,  0.2,  'sawtooth'),
       'reload':      () => this._makeTone(500,  0.1,  'triangle'),
       'phone_ring':  () => { this._makeTone(700, 0.3, 'sine'); },
+      'shotgun_shot': () => this._makeTone(80, 0.14, 'sawtooth'),
+      'door_metal':  () => this._makeTone(220, 0.25, 'triangle'),
+      'shutter_open': () => this._makeTone(150, 0.5, 'square'),
+      'generator_start': () => this._makeTone(60, 1.0, 'sawtooth'),
+      'enemy_alert': () => this._makeTone(140, 0.25, 'sawtooth'),
+      'enemy_death': () => this._makeTone(90, 0.3, 'sawtooth'),
+      'enemy_groan': () => {}, 'enemy_attack': () => {}, 'paper': () => {}, 'heartbeat': () => {}, 'flashlight_click': () => this._makeTone(1200, 0.02, 'square'),
+      'chapter_sting': () => this._makeTone(55, 1.2, 'sine'),
       'step_normal': () => this._makeTone(80,   0.05, 'triangle'),
       'step_run':    () => this._makeTone(100,  0.04, 'triangle'),
       'ui_click':    () => this._makeTone(600,  0.05, 'sine'),
@@ -1422,6 +1468,7 @@ class AudioManager {
     if (!this._ctx) return;
     const buf = this._sounds[id];
     if (!buf) return;
+    if (buf.el) { this._playing['music'] = this._loopEl(buf.el, 'music', id); return; }
     const src  = this._ctx.createBufferSource();
     const gain = this._ctx.createGain();
     src.buffer = buf;
@@ -1437,6 +1484,7 @@ class AudioManager {
   stopMusic(fadeOut = 0.5) {
     const m = this._playing['music'];
     if (!m) return;
+    if (m.el) { m.el.pause(); delete this._playing['music']; return; }
     const t = this._ctx.currentTime;
     m.gain.gain.linearRampToValueAtTime(0, t + fadeOut);
     m.src.stop(t + fadeOut + 0.05);
@@ -1446,10 +1494,12 @@ class AudioManager {
   /** Suono ambientale in loop */
   playAmbient(id, fadeIn = 2.0) {
     this.resume();
+    if (this._playing['ambient']?.id === id) return;     // stesso ambiente: continua senza stacchi
     this.stopAmbient(1.0);
     if (!this._ctx) return;
     const buf = this._sounds[id];
     if (!buf) return;
+    if (buf.el) { this._playing['ambient'] = this._loopEl(buf.el, 'ambient', id); return; }
     const src  = this._ctx.createBufferSource();
     const gain = this._ctx.createGain();
     src.buffer = buf;
@@ -1459,12 +1509,21 @@ class AudioManager {
     src.connect(gain);
     gain.connect(this._buses['ambient'] || this._master);
     src.start();
-    this._playing['ambient'] = { src, gain };
+    this._playing['ambient'] = { src, gain, id };
+  }
+
+  _loopEl(proto, cat, id) {
+    const el = proto.cloneNode();
+    el.loop = true;
+    el.volume = this._elVol(cat);
+    el.play().catch(() => {});
+    return { el, id, cat };
   }
 
   stopAmbient(fadeOut = 1.0) {
     const a = this._playing['ambient'];
     if (!a || !this._ctx) return;
+    if (a.el) { a.el.pause(); delete this._playing['ambient']; return; }
     const t = this._ctx.currentTime;
     a.gain.gain.linearRampToValueAtTime(0, t + fadeOut);
     a.src.stop(t + fadeOut + 0.05);
@@ -1476,6 +1535,7 @@ class AudioManager {
     this._volumes[category] = value;
     const bus = this._buses[category];
     if (bus) bus.gain.value = value;
+    for (const p of Object.values(this._playing)) if (p.el && p.cat === category) p.el.volume = this._elVol(category);
   }
 
   getVolume(category) { return this._volumes[category] ?? 1; }
@@ -1486,8 +1546,10 @@ class AudioManager {
   }
 
   /** Passi del giocatore */
-  playStep(surface = 'normal', isRunning = false) {
-    this.playSfx(isRunning ? 'step_run' : 'step_normal', 0.6);
+  playStep(surface = 'concrete', isRunning = false) {
+    const id = `step_${surface}`;
+    if (this._sounds[id]) this.playSfx(id, isRunning ? 0.8 : 0.5);
+    else this.playSfx(isRunning ? 'step_run' : 'step_normal', 0.6);
   }
 }
 
@@ -2282,7 +2344,7 @@ const ITEMS = {
     description: 'Torcia a LED. [F] per accenderla. Consuma batteria e rende più facile essere visti.',
     equippable: true },
   pistol: { id: 'pistol', name: 'Pistola 9mm', icon: 'pistol', type: 'weapon', weaponId: 'pistol',
-    description: 'Pistola di servizio della Polfer. Caricatore da 8 colpi.', equippable: true },
+    description: 'Pistola di servizio della Polfer. Caricatore da 10 colpi.', equippable: true },
   shotgun: { id: 'shotgun', name: 'Fucile a pompa', icon: 'shotgun', type: 'weapon', weaponId: 'shotgun',
     description: 'Fucile della vigilanza dell\'ospedale. Devastante da vicino, inutile da lontano.', equippable: true },
   crowbar: { id: 'crowbar', name: 'Piede di porco', icon: 'crowbar', type: 'tool',
@@ -2849,7 +2911,7 @@ class WeaponSystem {
     if (!w) return false;
     if (w.isReloading || w.cooldownTimer > 0) return false;
     if (w.ammoInMag <= 0) {
-      this.game.audio?.playSfx('door_locked');
+      this.game.audio?.playSfx('dry_fire');
       if (this.ammoReserve > 0) this.reload();
       else this.game.ui?.showNotification('Caricatore vuoto.');
       w.cooldownTimer = 0.4;
@@ -2869,7 +2931,7 @@ class WeaponSystem {
     }
     this._flash = 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
-    this.game.audio?.playSfx('shot');
+    this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_shot' : 'shot');
     this.game.camera?.shake(w.def.shake, 0.12);
     return true;
   }
@@ -2883,7 +2945,7 @@ class WeaponSystem {
     }
     w.isReloading = true;
     w.reloadTimer = w.def.reloadTime;
-    this.game.audio?.playSfx('reload');
+    this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_pump' : 'reload');
   }
 
   _finishReload() {
@@ -3338,9 +3400,30 @@ class EnemyManager {
     const player = this.game.player;
     const col    = this.game.collision;
     for (const e of this.enemies) {
-      const wasAlive = e.alive;
+      const wasAlive = e.alive, was = e.state;
       e.update(dt, player, col);
-      if (wasAlive && !e.alive) this.onEnemyKilled(e);
+      if (wasAlive && !e.alive) { this.onEnemyKilled(e); this._sound(e, 'enemy_death'); continue; }
+      this._voice(e, was, dt);
+    }
+  }
+
+  /** Versi dei nemici: più forti se sono vicini (si sentono anche fuori schermo) */
+  _sound(e, id, base = 1) {
+    const d = Math.abs(e.centerX - this.game.player.centerX);
+    const v = base * Math.max(0, 1 - d / 1400);
+    if (v > 0.05) this.game.audio?.playSfx(id, v);
+  }
+
+  _voice(e, was, dt) {
+    const s = e.state;
+    if (s === AI_STATE.DROP && was !== AI_STATE.DROP) this._sound(e, 'crawler_drop');
+    else if (s === AI_STATE.CHASE && was !== AI_STATE.CHASE && was !== AI_STATE.ATTACK && was !== AI_STATE.STUNNED) {
+      this._sound(e, e.type === 'listener' ? 'listener_shriek' : e.type === 'corridore' ? 'runner_scream' : 'enemy_alert');
+    } else if (s === AI_STATE.ATTACK && was !== AI_STATE.ATTACK) this._sound(e, 'enemy_attack', 0.8);
+    // rantoli ogni tanto, finché non ti hanno visto
+    if (s === AI_STATE.PATROL || s === AI_STATE.IDLE) {
+      e._groanCd = (e._groanCd ?? 3 + Math.random() * 6) - dt;
+      if (e._groanCd <= 0) { e._groanCd = 6 + Math.random() * 8; this._sound(e, 'enemy_groan', 0.6); }
     }
   }
 
@@ -3496,7 +3579,7 @@ class EventManager {
     ]});
 
     R('open_shutter', { once: true, actions: [
-      { type: 'sfx', id: 'door_open' },
+      { type: 'sfx', id: 'shutter_open' },
       { type: 'shake', power: 6, time: 0.6 },
       narr('Un tonfo metallico dal piano di sotto. La serranda dell\'uscita si alza.'),
       { type: 'set_flag', flag: 'shutter_open' },
@@ -3530,11 +3613,12 @@ class EventManager {
     R('start_generator', { once: true, actions: [
       { type: 'take', item: 'fuse' },
       narr('Inserisci il fusibile e abbassi la leva di avvio.'),
-      { type: 'sfx', id: 'door_locked' },
+      { type: 'sfx', id: 'generator_start' },
       { type: 'shake', power: 10, time: 1.2 },
       { type: 'wait', sec: 1.2 },
       { type: 'set_flag', flag: 'power_on' },
       { type: 'set_light', value: 0.75 },
+      { type: 'ambient', id: 'generator_loop' },
       narr('Il generatore si avvia con un ruggito. Le luci si accendono, una dopo l\'altra, fino al laboratorio.'),
       { type: 'respawn' },
       narr('Il rumore ha svegliato qualcosa.'),
@@ -3557,10 +3641,11 @@ class EventManager {
     R('upload_data', { once: true, actions: [
       { type: 'take', item: 'usb' },
       narr('Inserisci la chiavetta. Sul monitor: TRASMISSIONE IN CORSO...'),
+      { type: 'sfx', id: 'data_upload' },
       { type: 'wait', sec: 1.0 },
       narr('12%... 57%... 100%.\nDESTINATARI: ISS Roma — OMS Ginevra — Istituto Pasteur. INVIO COMPLETATO.'),
       { type: 'set_flag', flag: 'data_sent' },
-      { type: 'sfx', id: 'door_open' },
+      { type: 'sfx', id: 'door_metal' },
       narr('La porta stagna della camera centrale si sblocca.'),
     ]});
 
@@ -3585,6 +3670,7 @@ class EventManager {
       { type: 'respawn' },
       { type: 'fade_in', ms: 900 },
       { type: 'shake', power: 5, time: 0.8 },
+      { type: 'sfx', id: 'alarm' },
       narr('Un allarme. Le porte stagne si sigillano. Dalla sala server sta arrivando qualcosa.'),
       narr('Dove c\'era Elena, sul tavolo: una lettera e una chiave.'),
     ]});
@@ -3596,6 +3682,7 @@ class EventManager {
     ]});
 
     R('ending', { once: true, actions: [
+      { type: 'sfx', id: 'boat_engine' },
       narr('Sciogli la catena. Il motore del gozzo tossisce, poi parte.'),
       { type: 'ending' },
     ]});
@@ -3651,6 +3738,7 @@ class EventManager {
       case 'wait':        await this._wait(a.sec); break;
       case 'set_flag':    this.setFlag(a.flag, a.value ?? true); break;
       case 'sfx':         g.audio.playSfx(a.id); break;
+      case 'ambient':     g.audio.playAmbient(a.id); break;
       case 'ring': {
         const tick = () => {
           if (!this.getFlag('phone_ringing')) return;
@@ -3663,7 +3751,7 @@ class EventManager {
       case 'lights_fade': g.startLightFade(a.duration); break;
       case 'set_light':   if (g.roomManager.current) g.roomManager.current.lightLevel = a.value; break;
       case 'title':       g.showCinematicTitle(a.duration); break;
-      case 'chapter':     g.ui.showChapter(a.text); await this._wait(2.6); break;
+      case 'chapter':     g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text); await this._wait(2.6); break;
       case 'respawn':     g.roomManager.respawnEnemies(); break;
       case 'spawn': {
         const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scaleAt(a.x) });
@@ -4507,6 +4595,7 @@ class SaveManager {
    hotspots: { id, x, w, label, markY, icon, iconY, give, doc, text,
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
+   ambient:  suono in loop (assets/audio/<id>.mp3), steps: concrete|wet|metal|tile
    props:    { name, x, flip }
    overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
    enemies:  { id, type, x, patrol, ceiling, idle, facingRight, showIf, hideIf }
@@ -4524,7 +4613,7 @@ const ROOMS = {
 
   train_wagon: {
     name: 'Treno 847 — Vagone 4', bg: BGV2 + 'train_wagon.png', layoutW: 1400, keepEdges: true, scale: 1.25, floorY: 660,
-    light: 0.6, map: [0, 0], ambient: 'train_idle', spawnX: 420,
+    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal',
     hotspots: [
       { id: 'window_wagon', x: 555, w: 245, label: 'Finestrino', markY: 290,
         text: 'Pioggia. Il binario 1 di Porto Salvo è deserto.\nNessun capotreno, nessun annuncio.' },
@@ -4547,7 +4636,7 @@ const ROOMS = {
     scale: 0.74, floorY: 540,
     floorLine: [[300, 500], [1319, 592]],          // linea dei piedi (segue il marciapiede)
     scaleLine: [[300, 0.70], [1319, 0.84]],        // più vicino alla telecamera = più grande
-    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet',
     props: [{ name: 'body_0', x: 890 }],
     hotspots: [
       { id: 'body_conductor', x: 820, w: 150, label: 'Il capotreno', markY: 520,
@@ -4573,7 +4662,7 @@ const ROOMS = {
     // NUOVO SFONDO LATERALE (v2)
     name: 'Atrio', bg: BGV2 + 'station_hall.png', layoutW: 2782, keepEdges: true,
     scale: 0.92, floorY: 640,
-    light: 0.72, map: [2, 0], ambient: 'station_ambient',
+    light: 0.72, map: [2, 0], ambient: 'station_ambient', steps: 'tile',
     hotspots: [
       { id: 'ticket_booth', x: 660, w: 320, label: 'Biglietteria', markY: 360, give: ['flashlight', 'battery'],
         text: 'La biglietteria è chiusa. Dalla fessura della serranda si vede il cassetto dei soldi, aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
@@ -4598,7 +4687,7 @@ const ROOMS = {
 
   station_storage: {
     name: 'Servizi tecnici', bg: BGV2 + 'station_storage.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 600,
-    light: 0.5, map: [1, 1], ambient: 'room_hum',
+    light: 0.5, map: [1, 1], ambient: 'room_hum', steps: 'tile',
     props: [{ name: 'body_1', x: 350 }],
     hotspots: [
       { id: 'guard_body', x: 285, w: 130, label: 'La guardia', markY: 560,
@@ -4622,7 +4711,7 @@ const ROOMS = {
 
   station_control: {
     name: 'Sala controllo', bg: BGV2 + 'station_control.png', layoutW: 1472, keepEdges: true, scale: 1.42, floorY: 665,
-    light: 0.72, map: [3, 0], ambient: 'electronics_hum', safe: true,
+    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete',
     npcs: [
       { id: 'carmine', char: 'carmine', x: 800, anim: 'scared', facingRight: false, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
     ],
@@ -4641,7 +4730,7 @@ const ROOMS = {
 
   station_exit: {
     name: 'Uscita della stazione', bg: BGV2 + 'station_exit.png', layoutW: 1360, keepEdges: true, scale: 1.12, floorY: 668,
-    light: 0.6, map: [4, 0], ambient: 'rain_heavy',
+    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_1', x: 1170 }],
     hotspots: [
       { id: 'exit_map', x: 290, w: 190, label: 'Piantina a terra', icon: 'city_map', iconY: 655, give: ['city_map'],
@@ -4664,7 +4753,7 @@ const ROOMS = {
 
   city_street: {
     name: 'Via Ferrante', bg: BGV2 + 'city_street.png', layoutW: 2587, keepEdges: true, scale: 0.85, floorY: 625,
-    light: 0.55, map: [0, 2], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_3', x: 1060, flip: true }],
     hotspots: [
       { id: 'car_glovebox', x: 1700, w: 110, label: 'Cinquecento con la portiera aperta', markY: 520,
@@ -4684,7 +4773,7 @@ const ROOMS = {
 
   alimentari: {
     name: 'Alimentari da Luigi', bg: BGV2 + 'alimentari.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.6, map: [1, 2],
+    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile',
     props: [{ name: 'body_3', x: 420 }],
     hotspots: [
       { id: 'shop_crowbar', x: 215, w: 110, label: 'Dietro il bancone', icon: 'crowbar', iconY: 480, give: ['crowbar'] },
@@ -4712,7 +4801,7 @@ const ROOMS = {
 
   apartment: {
     name: 'Palazzo Conti — Int. 4', bg: BGV2 + 'apartment.png', layoutW: 1418, keepEdges: true, scale: 1.32, floorY: 682,
-    light: 0.55, map: [2, 2],
+    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete',
     overlays: [{ type: 'monitor', x: 404, y: 474, w: 92, h: 74 }],
     hotspots: [
       { id: 'apt_diary', x: 40, w: 260, label: 'Diario sul divano', icon: 'note', iconY: 520, doc: 'doc_diario_giulia',
@@ -4735,7 +4824,7 @@ const ROOMS = {
 
   city_alley: {
     name: 'Vicolo dei Pescatori', bg: BGV2 + 'city_alley.png', layoutW: 1388, keepEdges: true, scale: 1.1, floorY: 645,
-    light: 0.5, map: [3, 2], ambient: 'rain_heavy', rain: true,
+    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
     props: [{ name: 'body_4', x: 560 }],
     hotspots: [
       { id: 'alley_woman', x: 470, w: 180, label: 'Una donna', markY: 610,
@@ -4758,7 +4847,7 @@ const ROOMS = {
 
   hospital_corridor: {
     name: 'San Rocco — Corridoio', bg: BGV2 + 'hospital_corridor.png', layoutW: 2711, keepEdges: true, scale: 1.08, floorY: 655,
-    light: 0.55, map: [0, 3], ambient: 'hospital_hum',
+    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile',
     props: [{ name: 'body_2', x: 2170 }],
     hotspots: [
       { id: 'hosp_cart', x: 1040, w: 240, label: 'Carrello medicazioni', icon: 'note', iconY: 455,
@@ -4781,7 +4870,7 @@ const ROOMS = {
 
   hospital_ward: {
     name: 'Degenze — 2° piano', bg: BGV2 + 'hospital_ward.png', layoutW: 2701, keepEdges: true, scale: 1.32, floorY: 685,
-    light: 0.5, map: [1, 3],
+    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile',
     props: [{ name: 'body_2', x: 2060, flip: true }],
     hotspots: [
       { id: 'ward_locker', x: 420, w: 180, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 420,
@@ -4806,7 +4895,7 @@ const ROOMS = {
 
   hospital_surgery: {
     name: 'Sala operatoria', bg: BGV2 + 'hospital_surgery.png', layoutW: 1451, keepEdges: true, scale: 1.22, floorY: 670,
-    light: 0.62, map: [2, 3], safe: true,
+    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile',
     hotspots: [
       { id: 'surg_terminal', x: 270, w: 190, label: 'Terminale [SALVA]', markY: 380, event: 'open_save' },
       { id: 'surg_table', x: 580, w: 420, label: 'Tavolo operatorio', markY: 450,
@@ -4825,7 +4914,7 @@ const ROOMS = {
 
   hospital_morgue: {
     name: 'Obitorio', bg: BGV2 + 'hospital_morgue.png', layoutW: 1360, keepEdges: true, scale: 1.15, floorY: 655,
-    light: 0.45, map: [3, 3],
+    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile',
     hotspots: [
       { id: 'morgue_report', x: 260, w: 350, label: 'Tavolo autoptico', icon: 'note', iconY: 430,
         doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
@@ -4846,7 +4935,7 @@ const ROOMS = {
 
   metro_ingresso: {
     name: 'Metro — Ingresso', bg: BGV2 + 'metro_ingresso.png', layoutW: 1592, keepEdges: true, scale: 1.1, floorY: 660,
-    light: 0.55, map: [0, 4],
+    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile',
     hotspots: [
       { id: 'metro_notice', x: 305, w: 155, label: 'Avviso', icon: 'note', iconY: 360, doc: 'doc_avviso_metro' },
       { id: 'metro_turnstiles', x: 470, w: 270, label: 'Tornelli', markY: 450,
@@ -4865,7 +4954,7 @@ const ROOMS = {
 
   metro_banchina: {
     name: 'Metro — Banchina B', bg: BGV2 + 'metro_banchina.png', layoutW: 3047, keepEdges: true, scale: 0.98, floorY: 665,
-    light: 0.5, map: [1, 4],
+    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete',
     props: [{ name: 'body_5', x: 1900 }],
     hotspots: [
       { id: 'mb_train', x: 1380, w: 140, label: 'Carrozze abbandonate', markY: 470,
@@ -4885,7 +4974,7 @@ const ROOMS = {
 
   metro_tunnel: {
     name: 'Tunnel Linea 3', bg: BGV2 + 'metro_tunnel.png', layoutW: 2617, keepEdges: true, scale: 0.92, floorY: 600,
-    light: 0.3, map: [2, 4],
+    light: 0.3, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete',
     props: [{ name: 'body_0', x: 720 }],
     hotspots: [
       { id: 'tunnel_notebook', x: 630, w: 180, label: 'Il soldato', icon: 'note', iconY: 575,
@@ -4903,7 +4992,7 @@ const ROOMS = {
 
   sala_generatori: {
     name: 'Sala generatori', bg: BGV2 + 'sala_generatori.png', layoutW: 2732, keepEdges: true, scale: 0.85, floorY: 650,
-    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4],
+    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal',
     hotspots: [
       { id: 'generator', x: 520, w: 680, label: 'Generatore di emergenza', markY: 330, event: 'start_generator',
         requires: [{ item: 'fuse' }], failText: 'Il vano del fusibile principale è vuoto.\nSenza un fusibile da 30A non parte.',
@@ -4927,7 +5016,7 @@ const ROOMS = {
 
   stanza_manutenzione: {
     name: 'Officina', bg: BGV2 + 'stanza_manutenzione.png', layoutW: 1672, keepEdges: true, scale: 1.26, floorY: 670,
-    light: 0.55, map: [4, 4],
+    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete',
     hotspots: [
       { id: 'maint_bench', x: 700, w: 510, label: 'Banco da lavoro', icon: 'note', iconY: 440,
         doc: 'doc_officina', give: [['ammo_shells', 8]] },
@@ -4948,7 +5037,7 @@ const ROOMS = {
 
   safe_room: {
     name: 'Il rifugio di Elena', bg: BGV2 + 'safe_room.png', layoutW: 1303, keepEdges: true, scale: 1.3, floorY: 680,
-    light: 0.85, map: [5, 4], safe: true,
+    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete',
     hotspots: [
       { id: 'safe_shelf', x: 265, w: 270, label: 'Scaffale', markY: 400,
         give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
@@ -4969,7 +5058,7 @@ const ROOMS = {
 
   lab_ingresso: {
     name: 'Laboratorio — Ingresso', bg: BGV2 + 'lab_ingresso.png', layoutW: 1559, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [0, 5],
+    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'lab_papers', x: 1150, w: 260, label: 'Fogli a terra', markY: 600,
         text: 'Moduli di evacuazione. Tutti firmati "Dir. Amati". Nessuno compilato.' },
@@ -4985,7 +5074,7 @@ const ROOMS = {
 
   lab_corridoio: {
     name: 'Laboratorio — Corridoio', bg: BGV2 + 'lab_corridoio.png', layoutW: 2587, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [1, 5],
+    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'lc_log', x: 335, w: 60, label: 'Registro accessi', icon: 'note', iconY: 390, doc: 'doc_accessi' },
       { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
@@ -5003,7 +5092,7 @@ const ROOMS = {
 
   lab_biologico: {
     name: 'Laboratorio biologico', bg: BGV2 + 'lab_biologico.png', layoutW: 1257, keepEdges: true, scale: 1.02, floorY: 640,
-    light: 0.55, map: [2, 5],
+    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile',
     hotspots: [
       { id: 'bio_cabinet', x: 245, w: 165, label: 'Vetrina dei reagenti', markY: 330,
         text: 'Flaconi etichettati "R-0", tutti vuoti. Qualcuno li ha svuotati in fretta.' },
@@ -5023,7 +5112,7 @@ const ROOMS = {
 
   sala_server: {
     name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.55, map: [3, 5],
+    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal',
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
       { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
@@ -5046,7 +5135,7 @@ const ROOMS = {
 
   camera_centrale: {
     name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650,
-    light: 0.62, map: [4, 5],
+    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal',
     npcs: [
       { id: 'elena', char: 'elena', x: 930, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
     ],
@@ -5072,7 +5161,7 @@ const ROOMS = {
 
   porto: {
     name: 'Porto commerciale', bg: BGV2 + 'porto.png', layoutW: 2261, keepEdges: true, scale: 0.78, floorY: 630,
-    light: 0.55, map: [0, 6], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
     props: [{ name: 'body_5', x: 1200 }],
     hotspots: [
       { id: 'port_container', x: 840, w: 160, label: 'Container aperto', markY: 330,
@@ -5092,7 +5181,7 @@ const ROOMS = {
 
   molo_finale: {
     name: 'Molo 4', bg: BGV2 + 'molo_finale.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 650,
-    light: 0.55, map: [1, 6], ambient: 'rain_heavy', rain: true,
+    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
     hotspots: [
       { id: 'the_boat', x: 90, w: 520, label: 'Bitta — il gozzo di papà', markY: 430, event: 'ending',
         requires: [{ item: 'key_rusty' }], failText: 'Alla bitta è legato il gozzo di papà, con una catena e un lucchetto.' },
@@ -5269,7 +5358,9 @@ class RoomManager {
     cam.setBounds(0, 0, def.width, VIEW_H);
     cam.snapTo(p.centerX, VIEW_H / 2);
 
-    if (def.ambient) this.game.audio.playAmbient(def.ambient);
+    const powered = def.poweredFlag && this.game.events.getFlag(def.poweredFlag);
+    const amb = (powered && def.poweredAmbient) || def.ambient;
+    if (amb) this.game.audio.playAmbient(amb);
     this.respawnEnemies();
     this.game.events.onRoomEnter(roomId);
   }
@@ -6013,6 +6104,7 @@ class Game {
     // Sistemi creati una volta sola (legano eventi DOM)
     this.input    = new InputManager();
     this.audio    = new AudioManager();
+    this.audio.preloadAll();
     this.camera   = new Camera(CANVAS_W, CANVAS_H);
     this.save     = new SaveManager(this);
     this._resetState();
@@ -6238,6 +6330,10 @@ class Game {
     if (input.justPressed('debug')) { this.debug = !this.debug; this.ui.toggleDebug(this.debug); }
 
     this._updateSteps(dt);
+    // torcia e battito (salute bassa)
+    if (p.flashlightOn !== this._torchWas) { if (this._torchWas !== undefined) this.audio.playSfx('flashlight_click'); this._torchWas = p.flashlightOn; }
+    this._beatCd = (this._beatCd || 0) - dt;
+    if (p.healthState === 'DANGER' && this._beatCd <= 0) { this._beatCd = 1.1; this.audio.playSfx('heartbeat', 0.7); }
     this._updateLightFade(dt);
     this.ui.updateHUD();
     this.ui.updateDebug(Math.round(this._fpsAvg), p, this.roomManager.current?.id,
@@ -6344,6 +6440,7 @@ class Game {
     const lines = !h.text ? [] : (Array.isArray(h.text) ? h.text : [['', h.text]]);
     const afterText = () => {
       if (h.doc) {
+        this.audio.playSfx('paper');
         this.inventory.addDocument(h.doc);
         this.ui.showDocument(h.doc);
       }
@@ -6439,7 +6536,7 @@ class Game {
     this._transitioning = true;
     this.autoWalk = null;
     this.ui.hideInteractPrompt();
-    this.audio.playSfx('door_open');
+    this.audio.playSfx(this.roomManager.current?.steps === 'metal' ? 'door_metal' : 'door_open');
     this.ui.fadeOut(350, () => {
       this.weapon.bullets = [];
       this._lightFadeActive = false;
@@ -6456,7 +6553,7 @@ class Game {
     this._stepTimer = (this._stepTimer || 0) + dt;
     if (this._stepTimer >= interval) {
       this._stepTimer = 0;
-      if (!p.isCrouching) this.audio.playStep('concrete', p.isRunning);
+      if (!p.isCrouching) this.audio.playStep(this.roomManager.current?.steps || 'concrete', p.isRunning);
     }
   }
 
@@ -6679,6 +6776,7 @@ class Game {
     this.ui.resetOverlays();
     this.ui.hideHUD();
     this.audio.stopAmbient(0.5);
+    this.audio.stopMusic(0.5);
     this.canvas.style.display = 'none';
     document.getElementById('main-menu-bg')?.classList.remove('hidden');
     this._showScreen('main-menu');

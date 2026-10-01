@@ -396,9 +396,30 @@ export class EnemyManager {
     const player = this.game.player;
     const col    = this.game.collision;
     for (const e of this.enemies) {
-      const wasAlive = e.alive;
+      const wasAlive = e.alive, was = e.state;
       e.update(dt, player, col);
-      if (wasAlive && !e.alive) this.onEnemyKilled(e);
+      if (wasAlive && !e.alive) { this.onEnemyKilled(e); this._sound(e, 'enemy_death'); continue; }
+      this._voice(e, was, dt);
+    }
+  }
+
+  /** Versi dei nemici: più forti se sono vicini (si sentono anche fuori schermo) */
+  _sound(e, id, base = 1) {
+    const d = Math.abs(e.centerX - this.game.player.centerX);
+    const v = base * Math.max(0, 1 - d / 1400);
+    if (v > 0.05) this.game.audio?.playSfx(id, v);
+  }
+
+  _voice(e, was, dt) {
+    const s = e.state;
+    if (s === AI_STATE.DROP && was !== AI_STATE.DROP) this._sound(e, 'crawler_drop');
+    else if (s === AI_STATE.CHASE && was !== AI_STATE.CHASE && was !== AI_STATE.ATTACK && was !== AI_STATE.STUNNED) {
+      this._sound(e, e.type === 'listener' ? 'listener_shriek' : e.type === 'corridore' ? 'runner_scream' : 'enemy_alert');
+    } else if (s === AI_STATE.ATTACK && was !== AI_STATE.ATTACK) this._sound(e, 'enemy_attack', 0.8);
+    // rantoli ogni tanto, finché non ti hanno visto
+    if (s === AI_STATE.PATROL || s === AI_STATE.IDLE) {
+      e._groanCd = (e._groanCd ?? 3 + Math.random() * 6) - dt;
+      if (e._groanCd <= 0) { e._groanCd = 6 + Math.random() * 8; this._sound(e, 'enemy_groan', 0.6); }
     }
   }
 

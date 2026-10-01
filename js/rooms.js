@@ -163,7 +163,9 @@ export class RoomManager {
     cam.setBounds(0, 0, def.width, VIEW_H);
     cam.snapTo(p.centerX, VIEW_H / 2);
 
-    if (def.ambient) this.game.audio.playAmbient(def.ambient);
+    const powered = def.poweredFlag && this.game.events.getFlag(def.poweredFlag);
+    const amb = (powered && def.poweredAmbient) || def.ambient;
+    if (amb) this.game.audio.playAmbient(amb);
     this.respawnEnemies();
     this.game.events.onRoomEnter(roomId);
   }

@@ -50,6 +50,7 @@ export class Game {
     // Sistemi creati una volta sola (legano eventi DOM)
     this.input    = new InputManager();
     this.audio    = new AudioManager();
+    this.audio.preloadAll();
     this.camera   = new Camera(CANVAS_W, CANVAS_H);
     this.save     = new SaveManager(this);
     this._resetState();
@@ -275,6 +276,10 @@ export class Game {
     if (input.justPressed('debug')) { this.debug = !this.debug; this.ui.toggleDebug(this.debug); }
 
     this._updateSteps(dt);
+    // torcia e battito (salute bassa)
+    if (p.flashlightOn !== this._torchWas) { if (this._torchWas !== undefined) this.audio.playSfx('flashlight_click'); this._torchWas = p.flashlightOn; }
+    this._beatCd = (this._beatCd || 0) - dt;
+    if (p.healthState === 'DANGER' && this._beatCd <= 0) { this._beatCd = 1.1; this.audio.playSfx('heartbeat', 0.7); }
     this._updateLightFade(dt);
     this.ui.updateHUD();
     this.ui.updateDebug(Math.round(this._fpsAvg), p, this.roomManager.current?.id,
@@ -381,6 +386,7 @@ export class Game {
     const lines = !h.text ? [] : (Array.isArray(h.text) ? h.text : [['', h.text]]);
     const afterText = () => {
       if (h.doc) {
+        this.audio.playSfx('paper');
         this.inventory.addDocument(h.doc);
         this.ui.showDocument(h.doc);
       }
@@ -476,7 +482,7 @@ export class Game {
     this._transitioning = true;
     this.autoWalk = null;
     this.ui.hideInteractPrompt();
-    this.audio.playSfx('door_open');
+    this.audio.playSfx(this.roomManager.current?.steps === 'metal' ? 'door_metal' : 'door_open');
     this.ui.fadeOut(350, () => {
       this.weapon.bullets = [];
       this._lightFadeActive = false;
@@ -493,7 +499,7 @@ export class Game {
     this._stepTimer = (this._stepTimer || 0) + dt;
     if (this._stepTimer >= interval) {
       this._stepTimer = 0;
-      if (!p.isCrouching) this.audio.playStep('concrete', p.isRunning);
+      if (!p.isCrouching) this.audio.playStep(this.roomManager.current?.steps || 'concrete', p.isRunning);
     }
   }
 
@@ -716,6 +722,7 @@ export class Game {
     this.ui.resetOverlays();
     this.ui.hideHUD();
     this.audio.stopAmbient(0.5);
+    this.audio.stopMusic(0.5);
     this.canvas.style.display = 'none';
     document.getElementById('main-menu-bg')?.classList.remove('hidden');
     this._showScreen('main-menu');

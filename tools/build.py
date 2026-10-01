@@ -38,6 +38,10 @@ def main():
         with open(path, encoding='utf-8') as fh:
             parts.append(f'/* ───── {name}.js ───── */\n' + strip_modules(fh.read()))
     bundle = '\n\n'.join(parts)
+    # suoni presenti in assets/audio (il gioco carica solo questi)
+    adir = os.path.join(ROOT, 'assets', 'audio')
+    present = sorted(f[:-4] for f in os.listdir(adir) if f.endswith('.mp3')) if os.path.isdir(adir) else []
+    bundle = bundle.replace('/*__AUDIO_FILES__*/null', repr(present).replace("'", '"'))
     if re.search(r'^\s*(import|export)\s', bundle, re.M):
         sys.exit('ERRORE: import/export rimasti nel bundle')
 
