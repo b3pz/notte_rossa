@@ -60,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v1.0</div>
+      <div class="menu-version">v1.1</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -109,7 +109,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v1.0</p>
+        <p class="dim">Survival horror 2D — v1.1</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -206,7 +206,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
-        <div class="pause-version">versione 1.0</div>
+        <div class="pause-version">versione 1.1</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>
@@ -4419,237 +4419,240 @@ const ROOMS = {
   },
 
   station_exit: {
-    name: 'Uscita della stazione', bg: BG + 'station_exit.png', scale: 1.15, floorY: 672,
-    light: 0.55, map: [4, 0], ambient: 'rain_heavy',
-    props: [{ name: 'body_1', x: 1000 }],
+    name: 'Uscita della stazione', bg: BGV2 + 'station_exit.png', layoutW: 1360, keepEdges: true, scale: 1.12, floorY: 668,
+    light: 0.6, map: [4, 0], ambient: 'rain_heavy',
+    props: [{ name: 'body_1', x: 1170 }],
     hotspots: [
-      { id: 'exit_map', x: 160, w: 110, label: 'Piantina a terra', icon: 'city_map', iconY: 640, give: ['city_map'],
+      { id: 'exit_map', x: 290, w: 190, label: 'Piantina a terra', icon: 'city_map', iconY: 655, give: ['city_map'],
         text: 'Qualcuno ha cerchiato in rosso l\'Ospedale San Rocco, a tre isolati da qui.' },
-      { id: 'police_body', x: 920, w: 170, label: 'Il poliziotto', markY: 600,
+      { id: 'exit_phone', x: 370, w: 80, label: 'Telefono a gettoni', markY: 330,
+        text: 'Il telefono a gettoni. Alzi la cornetta: nessun segnale.\nSolo un respiro, lontano. Riattacchi.' },
+      { id: 'police_body', x: 1090, w: 170, label: 'Il poliziotto', markY: 610,
         give: [['ammo_pistol_small', 16]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
     ],
     doors: [
-      { id: 'exit_to_hall', x: 0, w: 110, top: 220, label: 'Atrio', target: 'station_hall' },
-      { id: 'exit_to_city', x: 600, w: 190, top: 210, label: 'Via Ferrante', target: 'city_street' },
+      { id: 'exit_to_hall', x: 95, w: 180, top: 235, bottom: 620, label: 'Atrio', target: 'station_hall', noSprite: true },
+      { id: 'exit_to_city', x: 550, w: 510, top: 180, bottom: 615, label: 'Via Ferrante', target: 'city_street', noSprite: true },
     ],
     enemies: [
-      { id: 'exit_corridore', type: 'corridore', x: 1100, idle: true, facingRight: false },
+      { id: 'exit_corridore', type: 'corridore', x: 1270, idle: true, facingRight: false },
     ],
   },
 
   /* ═══════════ CAPITOLO 2 — PORTO SALVO ═══════════ */
 
   city_street: {
-    name: 'Via Ferrante', bg: BG + 'city_street.png', scale: 0.80, floorY: 652,
-    light: 0.5, map: [0, 2], ambient: 'rain_heavy', rain: true,
-    props: [{ name: 'body_3', x: 760, flip: true }],
+    name: 'Via Ferrante', bg: BGV2 + 'city_street.png', layoutW: 2587, keepEdges: true, scale: 0.85, floorY: 625,
+    light: 0.55, map: [0, 2], ambient: 'rain_heavy', rain: true,
+    props: [{ name: 'body_3', x: 1060, flip: true }],
     hotspots: [
-      { id: 'car_glovebox', x: 420, w: 150, label: 'Auto con la portiera aperta', markY: 490,
+      { id: 'car_glovebox', x: 1700, w: 110, label: 'Cinquecento con la portiera aperta', markY: 520,
         give: ['battery', ['ammo_pistol_small', 12]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
     ],
     doors: [
-      { id: 'street_to_station', x: 0, w: 110, top: 300, label: 'Stazione', target: 'station_exit' },
-      { id: 'street_to_apartment', x: 140, w: 100, top: 330, label: 'Palazzo Conti', target: 'apartment' },
-      { id: 'street_to_alley', x: 580, w: 120, top: 330, label: 'Vicolo — San Rocco', target: 'city_alley' },
-      { id: 'street_to_shop', x: 900, w: 110, top: 300, label: 'Alimentari da Luigi', target: 'alimentari' },
+      { id: 'street_to_station', x: 190, w: 120, top: 300, bottom: 555, label: 'Stazione', target: 'station_exit', noSprite: true },
+      { id: 'street_to_apartment', x: 640, w: 115, top: 280, bottom: 555, label: 'Palazzo Conti', target: 'apartment', noSprite: true },
+      { id: 'street_to_alley', x: 1420, w: 190, top: 270, bottom: 560, label: 'Vicolo — San Rocco', target: 'city_alley', noSprite: true },
+      { id: 'street_to_shop', x: 1810, w: 115, top: 355, bottom: 545, label: 'Alimentari da Luigi', target: 'alimentari', noSprite: true },
     ],
     enemies: [
-      { id: 'street_c1', type: 'contaminato', x: 380, patrol: [280, 520] },
-      { id: 'street_c2', type: 'ferroviere', x: 1050, patrol: [1000, 1200] },
+      { id: 'street_c1', type: 'contaminato', x: 950, patrol: [850, 1250] },
+      { id: 'street_c2', type: 'ferroviere', x: 2250, patrol: [2100, 2450] },
     ],
   },
 
   alimentari: {
-    name: 'Alimentari da Luigi', bg: BG + 'alimentari.png', scale: 1.00, floorY: 666,
-    light: 0.55, map: [1, 2],
-    props: [{ name: 'body_3', x: 690 }],
+    name: 'Alimentari da Luigi', bg: BGV2 + 'alimentari.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 640,
+    light: 0.6, map: [1, 2],
+    props: [{ name: 'body_3', x: 420 }],
     hotspots: [
-      { id: 'shop_meds', x: 280, w: 170, label: 'Scaffale farmacia', markY: 420, give: ['painkillers'] },
-      { id: 'shop_note', x: 610, w: 120, label: 'Luigi', icon: 'note', iconY: 610, doc: 'doc_luigi',
+      { id: 'shop_crowbar', x: 215, w: 110, label: 'Dietro il bancone', icon: 'crowbar', iconY: 480, give: ['crowbar'] },
+      { id: 'shop_note', x: 345, w: 150, label: 'Luigi', icon: 'note', iconY: 615, doc: 'doc_luigi',
         text: 'È Luigi. Ha ancora il grembiule. Nella mano, un biglietto.' },
-      { id: 'shop_crowbar', x: 760, w: 90, label: 'Dietro il bancone', icon: 'crowbar', iconY: 500, give: ['crowbar'] },
-      { id: 'shop_safe', x: 860, w: 110, label: 'Cassaforte sotto la cassa', icon: 'padlock', iconY: 470,
+      { id: 'shop_meds', x: 500, w: 100, label: 'Scaffale farmacia', markY: 260, give: ['painkillers'] },
+      { id: 'shop_safe', x: 605, w: 85, label: 'Cassaforte sotto la cassa', icon: 'padlock', iconY: 525,
         requires: [{ flag: 'knows_safe_code' }], failText: 'Una cassaforte a combinazione. Quattro cifre.\nNon la conosci.',
         give: ['fuse', 'medikit_small', ['ammo_pistol_small', 16]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
-      { id: 'shop_batteries', x: 1060, w: 180, label: 'Frigoriferi', markY: 400, give: ['battery'],
+      { id: 'shop_batteries', x: 885, w: 260, label: 'Frigoriferi', markY: 380, give: ['battery'],
         text: 'I frigo sono spenti. Tra le bottiglie qualcuno ha nascosto delle batterie.' },
     ],
     doors: [
-      { id: 'shop_to_street', x: 0, w: 130, top: 120, label: 'Via Ferrante', target: 'city_street' },
-      { id: 'shop_back', x: 600, w: 80, top: 260, label: 'Retro', lockedText: 'La porta del retro è inchiodata dall\'interno.', requires: NEVER },
+      { id: 'shop_to_street', x: 20, w: 170, top: 100, bottom: 630, label: 'Via Ferrante', target: 'city_street', noSprite: true },
+      { id: 'shop_back', x: 700, w: 115, top: 190, bottom: 555, label: 'Retro', noSprite: true,
+        lockedText: 'La porta del retro è inchiodata dall\'interno.', requires: NEVER },
     ],
     enemies: [
-      { id: 'shop_crawler', type: 'crawler', x: 820, ceiling: true },
+      { id: 'shop_crawler', type: 'crawler', x: 950, ceiling: true },
     ],
   },
 
   apartment: {
-    name: 'Palazzo Conti — Int. 4', bg: BG + 'apartment.png', scale: 0.90, floorY: 664,
-    light: 0.5, map: [2, 2],
-    overlays: [{ type: 'monitor', x: 455, y: 352, w: 66, h: 46 }],
+    name: 'Palazzo Conti — Int. 4', bg: BGV2 + 'apartment.png', layoutW: 1418, keepEdges: true, scale: 1.32, floorY: 682,
+    light: 0.55, map: [2, 2],
+    overlays: [{ type: 'monitor', x: 404, y: 474, w: 92, h: 74 }],
     hotspots: [
-      { id: 'apt_diary', x: 300, w: 140, label: 'Diario sul divano', icon: 'note', iconY: 470, doc: 'doc_diario_giulia',
+      { id: 'apt_diary', x: 40, w: 260, label: 'Diario sul divano', icon: 'note', iconY: 520, doc: 'doc_diario_giulia',
         setFlag: { knows_safe_code: true } },
-      { id: 'apt_tv', x: 450, w: 90, label: 'Televisore', markY: 340,
+      { id: 'apt_tv', x: 395, w: 155, label: 'Televisore', markY: 450,
         text: 'Solo statico. Poi, per un secondo, una scritta:\n"RESTATE IN CASA. NON APRITE A NESSUNO."' },
-      { id: 'apt_key', x: 680, w: 110, label: 'Bancone della cucina', icon: 'key_hospital', iconY: 345, give: ['key_hospital', 'bandage'] },
-      { id: 'apt_radio', x: 830, w: 150, label: 'Radio sul tavolo', icon: 'radio', iconY: 440,
+      { id: 'apt_key', x: 575, w: 230, label: 'Bancone della cucina', icon: 'key_hospital', iconY: 435, give: ['key_hospital', 'bandage'] },
+      { id: 'apt_radio', x: 940, w: 120, label: 'Radio sul tavolo', markY: 440,
         text: [['RADIO', '"...Protezione Civile. La zona rossa comprende tutto il comune di Porto Salvo..."'],
                ['RADIO', '"...all\'alba è prevista un\'operazione di bonifica. Chi è in grado di raggiungere il mare..."'],
                ['', 'Poi solo fruscio.']] },
     ],
     doors: [
-      { id: 'apt_to_street', x: 1110, w: 130, top: 190, label: 'Scale — Via Ferrante', target: 'city_street' },
+      { id: 'apt_to_street', x: 1160, w: 210, top: 170, bottom: 672, label: 'Scale — Via Ferrante', target: 'city_street', noSprite: true },
     ],
     enemies: [
-      { id: 'apt_listener', type: 'listener', x: 220, idle: true, facingRight: true },
+      { id: 'apt_listener', type: 'listener', x: 260, idle: true, facingRight: true },
     ],
   },
 
   city_alley: {
-    name: 'Vicolo dei Pescatori', bg: BG + 'city_alley.png', scale: 0.95, floorY: 664,
-    light: 0.42, map: [3, 2], ambient: 'rain_heavy', rain: true,
-    props: [{ name: 'body_4', x: 330 }],
-    overlays: [{ type: 'barricade', door: 'alley_to_hospital' }],
+    name: 'Vicolo dei Pescatori', bg: BGV2 + 'city_alley.png', layoutW: 1388, keepEdges: true, scale: 1.1, floorY: 645,
+    light: 0.5, map: [3, 2], ambient: 'rain_heavy', rain: true,
+    props: [{ name: 'body_4', x: 560 }],
     hotspots: [
-      { id: 'alley_woman', x: 240, w: 170, label: 'Una donna', markY: 600,
+      { id: 'alley_woman', x: 470, w: 180, label: 'Una donna', markY: 610,
         text: 'Una donna in cappotto. La borsa è ancora a tracolla. Dentro, solo le chiavi di casa.' },
-      { id: 'alley_dumpster', x: 700, w: 160, label: 'Cassonetto', markY: 470, give: [['ammo_pistol_small', 16]],
+      { id: 'alley_dumpster', x: 780, w: 170, label: 'Cassonetto', markY: 440, give: [['ammo_pistol_small', 16]],
         text: 'Qualcuno ha buttato una scatola di munizioni ancora piena. O l\'ha nascosta.' },
     ],
     doors: [
-      { id: 'alley_to_street', x: 480, w: 140, top: 330, label: 'Via Ferrante', target: 'city_street' },
-      { id: 'alley_to_hospital', x: 1000, w: 160, top: 250, label: 'San Rocco — Ingresso di servizio', target: 'hospital_corridor',
+      { id: 'alley_to_street', x: 110, w: 250, top: 150, bottom: 590, label: 'Via Ferrante', target: 'city_street', noSprite: true },
+      { id: 'alley_to_hospital', x: 1075, w: 210, top: 225, bottom: 600, label: 'San Rocco — Ingresso di servizio', target: 'hospital_corridor', noSprite: true,
         keyId: 'crowbar', keepKey: true, lockedText: 'La porta di servizio dell\'ospedale è sbarrata con assi inchiodate.\nServe qualcosa per fare leva.' },
     ],
     enemies: [
-      { id: 'alley_crawler', type: 'crawler', x: 600, ceiling: true },
-      { id: 'alley_c', type: 'contaminato', x: 880, patrol: [760, 960] },
+      { id: 'alley_crawler', type: 'crawler', x: 680, ceiling: true },
+      { id: 'alley_c', type: 'contaminato', x: 900, patrol: [760, 1000] },
     ],
   },
 
   /* ═══════════ CAPITOLO 3 — OSPEDALE SAN ROCCO ═══════════ */
 
   hospital_corridor: {
-    name: 'San Rocco — Corridoio', bg: BG + 'hospital_corridor.png', scale: 1.10, floorY: 672,
-    light: 0.5, map: [0, 3], ambient: 'hospital_hum',
-    props: [{ name: 'body_2', x: 820 }],
+    name: 'San Rocco — Corridoio', bg: BGV2 + 'hospital_corridor.png', layoutW: 2711, keepEdges: true, scale: 1.08, floorY: 655,
+    light: 0.55, map: [0, 3], ambient: 'hospital_hum',
+    props: [{ name: 'body_2', x: 2170 }],
     hotspots: [
-      { id: 'hosp_cart', x: 370, w: 90, label: 'Carrello medicazioni', icon: 'note', iconY: 420,
+      { id: 'hosp_cart', x: 1040, w: 240, label: 'Carrello medicazioni', icon: 'note', iconY: 455,
         give: ['bandage', ['ammo_pistol_small', 12]], doc: 'doc_cartella' },
     ],
     doors: [
-      { id: 'corr_to_alley', x: 90, w: 120, top: 110, label: 'Vicolo', target: 'city_alley' },
-      { id: 'corr_to_ward', x: 290, w: 70, top: 220, label: 'Degenze', target: 'hospital_ward',
+      { id: 'corr_to_alley', x: 385, w: 165, top: 230, bottom: 600, label: 'Vicolo', target: 'city_alley', noSprite: true },
+      { id: 'corr_to_ward', x: 770, w: 190, top: 240, bottom: 610, label: 'Degenze', target: 'hospital_ward', noSprite: true,
         keyId: 'key_hospital', lockedText: 'Porta del reparto degenze. Chiusa a chiave.' },
-      { id: 'corr_to_morgue', x: 590, w: 100, top: 300, label: 'Scale — Obitorio', target: 'hospital_morgue',
+      { id: 'corr_to_morgue', x: 1545, w: 200, top: 270, bottom: 555, label: 'Scale — Obitorio', target: 'hospital_morgue', noSprite: true,
         requires: [{ item: 'shotgun' }], failText: 'Le scale scendono verso l\'obitorio. Da laggiù arrivano dei versi, tanti.\nCon una pistola sola non scendi.' },
-      { id: 'corr_to_surgery', x: 1110, w: 130, top: 120, label: 'Sala operatoria', target: 'hospital_surgery',
-        keyId: 'badge', lockedText: 'Porta chirurgica con lettore di badge. La spia è rossa.' },
+      { id: 'corr_to_surgery', x: 2350, w: 290, top: 210, bottom: 650, label: 'Sala operatoria', target: 'hospital_surgery', noSprite: true,
+        keyId: 'badge', lockedText: 'Porta chirurgica con lettore di badge. Senza badge non si apre.' },
     ],
     enemies: [
-      { id: 'corr_inf1', type: 'infermiere', x: 480, patrol: [430, 700] },
-      { id: 'corr_inf2', type: 'infermiere', x: 960, patrol: [880, 1060] },
+      { id: 'corr_inf1', type: 'infermiere', x: 1250, patrol: [1050, 1450] },
+      { id: 'corr_inf2', type: 'infermiere', x: 2050, patrol: [1900, 2250] },
     ],
   },
 
   hospital_ward: {
-    name: 'Degenze — 2° piano', bg: BG + 'hospital_ward.png', scale: 1.10, floorY: 672,
-    light: 0.45, map: [1, 3],
-    props: [{ name: 'body_2', x: 990, flip: true }],
+    name: 'Degenze — 2° piano', bg: BGV2 + 'hospital_ward.png', layoutW: 2701, keepEdges: true, scale: 1.32, floorY: 685,
+    light: 0.5, map: [1, 3],
+    props: [{ name: 'body_2', x: 2060, flip: true }],
     hotspots: [
-      { id: 'ward_locker', x: 140, w: 120, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 430,
+      { id: 'ward_locker', x: 420, w: 180, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 420,
         give: ['shotgun', ['ammo_shells', 16]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
-      { id: 'ward_notes', x: 380, w: 160, label: 'Cartellina sul letto', icon: 'note', iconY: 470, doc: 'doc_ricerca_elena' },
-      { id: 'ward_bed', x: 720, w: 140, label: 'Letto', markY: 470,
+      { id: 'ward_notes', x: 680, w: 210, label: 'Cartellina sul letto', icon: 'note', iconY: 500, doc: 'doc_ricerca_elena' },
+      { id: 'ward_bed', x: 1180, w: 240, label: 'Letto', markY: 470,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
-      { id: 'ward_badge', x: 920, w: 140, label: 'L\'infermiera', icon: 'badge', iconY: 620, give: ['badge'],
+      { id: 'ward_badge', x: 1960, w: 200, label: 'L\'infermiera', icon: 'badge', iconY: 640, give: ['badge'],
         text: 'Sul camice c\'è scritto GIULIA. Il badge è ancora appeso al taschino.' },
     ],
     doors: [
-      { id: 'ward_to_corr', x: 0, w: 110, top: 160, label: 'Corridoio', target: 'hospital_corridor' },
+      { id: 'ward_to_corr', x: 110, w: 160, top: 170, bottom: 685, label: 'Corridoio', target: 'hospital_corridor', noSprite: true },
     ],
     enemies: [
-      { id: 'ward_listener', type: 'listener', x: 620, idle: true, facingRight: true },
-      { id: 'ward_inf', type: 'infermiere', x: 1120, patrol: [1080, 1200] },
+      { id: 'ward_listener', type: 'listener', x: 1550, idle: true, facingRight: false },
+      { id: 'ward_inf', type: 'infermiere', x: 2400, patrol: [2250, 2600] },
     ],
   },
 
   hospital_surgery: {
-    name: 'Sala operatoria', bg: BG + 'hospital_surgery.png', scale: 1.00, floorY: 668,
-    light: 0.6, map: [2, 3], safe: true,
+    name: 'Sala operatoria', bg: BGV2 + 'hospital_surgery.png', layoutW: 1451, keepEdges: true, scale: 1.22, floorY: 670,
+    light: 0.62, map: [2, 3], safe: true,
     hotspots: [
-      { id: 'surg_terminal', x: 140, w: 110, label: 'Terminale [SALVA]', markY: 330, event: 'open_save' },
-      { id: 'surg_table', x: 470, w: 280, label: 'Tavolo operatorio', markY: 440,
+      { id: 'surg_terminal', x: 270, w: 190, label: 'Terminale [SALVA]', markY: 380, event: 'open_save' },
+      { id: 'surg_table', x: 580, w: 420, label: 'Tavolo operatorio', markY: 450,
         text: 'Strumenti sparsi. Un bisturi piegato a metà.' },
-      { id: 'surg_protocol', x: 860, w: 110, label: 'Carrello monitor', icon: 'note', iconY: 410, doc: 'doc_formula' },
-      { id: 'surg_fridge', x: 1080, w: 170, label: 'Armadio frigo', icon: 'vial', iconY: 400, give: ['vial'],
+      { id: 'surg_protocol', x: 1010, w: 160, label: 'Carrello monitor', icon: 'note', iconY: 420, doc: 'doc_formula' },
+      { id: 'surg_fridge', x: 1245, w: 160, label: 'Armadio frigo', icon: 'vial', iconY: 400, give: ['vial'],
         text: 'Ripiano 2. Una sola provetta, etichetta "R-0".\nÈ fredda. La avvolgi in una garza.' },
     ],
     doors: [
-      { id: 'surg_to_corr', x: 250, w: 70, top: 260, label: 'Corridoio', target: 'hospital_corridor' },
+      { id: 'surg_to_corr', x: 60, w: 180, top: 150, bottom: 680, label: 'Corridoio', target: 'hospital_corridor', noSprite: true },
     ],
     enemies: [
-      { id: 'surg_corridore', type: 'corridore', x: 980, idle: true, facingRight: false },
+      { id: 'surg_corridore', type: 'corridore', x: 1150, idle: true, facingRight: false },
     ],
   },
 
   hospital_morgue: {
-    name: 'Obitorio', bg: BG + 'hospital_morgue.png', scale: 1.05, floorY: 670,
-    light: 0.35, map: [3, 3],
-    props: [{ name: 'body_7', x: 260 }],
+    name: 'Obitorio', bg: BGV2 + 'hospital_morgue.png', layoutW: 1360, keepEdges: true, scale: 1.15, floorY: 655,
+    light: 0.45, map: [3, 3],
     hotspots: [
-      { id: 'morgue_report', x: 520, w: 240, label: 'Tavolo autoptico', icon: 'note', iconY: 420,
+      { id: 'morgue_report', x: 260, w: 350, label: 'Tavolo autoptico', icon: 'note', iconY: 430,
         doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
-      { id: 'morgue_drawer', x: 860, w: 180, label: 'Celle frigorifere', markY: 420,
+      { id: 'morgue_drawer', x: 745, w: 190, label: 'Celle frigorifere', markY: 420,
         text: 'Una cella è aperta. Vuota. Il lenzuolo è sul pavimento.' },
     ],
     doors: [
-      { id: 'morgue_to_corr', x: 330, w: 70, top: 250, label: 'Scale — Corridoio', target: 'hospital_corridor' },
-      { id: 'morgue_to_metro', x: 1140, w: 130, top: 160, label: 'Passaggio di servizio', target: 'metro_ingresso' },
+      { id: 'morgue_to_corr', x: 55, w: 140, top: 205, bottom: 645, label: 'Scale — Corridoio', target: 'hospital_corridor', noSprite: true },
+      { id: 'morgue_to_metro', x: 1135, w: 170, top: 205, bottom: 640, label: 'Passaggio di servizio', target: 'metro_ingresso', noSprite: true },
     ],
     enemies: [
-      { id: 'morgue_cr1', type: 'crawler', x: 640, ceiling: true },
-      { id: 'morgue_cr2', type: 'crawler', x: 900, patrol: [800, 1050] },
+      { id: 'morgue_cr1', type: 'crawler', x: 650, ceiling: true },
+      { id: 'morgue_cr2', type: 'crawler', x: 880, patrol: [700, 1050] },
     ],
   },
 
   /* ═══════════ CAPITOLO 4 — SOTTERRANEI ═══════════ */
 
   metro_ingresso: {
-    name: 'Metro — Ingresso', bg: BG + 'metro_ingresso.png', scale: 0.85, floorY: 668,
-    light: 0.45, map: [0, 4],
+    name: 'Metro — Ingresso', bg: BGV2 + 'metro_ingresso.png', layoutW: 1592, keepEdges: true, scale: 1.1, floorY: 660,
+    light: 0.55, map: [0, 4],
     hotspots: [
-      { id: 'metro_turnstiles', x: 220, w: 200, label: 'Tornelli', markY: 470,
+      { id: 'metro_notice', x: 305, w: 155, label: 'Avviso', icon: 'note', iconY: 360, doc: 'doc_avviso_metro' },
+      { id: 'metro_turnstiles', x: 470, w: 270, label: 'Tornelli', markY: 450,
         text: 'I tornelli sono bloccati in posizione aperta. Qualcuno è passato di corsa, in tanti.' },
-      { id: 'metro_notice', x: 540, w: 160, label: 'Avviso', icon: 'note', iconY: 420, doc: 'doc_avviso_metro' },
+      { id: 'metro_tickets', x: 750, w: 225, label: 'Biglietterie', markY: 360,
+        text: 'Lo schermo lampeggia ancora:\n"SERVIZIO SOSPESO — ORDINANZA PREFETTIZIA".' },
     ],
     doors: [
-      { id: 'mi_to_morgue', x: 90, w: 110, top: 230, label: 'Passaggio — Obitorio', target: 'hospital_morgue' },
-      { id: 'mi_to_banchina', x: 820, w: 330, top: 160, label: 'Scala mobile — Banchina B', target: 'metro_banchina' },
+      { id: 'mi_to_morgue', x: 60, w: 195, top: 220, bottom: 640, label: 'Uscita riservata — Ospedale', target: 'hospital_morgue', noSprite: true },
+      { id: 'mi_to_banchina', x: 1110, w: 330, top: 120, bottom: 600, label: 'Scala mobile — Banchina B', target: 'metro_banchina', noSprite: true },
     ],
     enemies: [
-      { id: 'mi_listener', type: 'listener', x: 650, patrol: [560, 780] },
+      { id: 'mi_listener', type: 'listener', x: 820, patrol: [650, 1000] },
     ],
   },
 
   metro_banchina: {
-    name: 'Metro — Banchina B', bg: BG + 'metro_banchina.png', scale: 0.90, floorY: 668,
-    light: 0.42, map: [1, 4],
-    props: [{ name: 'body_5', x: 860 }],
+    name: 'Metro — Banchina B', bg: BGV2 + 'metro_banchina.png', layoutW: 3047, keepEdges: true, scale: 0.98, floorY: 665,
+    light: 0.5, map: [1, 4],
+    props: [{ name: 'body_5', x: 1900 }],
     hotspots: [
-      { id: 'mb_train', x: 180, w: 250, label: 'Carrozze abbandonate', markY: 380,
+      { id: 'mb_train', x: 1380, w: 140, label: 'Carrozze abbandonate', markY: 470,
         give: ['medikit_small', ['ammo_pistol_small', 12]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
-      { id: 'mb_phone', x: 560, w: 100, label: 'Colonnina SOS [SALVA]', markY: 380, event: 'open_save' },
-      { id: 'mb_log', x: 780, w: 160, label: 'Il capotreno', icon: 'note', iconY: 610, doc: 'doc_registro_metro' },
+      { id: 'mb_log', x: 1820, w: 170, label: 'Il capotreno', icon: 'note', iconY: 640, doc: 'doc_registro_metro' },
+      { id: 'mb_phone', x: 2330, w: 90, label: 'Colonnina SOS [SALVA]', markY: 420, event: 'open_save' },
     ],
     doors: [
-      { id: 'mb_to_mi', x: 0, w: 120, top: 260, label: 'Ingresso', target: 'metro_ingresso' },
-      { id: 'mb_to_tunnel', x: 1020, w: 220, top: 200, label: 'Tunnel Linea 3', target: 'metro_tunnel' },
+      { id: 'mb_to_mi', x: 250, w: 400, top: 150, bottom: 640, label: 'Scala mobile — Ingresso', target: 'metro_ingresso', noSprite: true },
+      { id: 'mb_to_tunnel', x: 2600, w: 400, top: 230, bottom: 690, label: 'Tunnel Linea 3', target: 'metro_tunnel', noSprite: true },
     ],
     enemies: [
-      { id: 'mb_tec', type: 'tecnico', x: 420, patrol: [300, 700] },
-      { id: 'mb_run', type: 'corridore', x: 960, idle: true, facingRight: false },
+      { id: 'mb_tec', type: 'tecnico', x: 1100, patrol: [900, 1600] },
+      { id: 'mb_run', type: 'corridore', x: 2650, idle: true, facingRight: false },
     ],
   },
 
