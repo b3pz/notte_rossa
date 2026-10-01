@@ -13,14 +13,14 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/player_walk.png",
-        "frames": 4,
-        "fps": 8,
+        "frames": 8,
+        "fps": 10,
         "loop": true
       },
       "run": {
         "file": "assets/sprites/cut/player_run.png",
-        "frames": 3,
-        "fps": 10,
+        "frames": 6,
+        "fps": 12,
         "loop": true
       },
       "gun_idle": {

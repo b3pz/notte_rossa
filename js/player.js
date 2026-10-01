@@ -203,7 +203,7 @@ export class Player {
     if (!def) return;
     this.animTimer += dt;
     // passi sincronizzati con la velocità reale (niente piedi che pattinano)
-    const stride = { walk: 50, run: 95, sneak: 42 }[this.anim];
+    const stride = { walk: 30, run: 72, sneak: 42 }[this.anim];
     const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
     const fd = 1 / fps;
     while (this.animTimer >= fd) {

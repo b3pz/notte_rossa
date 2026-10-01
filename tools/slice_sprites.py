@@ -47,11 +47,14 @@ CONFIG = {
       'player_hurt_death.png': {'layout': 'free'},
       'player_flashlight.png': {'layout': 'free'},
       'player_crouch.png':     {'layout': 'free'},
+      # tavole nuove (ottobre 2026): camminata 8 pose, corsa 6 pose — stessa scala
+      'player_walk8.png':      {'layout': 'boxes', 'boxes': [(0, 0, 231, 724), (231, 0, 517, 724), (517, 0, 821, 724), (821, 0, 1121, 724), (1121, 0, 1379, 724), (1379, 0, 1613, 724), (1613, 0, 1905, 724), (1905, 0, 2172, 724)], 'scale': 0.456},
+      'player_run6.png':       {'layout': 'boxes', 'boxes': [(0, 0, 395, 724), (395, 0, 733, 724), (733, 0, 1116, 724), (1116, 0, 1431, 724), (1431, 0, 1727, 724), (1727, 0, 2172, 724)], 'scale': 0.456},
     },
     'anims': {
       'idle':       ('player_idle.png',       [0],        3,  True),
-      'walk':       ('player_walk_run.png',   [1,2,3,4],  8,  True),
-      'run':        ('player_walk_run.png',   [5,6,7],    10, True),
+      'walk':       ('player_walk8.png',      [0,1,2,3,4,5,6,7], 10, True),
+      'run':        ('player_run6.png',       [0,1,2,3,4,5],     12, True),
       'gun_idle':   ('player_gun.png',        [0],        3,  True),
       'aim':        ('player_gun.png',        [2],        3,  True),
       'shoot':      ('player_gun.png',        [3,4,5],    14, False),
