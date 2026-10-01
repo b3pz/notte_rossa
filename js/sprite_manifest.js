@@ -110,15 +110,15 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/contaminato_walk.png",
-        "frames": 3,
-        "fps": 5,
+        "frames": 8,
+        "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/contaminato_attack.png",
-        "frames": 1,
-        "fps": 3,
-        "loop": true
+        "frames": 2,
+        "fps": 6,
+        "loop": false
       },
       "hurt": {
         "file": "assets/sprites/cut/contaminato_hurt.png",
@@ -128,8 +128,8 @@ export const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/contaminato_dead.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 2,
+        "fps": 3,
         "loop": false
       }
     }
