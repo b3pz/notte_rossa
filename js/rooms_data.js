@@ -49,27 +49,30 @@ export const ROOMS = {
   },
 
   station_platform: {
-    // NUOVO SFONDO LATERALE (v2): porte disegnate nello sfondo, coordinate in pixel reali
-    name: 'Binario 1', bg: BGV2 + 'station_platform.png', layoutW: 2587, scale: 0.9, floorY: 548,
-    light: 0.7, darkFlag: 'lights_out', darkLight: 0.42, map: [1, 0], ambient: 'station_ambient',
-    props: [{ name: 'body_0', x: 760 }],
+    // NUOVO SFONDO (v2) con un po' di prospettiva: il marciapiede scende verso destra
+    name: 'Binario 1', bg: BGV2 + 'station_platform.png', layoutW: 1319, keepEdges: true,
+    scale: 0.74, floorY: 540,
+    floorLine: [[300, 500], [1319, 592]],          // linea dei piedi (segue il marciapiede)
+    scaleLine: [[300, 0.70], [1319, 0.84]],        // più vicino alla telecamera = più grande
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient',
+    props: [{ name: 'body_0', x: 890 }],
     hotspots: [
-      { id: 'body_conductor', x: 660, w: 200, label: 'Il capotreno', markY: 500,
+      { id: 'body_conductor', x: 820, w: 150, label: 'Il capotreno', markY: 520,
         text: 'Il capotreno. Ha la gola aperta.\nIl fischietto è ancora stretto nella mano.' },
-      { id: 'platform_sign', x: 880, w: 210, label: 'Orario arrivi e partenze', markY: 245,
+      { id: 'platform_sign', x: 418, w: 107, label: 'Orario arrivi e partenze', markY: 300,
         text: '22:47 — CIRCOLAZIONE SOSPESA\nPer informazioni rivolgersi al personale.' },
-      { id: 'public_phone', x: 2390, w: 160, label: 'Telefono pubblico', markY: 360, event: 'phone_answer',
+      { id: 'public_phone', x: 1150, w: 135, label: 'Telefono pubblico', markY: 365, event: 'phone_answer',
         showIf: { flag: 'phone_ringing' } },
     ],
     doors: [
-      { id: 'platform_to_wagon', x: 290, w: 130, top: 278, label: 'Treno 847', target: 'train_wagon', noSprite: true },
-      { id: 'platform_to_hall', x: 1351, w: 291, top: 207, label: 'Atrio', target: 'station_hall', noSprite: true,
+      { id: 'platform_to_wagon', x: 172, w: 90, top: 300, bottom: 445, label: 'Treno 847', target: 'train_wagon', noSprite: true },
+      { id: 'platform_to_hall', x: 645, w: 155, top: 240, bottom: 495, label: 'Atrio', target: 'station_hall', noSprite: true,
         requires: [{ notFlag: 'phone_ringing' }], failText: 'Il telefono continua a squillare. Sembra che stia chiamando te.' },
-      { id: 'platform_to_storage', x: 1925, w: 151, top: 270, label: 'Servizi tecnici', target: 'station_storage', noSprite: true,
+      { id: 'platform_to_storage', x: 968, w: 127, top: 260, bottom: 525, label: 'Servizi tecnici', target: 'station_storage', noSprite: true,
         requires: [{ notFlag: 'phone_ringing' }], failText: 'Il telefono continua a squillare. Sembra che stia chiamando te.' },
     ],
     enemies: [
-      { id: 'platform_ferroviere', type: 'ferroviere', x: 330, facingRight: true, showIf: { flag: 'intro_complete' } },
+      { id: 'platform_ferroviere', type: 'ferroviere', x: 250, facingRight: true, showIf: { flag: 'intro_complete' } },
     ],
   },
 

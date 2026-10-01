@@ -105,6 +105,17 @@ export class Enemy {
   }
 
   get centerX() { return this.x + this.width / 2; }
+
+  /** Adatta la dimensione alla profondità (pavimenti inclinati) */
+  setScale(s, foot) {
+    if (Math.abs(s - this.scale) < 0.002) { if (this.alive && this.state !== AI_STATE.CEILING) this.y = foot - this.height; return; }
+    const cx = this.centerX, base = ENEMY_DEFS[this.type];
+    this.scale = s;
+    this.width = Math.round(base.width * s);
+    this.height = Math.round(base.height * s);
+    this.x = cx - this.width / 2;
+    this.y = foot - this.height;
+  }
   get footY()   { return this.y + this.height; }
 
   /* ── PERCEZIONE ── */
@@ -415,7 +426,7 @@ export class EnemyManager {
     room.hotspots.push({
       id: `drop_${room.id}_${this._dropN}_${Date.now() % 100000}`, x, w: 80,
       label: shells ? 'Cartucce' : 'Munizioni 9mm', icon: shells ? 'ammo_shells' : 'ammo_pistol',
-      iconY: room.floorY - 18 * room.scale, give: [[shells ? 'ammo_shells' : 'ammo_pistol_small', shells ? 4 : 8]],
+      iconY: room.floorAt(x + 40) - 18 * room.scale, give: [[shells ? 'ammo_shells' : 'ammo_pistol_small', shells ? 4 : 8]],
       dropped: true,
     });
   }

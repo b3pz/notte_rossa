@@ -226,6 +226,13 @@ export class Game {
 
     this._updateAutoWalk();
     p.update(dt, input, this.collision);
+    const rs = this.roomManager.current;
+    if (rs?.scaleLine) {
+      const cx = p.centerX, foot = p.footY;
+      p.setScale(rs.scaleAt(cx));
+      p.x = cx - p.width / 2; p.y = foot - p.height;
+      for (const e of this.enemyManager.enemies) e.setScale?.(rs.scaleAt(e.centerX), rs.floorAt(e.centerX));
+    }
     this.camera.follow(p.x, p.y, p.width, p.height);
     this.camera.update(dt);
 
@@ -309,17 +316,18 @@ export class Game {
     }
     for (const n of r.npcs) {
       if (!rm.visible(n)) continue;
-      if (Math.abs(wx - n.x) < 70 * r.scale && wy > r.floorY - 300 * r.scale && wy < r.floorY + 20) return { kind: 'npc', obj: n };
+      if (Math.abs(wx - n.x) < 70 * r.scale && wy > r.floorAt(n.x) - 300 * r.scale && wy < r.floorAt(n.x) + 20) return { kind: 'npc', obj: n };
     }
     for (const h of r.hotspots) {
       if (rm.isPicked(h.id) || !rm.visible(h)) continue;
-      const y0 = Math.min(h.icon ? (h.iconY ?? r.floorY) - 60 : (h.markY ?? r.floorY - 160) - 50, r.floorY - 200 * r.scale);
-      if (wx > h.x - 10 && wx < h.x + h.w + 10 && wy > y0 && wy < r.floorY + 30) return { kind: 'hotspot', obj: h };
+      const hf = r.floorAt(h.x + h.w / 2);
+      const y0 = Math.min(h.icon ? (h.iconY ?? hf) - 60 : (h.markY ?? hf - 160) - 50, hf - 200 * r.scale);
+      if (wx > h.x - 10 && wx < h.x + h.w + 10 && wy > y0 && wy < hf + 30) return { kind: 'hotspot', obj: h };
     }
     for (const d of r.doors) {
       if (!rm.visible(d)) continue;
       const dr = rm.doorRect(d, r);
-      if (wx > dr.x - 20 && wx < dr.x + dr.w + 20 && wy > dr.y - 40 && wy < r.floorY + 40) return { kind: 'door', obj: d };
+      if (wx > dr.x - 20 && wx < dr.x + dr.w + 20 && wy > dr.y - 40 && wy < dr.foot + 40) return { kind: 'door', obj: d };
     }
     return null;
   }
@@ -577,7 +585,7 @@ export class Game {
       ctx.fillStyle = '#5d8'; ctx.fillText(d.id, d.x + 3, top + 14);
     }
     ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-    ctx.beginPath(); ctx.moveTo(0, room.floorY); ctx.lineTo(room.width, room.floorY); ctx.stroke();
+    ctx.beginPath(); for (let x = 0; x <= room.width; x += 40) { const y = room.floorAt(x); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke();
     ctx.restore();
   }
 

@@ -272,8 +272,8 @@ export class EventManager {
       case 'chapter':     g.ui.showChapter(a.text); await this._wait(2.6); break;
       case 'respawn':     g.roomManager.respawnEnemies(); break;
       case 'spawn': {
-        const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scale });
-        e.y = g.roomManager.current.floorY - e.height;
+        const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scaleAt(a.x) });
+        e.y = g.roomManager.current.floorAt(e.centerX) - e.height;
         break;
       }
       case 'give':

@@ -19,13 +19,10 @@ export class CollisionManager {
     let ny = entity.y + dy;
 
     // ── PAVIMENTO ──
-    const floor = room.floorY - entity.height;
-    if (ny > floor) {
-      ny = floor;
-      entity.onGround = true;
-    } else {
-      entity.onGround = false;
-    }
+    const floor = (room.floorAt ? room.floorAt(nx + entity.width / 2) : room.floorY) - entity.height;
+    // niente salti nel gioco: i piedi stanno sempre sul pavimento (anche se è inclinato)
+    ny = floor;
+    entity.onGround = true;
 
     // ── SOFFITTO ──
     const ceil = (room.ceilY || 0);
