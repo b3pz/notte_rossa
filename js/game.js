@@ -210,6 +210,7 @@ export class Game {
     p.armed     = !!this.weapon.equipped;
     p.reloading = !!this.weapon.equipped?.isReloading;
 
+    this._updateAutoWalk();
     p.update(dt, input, this.collision);
     this.camera.follow(p.x, p.y, p.width, p.height);
     this.camera.update(dt);
@@ -217,15 +218,7 @@ export class Game {
     // Armi
     this._target = (p.alive && p.armed) ? this._findTarget() : null;
     if (p.alive && p.armed && !input.locked) {
-      if (input.justPressed('shoot')) {
-        // mira assistita: si gira verso il nemico più vicino a portata
-        const t = this._findTarget(true);
-        if (t) p.facingRight = t.centerX > p.centerX;
-        if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) {
-          p.shotTimer = 0.22;
-          p.aimTimer  = 0.6;
-        }
-      }
+      if (input.justPressed('shoot')) this.shootAt(this._findTarget(true));
       if (input.justPressed('reload')) this.weapon.reload();
     } else if (p.alive && !p.armed && !input.locked && input.justPressed('shoot') && this.inventory.hasItem('pistol')) {
       this.ui.showNotification('Impugna un\'arma dall\'inventario [TAB]');
@@ -265,9 +258,73 @@ export class Game {
   _handleInteraction() {
     const near = this.roomManager._near;
     if (!near || !this.player.isInteract) return;
-    if (near.kind === 'door')    this._tryDoor(near.obj);
-    else if (near.kind === 'npc') this.events.trigger(near.obj.event);
-    else                          this._useHotspot(near.obj);
+    this._interact(near.kind, near.obj);
+  }
+
+  _interact(kind, obj) {
+    if (kind === 'door')      this._tryDoor(obj);
+    else if (kind === 'npc')  this.events.trigger(obj.event);
+    else                      this._useHotspot(obj);
+  }
+
+  /** Spara (girandosi verso il bersaglio, se c'è) */
+  shootAt(target) {
+    const p = this.player;
+    if (!p.alive || !this.weapon.equipped) return;
+    if (target) p.facingRight = target.centerX > p.centerX;
+    if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) {
+      p.shotTimer = 0.22;
+      p.aimTimer  = 0.6;
+    }
+  }
+
+  /** Cosa c'è nel punto (mondo) toccato: nemico, persona, porta, oggetto */
+  pickAt(wx, wy) {
+    const rm = this.roomManager, r = rm.current;
+    if (!r) return null;
+    const pad = 24;
+    for (const e of this.enemyManager.enemies) {
+      if (!e.alive) continue;
+      const top = e.state === 'CEILING' ? e.y - 160 * e.scale : e.y;
+      if (wx > e.x - pad && wx < e.x + e.width + pad && wy > top - pad && wy < e.y + e.height + pad) return { kind: 'enemy', obj: e };
+    }
+    for (const n of r.npcs) {
+      if (!rm.visible(n)) continue;
+      if (Math.abs(wx - n.x) < 70 * r.scale && wy > r.floorY - 300 * r.scale && wy < r.floorY + 20) return { kind: 'npc', obj: n };
+    }
+    for (const h of r.hotspots) {
+      if (rm.isPicked(h.id) || !rm.visible(h)) continue;
+      const y0 = Math.min(h.icon ? (h.iconY ?? r.floorY) - 60 : (h.markY ?? r.floorY - 160) - 50, r.floorY - 200 * r.scale);
+      if (wx > h.x - 10 && wx < h.x + h.w + 10 && wy > y0 && wy < r.floorY + 30) return { kind: 'hotspot', obj: h };
+    }
+    for (const d of r.doors) {
+      if (!rm.visible(d)) continue;
+      const top = (d.top ?? r.floorY - 330 * r.scale) - 30;
+      if (wx > d.x - 10 && wx < d.x + d.w + 10 && wy > top && wy < r.floorY + 30) return { kind: 'door', obj: d };
+    }
+    return null;
+  }
+
+  /** Cammina fino a una cosa toccata e la usa all'arrivo */
+  walkTo(hit) { this.autoWalk = hit; }
+
+  _updateAutoWalk() {
+    const a = this.autoWalk, v = this.input.virtual, p = this.player;
+    if (!a) return;
+    if (this.input.locked || !p.alive) { this.autoWalk = null; v.moveLeft = v.moveRight = false; return; }
+    const o = a.obj, sc = this.roomManager.current.scale;
+    const x0 = a.kind === 'npc' ? o.x - 60 * sc : o.x, x1 = a.kind === 'npc' ? o.x + 60 * sc : o.x + o.w;
+    const target = Math.max(x0 + 10, Math.min(x1 - 10, p.centerX));
+    const dx = target - p.centerX;
+    if (Math.abs(dx) <= 6) {
+      v.moveLeft = v.moveRight = false;
+      this.autoWalk = null;
+      if (a.kind === 'npc') p.facingRight = o.x > p.centerX;
+      this._interact(a.kind, o);
+      return;
+    }
+    v.moveLeft = dx < 0;
+    v.moveRight = dx > 0;
   }
 
   _useHotspot(h) {

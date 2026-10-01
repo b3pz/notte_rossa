@@ -24,8 +24,10 @@ export class EventManager {
     /* ── CAPITOLO 1 ── */
     R('tutorial_wagon', { once: true, actions: [
       narr('Il treno si è fermato.'),
-      narr('[A] [D] o frecce per muoverti — [SHIFT] per correre — [C] per muoverti accovacciato, in silenzio.'),
-      narr('[E] su ciò che brilla e sulle porte con il cartello — [TAB] inventario — [M] mappa. L\'obiettivo è in alto a sinistra.'),
+      { type: 'dialogue', speaker: '', text: '[A] [D] o frecce per muoverti — [SHIFT] per correre — [C] per muoverti accovacciato, in silenzio.',
+        touchText: 'Appoggia il pollice a sinistra e trascina per muoverti: poco = in silenzio, tanto = di corsa.' },
+      { type: 'dialogue', speaker: '', text: '[E] su ciò che brilla e sulle porte con il cartello — [TAB] inventario — [M] mappa. L\'obiettivo è in alto a sinistra.',
+        touchText: 'Tocca porte, oggetti e persone per usarli: ci vai da solo. In alto a destra lo zaino e la pausa. L\'obiettivo è in alto a sinistra.' },
       { type: 'set_flag', flag: 'intro_started' },
     ]});
 
@@ -56,13 +58,15 @@ export class EventManager {
     ]});
 
     R('got_flashlight', { once: true, actions: [
-      narr('[F] accende e spegne la torcia. Si vede meglio... e si viene visti meglio.'),
+      { type: 'dialogue', speaker: '', text: '[F] accende e spegne la torcia. Si vede meglio... e si viene visti meglio.',
+        touchText: 'Tocca l\'indicatore TORCIA in basso per accenderla. Si vede meglio... e si viene visti meglio.' },
     ]});
 
     R('got_pistol', { once: true, actions: [
       { type: 'set_flag', flag: 'has_pistol' },
       { type: 'equip', weapon: 'pistol' },
-      narr('[SPAZIO] o clic per sparare: la mira va da sola sul nemico più vicino (mirino rosso). [R] ricarica.'),
+      { type: 'dialogue', speaker: '', text: '[SPAZIO] o clic per sparare: la mira va da sola sul nemico più vicino (mirino rosso). [R] ricarica.',
+        touchText: 'Tocca un nemico per sparargli, oppure il pulsante col mirino in basso a destra. Ricarica da sola.' },
       { type: 'sfx', id: 'door_open' },
       narr('In fondo al corridoio, qualcosa ha sentito.'),
       { type: 'spawn', enemy: 'contaminato', x: 1150, facingRight: false, id: 'storage_ambush' },
@@ -249,10 +253,12 @@ export class EventManager {
   async _exec(a) {
     const g = this.game;
     switch (a.type) {
-      case 'dialogue':
-        await new Promise(res => g.dialogue.show(a.speaker, a.text, res));
+      case 'dialogue': {
+        const txt = (a.touchText && document.body.classList.contains('touch')) ? a.touchText : a.text;
+        await new Promise(res => g.dialogue.show(a.speaker, txt, res));
         g.input.lock();   // la sequenza non è finita
         break;
+      }
       case 'wait':        await this._wait(a.sec); break;
       case 'set_flag':    this.setFlag(a.flag, a.value ?? true); break;
       case 'sfx':         g.audio.playSfx(a.id); break;

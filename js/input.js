@@ -7,6 +7,8 @@ export class InputManager {
   constructor() {
     // Stato tasti (true = premuto)
     this.keys = {};
+    // Comandi "virtuali" impostati dal touch o dal cammino automatico
+    this.virtual = {};
     // Stato precedente (per rilevare "appena premuto")
     this._prev = {};
     // Mouse
@@ -68,6 +70,7 @@ export class InputManager {
 
   /** Azione attualmente mantenuta */
   isDown(action) {
+    if (this.virtual[action]) return true;
     const keys = this.bindings[action];
     if (!keys) return false;
     for (const k of keys) {
@@ -111,6 +114,7 @@ export class InputManager {
   /** Pulisce tutti i tasti (evita ghost key) */
   flush() {
     this._tapped.clear();
+    this.virtual = {};
     this.keys = {};
     this._prev = {};
     this.mouse.left = false;
