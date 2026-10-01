@@ -77,24 +77,26 @@ export const ROOMS = {
   },
 
   station_hall: {
-    name: 'Atrio', bg: BG + 'station_hall.png', scale: 1.05, floorY: 666,
-    light: 0.55, map: [2, 0], ambient: 'station_ambient',
+    // NUOVO SFONDO LATERALE (v2)
+    name: 'Atrio', bg: BGV2 + 'station_hall.png', layoutW: 2782, keepEdges: true,
+    scale: 0.92, floorY: 640,
+    light: 0.72, map: [2, 0], ambient: 'station_ambient',
     hotspots: [
-      { id: 'ticket_booth', x: 170, w: 200, label: 'Biglietteria', markY: 400, give: ['flashlight', 'battery'],
-        text: 'La biglietteria è chiusa. Il cassetto dei soldi è aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
-      { id: 'notice_board', x: 400, w: 80, label: 'Avviso sul pilastro', icon: 'note', iconY: 420, doc: 'doc_ordinanza' },
-      { id: 'ticket_machines', x: 540, w: 160, label: 'Biglietterie automatiche', markY: 380,
+      { id: 'ticket_booth', x: 660, w: 320, label: 'Biglietteria', markY: 360, give: ['flashlight', 'battery'],
+        text: 'La biglietteria è chiusa. Dalla fessura della serranda si vede il cassetto dei soldi, aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
+      { id: 'notice_board', x: 1040, w: 95, label: 'Avvisi sul pilastro', icon: 'note', iconY: 400, doc: 'doc_ordinanza' },
+      { id: 'ticket_machines', x: 1225, w: 330, label: 'Biglietterie automatiche', markY: 420,
         text: 'Lo schermo lampeggia: "SERVIZIO SOSPESO — ZONA ROSSA".' },
     ],
     doors: [
-      { id: 'hall_to_platform', x: 0, w: 130, top: 300, label: 'Binari', target: 'station_platform' },
-      { id: 'hall_to_control', x: 740, w: 180, top: 230, label: 'Sala controllo', target: 'station_control',
-        keyId: 'key_station', lockedText: 'In cima alla scala mobile c\'è una porta blindata.\n"SALA CONTROLLO — solo personale". Serve la chiave.' },
-      { id: 'hall_to_exit', x: 1030, w: 180, top: 250, label: 'Uscita', target: 'station_exit',
-        requires: [{ flag: 'shutter_open' }], failText: 'Oltre i vetri, la serranda dell\'uscita è abbassata.\nSi comanda dalla sala controllo.' },
+      { id: 'hall_to_platform', x: 160, w: 370, top: 240, bottom: 600, label: 'Binari', target: 'station_platform', noSprite: true },
+      { id: 'hall_to_control', x: 1560, w: 200, top: 300, bottom: 600, label: 'Scala mobile — Sala controllo', target: 'station_control', noSprite: true,
+        keyId: 'key_station', lockedText: 'In cima alla scala mobile c\'è una porta blindata con la luce rossa.\n"SALA CONTROLLO — solo personale". Serve la chiave.' },
+      { id: 'hall_to_exit', x: 2240, w: 510, top: 270, bottom: 560, label: 'Uscita', target: 'station_exit', noSprite: true,
+        requires: [{ flag: 'shutter_open' }], failText: 'Dietro i vetri dell\'uscita le serrande sono abbassate.\nSi comandano dalla sala controllo.' },
     ],
     enemies: [
-      { id: 'hall_contaminato', type: 'contaminato', x: 950, patrol: [800, 1150], showIf: { flag: 'has_pistol' } },
+      { id: 'hall_contaminato', type: 'contaminato', x: 2000, patrol: [1850, 2200], showIf: { flag: 'has_pistol' } },
     ],
   },
 
