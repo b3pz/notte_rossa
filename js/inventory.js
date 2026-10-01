@@ -106,7 +106,7 @@ export class InventoryManager {
         g.ui?.showNotification(`${item.name} riposta`);
       } else {
         g.weapon.equip(item.weaponId);
-        g.ui?.showNotification(`${item.name} in mano — [CTRL] o tasto destro per mirare`);
+        g.ui?.showNotification(`${item.name} in mano — [SPAZIO] o clic per sparare`);
       }
     }
   }

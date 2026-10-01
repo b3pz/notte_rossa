@@ -75,6 +75,27 @@ export const SpriteLib = {
     return true;
   },
 
+  /**
+   * Ombra di contatto morbida sotto i piedi.
+   * w = larghezza dell'ombra, alpha = intensità (0-1)
+   */
+  drawShadow(ctx, x, footY, w, alpha = 0.55) {
+    if (w <= 0 || alpha <= 0) return;
+    const h = w * 0.16;
+    ctx.save();
+    ctx.translate(x, footY);
+    ctx.scale(1, h / w);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+    g.addColorStop(0,    `rgba(0,0,0,${alpha})`);
+    g.addColorStop(0.45, `rgba(0,0,0,${alpha * 0.6})`);
+    g.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, w / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+
   icon(name) {
     return ICONS[name] || null;
   },
@@ -85,11 +106,47 @@ export const SpriteLib = {
     if (!p) return;
     const im = _img(p.file);
     if (!_ready(im)) return;
+    this.drawShadow(ctx, x, footY - 6 * scale, p.w * scale * 1.05, 0.5 * alpha);
     ctx.save();
     ctx.globalAlpha *= alpha;
     ctx.translate(x, footY);
     ctx.scale(flip ? -scale : scale, scale);
     ctx.drawImage(im, -p.w / 2, -p.h, p.w, p.h);
+    ctx.restore();
+  },
+
+  /** Fotogramma f di un oggetto di scena a più fotogrammi, dentro il riquadro x,y,w,h */
+  drawPropFrame(ctx, name, f, x, y, w, h, alpha = 1) {
+    const p = PROPS[name];
+    const im = p && _img(p.file);
+    if (!_ready(im)) return;
+    const n = p.frames || 1, fw = p.w / n;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.drawImage(im, (f % n) * fw, 0, fw, p.h, x, y, w, h);
+    ctx.restore();
+  },
+
+  /** Oggetto di scena alto h, con il centro-alto in (cx, y) */
+  drawPropFit(ctx, name, cx, y, h, alpha = 1) {
+    const p = PROPS[name];
+    const im = p && _img(p.file);
+    if (!_ready(im)) return;
+    const w = p.w * h / p.h;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.drawImage(im, cx - w / 2, y, w, h);
+    ctx.restore();
+  },
+
+  /** Oggetto di scena stirato nel riquadro (es. assi su una porta) */
+  drawPropBox(ctx, name, x, y, w, h, alpha = 1) {
+    const p = PROPS[name];
+    const im = p && _img(p.file);
+    if (!_ready(im)) return;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.drawImage(im, x, y, w, h);
     ctx.restore();
   },
 

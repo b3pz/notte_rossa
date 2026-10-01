@@ -134,6 +134,7 @@ export class Enemy {
 
   /* ── UPDATE ── */
   update(dt, player, col) {
+    if (this._hitFlash > 0) this._hitFlash -= dt;
     if (this._alertTimer > 0) this._alertTimer -= dt;
     if (!this.alive) {
       this._deadTimer += dt;
@@ -241,6 +242,7 @@ export class Enemy {
   takeDamage(amount, knockDir = 0) {
     if (!this.alive) return;
     this.hp -= amount;
+    this._hitFlash = 0.09;
     this.x += knockDir * 18 * this.scale;
     if (this.state === AI_STATE.CEILING || this.state === AI_STATE.DROP) this._dropY = 0;
     if (this.hp <= 0) {
@@ -284,7 +286,13 @@ export class Enemy {
     const def = SpriteLib.animDef(this.def.sprite, this.anim);
     if (!def) return;
     this.animTimer += dt;
-    const fd = 1 / def.fps;
+    let fps = def.fps;
+    if (this.anim === 'walk' || this.anim === 'run') {
+      const spd = this.state === AI_STATE.CHASE ? this.def.chaseSpeed : this.def.speed;
+      const stride = (this.type === 'crawler' ? 60 : this.type === 'corridore' ? 85 : 45) * this.scale;
+      fps = Math.max(2, spd / stride);
+    }
+    const fd = 1 / fps;
     while (this.animTimer >= fd) {
       this.animTimer -= fd;
       if (this.animFrame < def.frames - 1) this.animFrame++;
@@ -320,7 +328,17 @@ export class Enemy {
       if (this.state === AI_STATE.STUNNED) opts.rotate = (this.facingRight ? -1 : 1) * 0.15;
     }
 
+    // ombra sul pavimento (anche se il Crawler è appeso: si stringe mentre cade)
+    const sc = this.scale;
+    let sw = Math.max(this.width * 1.25, 100 * sc), sa = 0.55;
+    if (!this.alive) { sw = Math.max(sw, 230 * sc); sa = 0.45; }
+    if (this.state === AI_STATE.CEILING) { sw *= 0.55; sa = 0.22; }
+    if (this.state === AI_STATE.DROP) { const t = 1 + Math.min(0, this._dropY) / (150 * sc); sw *= 0.55 + 0.45 * t; sa = 0.22 + 0.33 * t; }
+    SpriteLib.drawShadow(ctx, this.centerX, this.footY - 2 * sc, sw, sa);
+
+    if (this._hitFlash > 0) ctx.filter = 'brightness(2.4) saturate(0.4)';
     const ok = SpriteLib.draw(ctx, s, this.anim, this.animFrame, this.centerX, footY, this.facingRight, opts);
+    ctx.filter = 'none';
     if (!ok) {
       ctx.fillStyle = this.alive ? '#3a2a24' : 'rgba(60,20,10,0.6)';
       ctx.fillRect(this.x, this.alive ? this.y : this.footY - 30, this.width, this.alive ? this.height : 30);

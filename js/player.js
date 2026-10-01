@@ -50,6 +50,7 @@ export class Player {
     this.armed       = false;   // arma equipaggiata
     this.reloading   = false;
     this.shotTimer   = 0;       // >0 subito dopo uno sparo
+    this.aimTimer    = 0;       // >0 = resta in posa di mira dopo aver sparato
 
     // Animazione
     this.anim      = 'idle';
@@ -88,6 +89,7 @@ export class Player {
     }
     if (this._hurtTimer > 0) this._hurtTimer -= dt;
     if (this.shotTimer  > 0) this.shotTimer  -= dt;
+    if (this.aimTimer   > 0) this.aimTimer   -= dt;
 
     if (!this.alive) {
       this.vx = 0;
@@ -177,7 +179,7 @@ export class Player {
     if (this._hurtTimer > 0) return 'hurt';
     if (this.armed && this.reloading) return 'reload';
     if (this.armed && this.shotTimer > 0) return 'shoot';
-    if (this.isAiming) return 'aim';
+    if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return 'aim';
     if (this.vx !== 0) {
       if (this.isCrouching) return 'sneak';
       if (this.isRunning)   return 'run';
@@ -200,7 +202,10 @@ export class Player {
     const def = SpriteLib.animDef('player', this.anim);
     if (!def) return;
     this.animTimer += dt;
-    const fd = 1 / def.fps;
+    // passi sincronizzati con la velocità reale (niente piedi che pattinano)
+    const stride = { walk: 50, run: 95, sneak: 42 }[this.anim];
+    const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
+    const fd = 1 / fps;
     while (this.animTimer >= fd) {
       this.animTimer -= fd;
       if (this.animFrame < def.frames - 1) this.animFrame++;
@@ -262,6 +267,9 @@ export class Player {
   /* ── RENDER ── */
   draw(ctx) {
     const blink = this.alive && this.invulnerable && Math.floor(Date.now() / 90) % 2 === 0;
+    // ombra: più larga quando è a terra o accovacciato
+    const sw = (this.alive ? (this.isCrouching ? 130 : 105) : 250) * this.scale;
+    SpriteLib.drawShadow(ctx, this.centerX, this.footY - 2 * this.scale, sw, 0.6);
     const ok = SpriteLib.draw(ctx, 'player', this.anim, this.animFrame,
       this.centerX, this.footY, this.facingRight, { alpha: blink ? 0.45 : 1, scale: this.scale });
     if (!ok) this._drawPlaceholder(ctx);

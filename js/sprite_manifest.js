@@ -448,5 +448,41 @@ export const PROPS = {
     "file": "assets/sprites/cut/props/body_7.png",
     "w": 240,
     "h": 194
+  },
+  "barricade_closed": {
+    "file": "assets/sprites/cut/props/barricade_closed.png",
+    "w": 61,
+    "h": 90,
+    "frames": 1
+  },
+  "barricade_broken": {
+    "file": "assets/sprites/cut/props/barricade_broken.png",
+    "w": 59,
+    "h": 90,
+    "frames": 1
+  },
+  "lever_off": {
+    "file": "assets/sprites/cut/props/lever_off.png",
+    "w": 49,
+    "h": 38,
+    "frames": 1
+  },
+  "lever_on": {
+    "file": "assets/sprites/cut/props/lever_on.png",
+    "w": 48,
+    "h": 61,
+    "frames": 1
+  },
+  "monitor_static": {
+    "file": "assets/sprites/cut/props/monitor_static.png",
+    "w": 237,
+    "h": 35,
+    "frames": 6
+  },
+  "neon": {
+    "file": "assets/sprites/cut/props/neon.png",
+    "w": 257,
+    "h": 44,
+    "frames": 6
   }
 };

@@ -27,6 +27,7 @@ export class WeaponSystem {
     this.game     = game;
     this.equipped = null;
     this.bullets  = [];
+    this.particles = [];
     this._flash   = 0;
     this._mags    = {};   // colpi nel caricatore per arma, conservati quando si cambia arma
   }
@@ -52,8 +53,24 @@ export class WeaponSystem {
   }
   get ammoInMag() { return this.equipped?.ammoInMag || 0; }
 
+  _blood(x, y, dir, sc) {
+    for (let i = 0; i < 14; i++) {
+      this.particles.push({
+        x, y,
+        vx: dir * (80 + Math.random() * 260) * sc + (Math.random() - 0.5) * 120,
+        vy: (-200 + Math.random() * 220) * sc,
+        life: 0.5 + Math.random() * 0.4, r: (1.5 + Math.random() * 3) * sc,
+      });
+    }
+  }
+
   update(dt) {
     if (this._flash > 0) this._flash -= dt;
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const q = this.particles[i];
+      q.life -= dt; q.vy += 900 * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.life <= 0) this.particles.splice(i, 1);
+    }
     const w = this.equipped;
     if (w) {
       if (w.cooldownTimer > 0) w.cooldownTimer -= dt;
@@ -83,6 +100,7 @@ export class WeaponSystem {
         // il fucile perde forza con la distanza
         const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
         hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
+        this._blood(b.x, Math.max(hit.y + hit.height * 0.15, Math.min(hit.y + hit.height * 0.6, b.y)), Math.sign(b.vx), hit.scale || 1);
         if (!hit.alive) em.onEnemyKilled(hit);
         this.bullets.splice(i, 1);
       }
@@ -143,6 +161,10 @@ export class WeaponSystem {
   loadAmmo() { return 0; }
 
   draw(ctx) {
+    for (const q of this.particles) {
+      ctx.fillStyle = `rgba(120,8,12,${Math.min(1, q.life * 2)})`;
+      ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2); ctx.fill();
+    }
     // Proiettili: scia sottile
     for (const b of this.bullets) {
       const g = ctx.createLinearGradient(b.x - Math.sign(b.vx) * 40, 0, b.x, 0);

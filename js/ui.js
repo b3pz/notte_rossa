@@ -118,6 +118,16 @@ export class UIManager {
     if (this.$room.textContent !== name) this.$room.textContent = name;
   }
 
+  setObjective(text) {
+    if (!this.$objective) this.$objective = $('hud-objective-text');
+    if (this.$objective && this._objText !== text) {
+      this._objText = text;
+      this.$objective.textContent = text;
+      const box = $('hud-objective');
+      box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
+    }
+  }
+
   showInteractPrompt(label) {
     this.$interPrompt.classList.remove('hidden');
     this.$interLabel.textContent = label || 'Esamina';
@@ -243,8 +253,8 @@ export class UIManager {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const rm = this.game.roomManager;
-    const rows = ['Stazione', 'Città', 'Ospedale', 'Sotterranei', 'Laboratorio', 'Porto'];
-    const nodeW = 118, nodeH = 44, gapX = 12, gapY = 30, left = 130, top = 24;
+    const rows = ['Stazione', '', 'Città', 'Ospedale', 'Sotterranei', 'Laboratorio', 'Porto'];
+    const nodeW = 118, nodeH = 42, gapX = 12, gapY = 22, left = 130, top = 20;
 
     ctx.font = '11px "Courier New", monospace';
     ctx.textBaseline = 'middle';

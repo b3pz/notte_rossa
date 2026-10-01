@@ -17,13 +17,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORDER = [
     'sprite_manifest', 'sprites', 'input', 'audio', 'camera', 'collision',
     'dialogue', 'player', 'items', 'inventory', 'weapons', 'enemy',
-    'events', 'ui', 'save', 'rooms', 'game', 'main',
+    'events', 'ui', 'save', 'rooms_data', 'rooms', 'editor', 'touch', 'game', 'main',
 ]
 
 def strip_modules(src):
     out = []
     for line in src.splitlines():
         if re.match(r'^\s*import\s.*from\s+[\'"].*[\'"];?\s*$', line):
+            continue
+        if re.match(r'^\s*export\s*\{[^}]*\}\s*;?\s*$', line):   # export { X };
             continue
         line = re.sub(r'^export\s+(const|let|class|function)\s', r'\1 ', line)
         out.append(line)

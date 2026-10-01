@@ -2,8 +2,17 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>NOTTE ROSSA</title>
+  <meta name="theme-color" content="#060609">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/menu.css">
@@ -44,12 +53,12 @@
         <span><b>C</b> accovacciati</span>
         <span><b>E</b> interagisci</span>
         <span><b>F</b> torcia</span>
-        <span><b>CTRL</b> + <b>SPAZIO</b> spara</span>
+        <span><b>SPAZIO</b> spara</span>
         <span><b>R</b> ricarica</span>
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v0.2</div>
+      <div class="menu-version">v0.3</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -93,7 +102,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v0.2</p>
+        <p class="dim">Survival horror 2D — v0.3</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -107,6 +116,7 @@
     <!-- HUD -->
     <div id="hud" class="hidden">
       <div id="hud-room"></div>
+      <div id="hud-objective"><span class="obj-label">OBIETTIVO</span><span id="hud-objective-text"></span></div>
       <div id="hud-ammo" class="hud-element hidden">
         <img id="hud-ammo-icon" alt="">
         <span id="hud-ammo-mag">0</span>
@@ -155,7 +165,7 @@
     <div id="map-screen" class="screen-overlay hidden">
       <div class="map-panel">
         <h3 class="map-title">MAPPA</h3>
-        <canvas id="map-canvas" width="900" height="470"></canvas>
+        <canvas id="map-canvas" width="900" height="500"></canvas>
         <div class="inv-hint">[M] o [ESC] per chiudere</div>
       </div>
     </div>

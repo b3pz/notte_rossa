@@ -15,10 +15,10 @@ OUT = '/tmp'
 STEPS = [
   ('use', 'document_ticket'), ('door', 'wagon_to_platform'),
   ('waitflag', 'phone_ringing'), ('use', 'public_phone'), ('waitflag', 'intro_complete'),
-  ('door', 'platform_to_hall'),
-  ('use', 'locker_flashlight'), ('use', 'notice_board'), ('door', 'hall_to_storage'),
+  ('door', 'platform_to_storage'),
   ('use', 'shelf_pistol'), ('use', 'crate_key'), ('use', 'document_note_storage'), ('use', 'guard_body'),
-  ('door', 'storage_to_hall'), ('door', 'hall_to_control'),
+  ('door', 'storage_to_platform'), ('door', 'platform_to_hall'),
+  ('use', 'ticket_booth'), ('use', 'notice_board'), ('door', 'hall_to_control'),
   ('npc', 'carmine'), ('waitflag', 'carmine_talked'), ('use', 'shutter_lever'), ('waitflag', 'shutter_open'),
   ('use', 'doc_turni'), ('door', 'control_to_hall'), ('door', 'hall_to_exit'),
   ('use', 'exit_map'), ('use', 'police_body'), ('door', 'exit_to_city'),
@@ -97,12 +97,21 @@ def main():
                     if (!n || n.obj !== h) return 'NON È IL PIÙ VICINO: ' + (n && n.obj.id);
                     g._useHotspot(h); return 'ok'; }}''')
             elif kind == 'door':
+                prev_room = room()
                 res = pg.evaluate(f'''() => {{ const g = window._notteRossa; const d = g.roomManager.current.doors.find(d => d.id === '{arg}');
                     if (!d) return 'MANCANTE in ' + g.roomManager.current.id;
                     if (!d.edge) {{ g.player.x = d.x + d.w/2 - g.player.width/2;
                       const n = g.roomManager.nearest(g.player); if (!n || n.obj !== d) return 'NON È IL PIÙ VICINO: ' + (n && n.obj.id); }}
                     return g._tryDoor(d) ? 'ok' : 'bloccata'; }}''')
                 time.sleep(0.9)
+                if res == 'ok':
+                    idle()
+                    chk = pg.evaluate(f'''() => {{ const g = window._notteRossa, r = g.roomManager.current;
+                        const back = r.doors.find(d => d.target === '{{FROM}}');
+                        if (!back) return 'nessuna porta di ritorno';
+                        const dx = Math.abs(g.player.centerX - (back.x + back.w/2));
+                        return dx < 40 ? 'ok' : 'arrivo lontano dalla porta ' + back.id + ' (' + Math.round(dx) + 'px)'; }}'''.replace('{FROM}', prev_room))
+                    if chk != 'ok' and not (arg == 'port_to_pier' or arg == 'core_to_port'): res = chk
             elif kind == 'npc':
                 res = pg.evaluate(f'''() => {{ const g = window._notteRossa; const n = g.roomManager.current.npcs.find(n => n.id === '{arg}');
                     if (!n) return 'MANCANTE'; g.events.trigger(n.event); return 'ok'; }}''')

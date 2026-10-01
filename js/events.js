@@ -25,7 +25,7 @@ export class EventManager {
     R('tutorial_wagon', { once: true, actions: [
       narr('Il treno si è fermato.'),
       narr('[A] [D] o frecce per muoverti — [SHIFT] per correre — [C] per muoverti accovacciato, in silenzio.'),
-      narr('[E] per interagire con ciò che brilla — [TAB] inventario — [M] mappa — [ESC] pausa.'),
+      narr('[E] su ciò che brilla e sulle porte con il cartello — [TAB] inventario — [M] mappa. L\'obiettivo è in alto a sinistra.'),
       { type: 'set_flag', flag: 'intro_started' },
     ]});
 
@@ -62,7 +62,7 @@ export class EventManager {
     R('got_pistol', { once: true, actions: [
       { type: 'set_flag', flag: 'has_pistol' },
       { type: 'equip', weapon: 'pistol' },
-      narr('Tieni premuto [CTRL] o il tasto destro per mirare, poi [SPAZIO] o clic sinistro per sparare. [R] ricarica.'),
+      narr('[SPAZIO] o clic per sparare: la mira va da sola sul nemico più vicino (mirino rosso). [R] ricarica.'),
       { type: 'sfx', id: 'door_open' },
       narr('In fondo al corridoio, qualcosa ha sentito.'),
       { type: 'spawn', enemy: 'contaminato', x: 1150, facingRight: false, id: 'storage_ambush' },

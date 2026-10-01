@@ -188,6 +188,18 @@ ICONS = {
 }
 ICON_SIZE = 96
 
+# ── Oggetti di scena dalla tavola nuova ──
+# 'cut'  = toglie lo sfondo bianco e tiene la figura
+# 'raw'  = ritaglio rettangolare (hanno già lo sfondo scuro), diviso in N fotogrammi
+SCENE_PROPS = {
+  'barricade_closed': ('cut', (9, 114, 70, 204), 1),
+  'barricade_broken': ('cut', (74, 114, 133, 204), 1),
+  'lever_off':        ('cut', (522, 143, 571, 181), 1),
+  'lever_on':         ('cut', (662, 120, 710, 181), 1),
+  'monitor_static':   ('raw', (278, 222, 515, 257), 6),
+  'neon':             ('raw', (8, 218, 265, 262), 6),
+}
+
 # ── Cadaveri (decorazioni di scena) ──
 # ogni corpo viene scalato perché la sua "lunghezza" (max tra larghezza e 1,15×altezza)
 # sia BODY_LEN: circa 0,86 di una persona in piedi
@@ -423,6 +435,22 @@ def main():
         im.save(os.path.join(prop_dir, f'body_{k}.png'))
         props[f'body_{k}'] = {'file': f'assets/sprites/cut/props/body_{k}.png', 'w': im.width, 'h': im.height}
     print(f'cadaveri: {len(props)}')
+
+    # ── oggetti di scena (porta sbarrata, leve, monitor, neon) ──
+    master = np.array(Image.open(os.path.join(SRC, 'sprites_sheet_master.png')).convert('RGB'))
+    for name, (mode, (x0, y0, x1, y1), nf) in SCENE_PROPS.items():
+        sub = master[y0:y1, x0:x1]
+        if mode == 'cut':
+            fg = remove_background(sub)
+            figs = find_figures(fg, min_area=150)
+            big = max(figs, key=lambda f: f['area'])
+            rgba, _ = extract(sub, fg, big)
+            im = Image.fromarray(rgba, 'RGBA')
+        else:
+            im = Image.fromarray(sub, 'RGB').convert('RGBA')
+        im.save(os.path.join(prop_dir, f'{name}.png'))
+        props[name] = {'file': f'assets/sprites/cut/props/{name}.png', 'w': im.width, 'h': im.height, 'frames': nf}
+    print(f'oggetti di scena: {len(SCENE_PROPS)}')
 
     js = ('/* Generato da tools/slice_sprites.py — NON modificare a mano */\n'
           'export const SPRITES = ' + json.dumps(manifest, indent=2) + ';\n'

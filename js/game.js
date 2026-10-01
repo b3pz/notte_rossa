@@ -6,7 +6,7 @@
 import { Player }           from './player.js';
 import { Camera }           from './camera.js';
 import { InputManager }     from './input.js';
-import { RoomManager, ROOMS } from './rooms.js';
+import { RoomManager } from './rooms.js';
 import { CollisionManager } from './collision.js';
 import { AudioManager }     from './audio.js';
 import { EventManager }     from './events.js';
@@ -18,6 +18,8 @@ import { EnemyManager }     from './enemy.js';
 import { SaveManager }      from './save.js';
 import { ITEMS, DOCUMENTS } from './items.js';
 import { SpriteLib }        from './sprites.js';
+import { LayoutEditor }     from './editor.js';
+import { TouchControls }    from './touch.js';
 
 const CANVAS_W = 1280;
 const CANVAS_H =  720;
@@ -53,6 +55,8 @@ export class Game {
     this._resetState();
     this.dialogue = new DialogueManager(this);
     this.ui       = new UIManager(this);
+    this.editor   = new LayoutEditor(this);
+    this.touch    = new TouchControls(this);
     this.roomManager.preload();
 
     if (this.save.hasSaveData()) document.getElementById('btn-continua')?.removeAttribute('disabled');
@@ -180,6 +184,12 @@ export class Game {
     if (!this.running) return;
     this._fpsAvg = this._fpsAvg * 0.95 + (1 / Math.max(dt, 0.001)) * 0.05;
 
+    if (this.editor.on) {
+      this.editor.update(dt);
+      this._render();
+      this.input.update();
+      return;
+    }
     if (this.paused || this.ui.hasOpenOverlay()) {
       this._render();
       this.input.update();
@@ -201,14 +211,24 @@ export class Game {
     p.reloading = !!this.weapon.equipped?.isReloading;
 
     p.update(dt, input, this.collision);
+    this.camera.follow(p.x, p.y, p.width, p.height);
     this.camera.update(dt);
 
     // Armi
+    this._target = (p.alive && p.armed) ? this._findTarget() : null;
     if (p.alive && p.armed && !input.locked) {
-      if (p.isAiming && (input.justPressed('shoot') || (this.weapon.equipped.id === 'pistol' ? false : input.isDown('shoot')))) {
-        if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) p.shotTimer = 0.18;
+      if (input.justPressed('shoot')) {
+        // mira assistita: si gira verso il nemico più vicino a portata
+        const t = this._findTarget(true);
+        if (t) p.facingRight = t.centerX > p.centerX;
+        if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) {
+          p.shotTimer = 0.22;
+          p.aimTimer  = 0.6;
+        }
       }
       if (input.justPressed('reload')) this.weapon.reload();
+    } else if (p.alive && !p.armed && !input.locked && input.justPressed('shoot') && this.inventory.hasItem('pistol')) {
+      this.ui.showNotification('Impugna un\'arma dall\'inventario [TAB]');
     }
     this.weapon.update(dt);
     this.enemyManager.update(dt);
@@ -225,14 +245,13 @@ export class Game {
       return;
     }
 
+    this.roomManager._near = input.locked ? null : this.roomManager.nearest(p);
     if (!input.locked) {
       this._handleInteraction();
-      this._handleEdges();
       if (input.justPressed('inventory')) this.ui.openInventory();
       else if (input.justPressed('map'))  this.ui.openMap();
-    } else {
-      this.ui.hideInteractPrompt();
     }
+    this.ui.setObjective(this._objective());
     if (input.justPressed('debug')) { this.debug = !this.debug; this.ui.toggleDebug(this.debug); }
 
     this._updateSteps(dt);
@@ -244,10 +263,8 @@ export class Game {
 
   /* ══════════ INTERAZIONI ══════════ */
   _handleInteraction() {
-    const near = this.roomManager.nearest(this.player);
-    if (!near) { this.ui.hideInteractPrompt(); return; }
-    this.ui.showInteractPrompt(near.obj.label);
-    if (!this.player.isInteract) return;
+    const near = this.roomManager._near;
+    if (!near || !this.player.isInteract) return;
     if (near.kind === 'door')    this._tryDoor(near.obj);
     else if (near.kind === 'npc') this.events.trigger(near.obj.event);
     else                          this._useHotspot(near.obj);
@@ -310,27 +327,65 @@ export class Game {
       if (d.lockedText) this.dialogue.show('', d.lockedText);
       return false;
     }
-    this._transitionToRoom(d.target, d.targetX);
+    this._transitionToRoom(d.target);
     return true;
   }
 
-  _handleEdges() {
-    const p = this.player, input = this.input;
-    let side = null;
-    if (p.x <= 40 && input.isDown('moveLeft'))  side = 'left';
-    if (p.x + p.width >= CANVAS_W - 40 && input.isDown('moveRight')) side = 'right';
-    if (!side) return;
-    const d = this.roomManager.edgeDoor(side);
-    if (!d) return;
-    if (d.target && (!d.requires || this.roomManager.check(d.requires)) && (!d.keyId || this.roomManager.isDoorOpen(d.id) || this.inventory.hasItem(d.keyId))) {
-      this._tryDoor(d);
-    } else if (this._edgeMsgCd <= 0) {
-      this._edgeMsgCd = 1.5;
-      this._tryDoor(d);
+  /** Nemico più vicino a portata di tiro; con anyDir=false solo davanti */
+  _findTarget(anyDir = false) {
+    const p = this.player, w = this.weapon.equipped;
+    if (!w) return null;
+    const range = w.def.bulletRange;
+    let best = null, bd = Infinity;
+    for (const e of this.enemyManager.enemies) {
+      if (!e.alive) continue;
+      const dx = e.centerX - p.centerX, d = Math.abs(dx);
+      if (d > range) continue;
+      if (!anyDir && (dx > 0) !== p.facingRight) continue;
+      // se c'è un nemico davanti, ha la precedenza su quelli alle spalle
+      const pen = (dx > 0) === p.facingRight ? 0 : 400;
+      if (d + pen < bd) { bd = d + pen; best = e; }
     }
+    return best;
   }
 
-  _transitionToRoom(roomId, targetX) {
+  /** Testo dell'obiettivo corrente */
+  _objective() {
+    const f = (k) => !!this.events.getFlag(k);
+    const has = (i) => this.inventory.hasItem(i);
+    const visited = (r) => !!this.roomManager.roomStates[r]?.visited;
+    if (!f('intro_complete')) return f('phone_ringing') ? 'Rispondi al telefono in fondo al binario' : 'Scendi dal treno';
+    if (!f('has_pistol')) return 'Cerca un\'arma: porta "Servizi tecnici" sul binario';
+    if (!f('carmine_talked')) return has('key_station') || this.roomManager.isDoorOpen('hall_to_control')
+      ? 'Sali in sala controllo: scala mobile dell\'atrio'
+      : 'Trova la chiave della sala controllo (Servizi tecnici)';
+    if (!f('shutter_open')) return 'Alza la serranda: leva in fondo alla sala controllo';
+    if (!visited('city_street')) return 'Esci dalla stazione';
+    if (!this.roomManager.isDoorOpen('alley_to_hospital')) return has('crowbar')
+      ? 'Forza la porta sbarrata del San Rocco nel vicolo'
+      : 'L\'ospedale è oltre il vicolo, ma la porta è sbarrata: cerca qualcosa per fare leva';
+    if (!visited('hospital_morgue')) {
+      if (!has('shotgun')) return has('key_hospital') || this.roomManager.isDoorOpen('corr_to_ward')
+        ? 'Esplora le Degenze del San Rocco' : 'Trova la chiave del reparto Degenze (Palazzo Conti)';
+      if (!has('vial')) return 'Il campione R-0 è in sala operatoria (serve un badge) — oppure scendi all\'obitorio';
+      return 'Scendi all\'obitorio';
+    }
+    if (!f('power_on')) {
+      if (has('fuse')) return 'Avvia il generatore nella sala oltre il tunnel';
+      return f('knows_safe_code') ? 'Ti serve un fusibile: è nella cassaforte di Luigi (Via Ferrante)'
+        : 'Ti serve un fusibile da 30A. Forse in città qualcuno ne aveva uno';
+    }
+    if (!has('card') && !this.roomManager.isDoorOpen('safe_to_lab')) return 'Trova la tessera del laboratorio in officina';
+    if (!visited('lab_ingresso')) return 'Entra nel laboratorio dal rifugio di Elena';
+    if (!f('data_sent')) return has('usb') ? 'Trasmetti i dati dalla sala server' : 'Trova i dati di Elena nel laboratorio biologico';
+    if (!f('elena_talked')) return 'Raggiungi la camera centrale';
+    if (!has('key_rusty')) return 'Prendi la chiave sul tavolo';
+    return 'Raggiungi il molo 4 e scappa';
+  }
+
+
+  _transitionToRoom(roomId) {
+    const fromRoom = this.roomManager.current?.id;
     if (this._transitioning) return;
     this._transitioning = true;
     this.input.lock();
@@ -339,7 +394,7 @@ export class Game {
     this.ui.fadeOut(350, () => {
       this.weapon.bullets = [];
       this._lightFadeActive = false;
-      this.roomManager.loadRoom(roomId, targetX);
+      this.roomManager.loadRoom(roomId, undefined, fromRoom);
       this._initRain();
       this.ui.fadeIn(350, () => {
         this._transitioning = false;
@@ -391,23 +446,65 @@ export class Game {
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
     if (!room) return;
 
+    // mondo
     this.camera.applyTransform(ctx);
     this.roomManager.drawBackground(ctx);
-    this.roomManager.drawDoors(ctx);
-    this.roomManager.drawInteractions(ctx);
     this.enemyManager.draw(ctx);
     this.player.draw(ctx);
     this.weapon.draw(ctx);
-    if (room.rain) this._drawRain(ctx);
     this.camera.restoreTransform(ctx);
 
+    // atmosfera (spazio schermo)
+    if (room.rain) this._drawRain(ctx);
     this._drawDarkness(ctx, room);
     this._drawVignette(ctx);
-    if (this.debug) {
-      ctx.strokeStyle = 'rgba(80,160,255,0.7)';
-      const p = this.player;
-      ctx.strokeRect(p.x - this.camera.x, p.y - this.camera.y, p.width, p.height);
+
+    // indicatori sopra il buio: devono sempre leggersi
+    this.camera.applyTransform(ctx);
+    this.roomManager.drawInteractions(ctx);
+    this.roomManager.drawDoors(ctx);
+    this._drawReticle(ctx);
+    this.roomManager.drawPrompt(ctx);
+    if (this.editor.on) this.editor.draw(ctx);
+    else if (this.debug) this._drawDebug(ctx, room);
+    this.camera.restoreTransform(ctx);
+  }
+
+  /** Mirino sul nemico che verrà colpito */
+  _drawReticle(ctx) {
+    const t = this._target;
+    if (!t || !t.alive) return;
+    const cx = t.centerX, cy = t.y + t.height * 0.4;
+    const r = 18 + Math.sin(Date.now() / 120) * 2;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(230,40,50,0.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      ctx.beginPath(); ctx.moveTo(cx + dx * (r - 6), cy + dy * (r - 6)); ctx.lineTo(cx + dx * (r + 7), cy + dy * (r + 7)); ctx.stroke();
     }
+    ctx.restore();
+  }
+
+  _drawDebug(ctx, room) {
+    const p = this.player;
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(80,160,255,0.8)';
+    ctx.strokeRect(p.x, p.y, p.width, p.height);
+    ctx.font = '11px monospace';
+    for (const h of room.hotspots) {
+      ctx.strokeStyle = 'rgba(255,200,0,0.7)'; ctx.strokeRect(h.x, room.floorY - 360 * room.scale, h.w, 360 * room.scale);
+      ctx.fillStyle = '#fc0'; ctx.fillText(h.id, h.x + 3, room.floorY - 6);
+    }
+    for (const d of room.doors) {
+      const top = d.top ?? room.floorY - 330 * room.scale;
+      ctx.strokeStyle = 'rgba(80,220,120,0.8)'; ctx.strokeRect(d.x, top, d.w, room.floorY - top);
+      ctx.fillStyle = '#5d8'; ctx.fillText(d.id, d.x + 3, top + 14);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.moveTo(0, room.floorY); ctx.lineTo(room.width, room.floorY); ctx.stroke();
+    ctx.restore();
   }
 
   /** Buio della stanza con "buco" di luce attorno al giocatore e cono della torcia */
