@@ -307,8 +307,8 @@ export const SPRITES = {
     }
   },
   "elena": {
-    "cellW": 191,
-    "cellH": 268,
+    "cellW": 321,
+    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -327,6 +327,12 @@ export const SPRITES = {
         "file": "assets/sprites/cut/elena_point.png",
         "frames": 1,
         "fps": 1,
+        "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/elena_walk.png",
+        "frames": 3,
+        "fps": 6,
         "loop": true
       },
       "scared": {
