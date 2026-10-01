@@ -232,46 +232,70 @@ export class RoomManager {
     }
   }
 
-  /** Cartelli sulle porte, sempre visibili */
+  /** Direzione di un'uscita: a sinistra, a destra o "dentro" (porta / passaggio in fondo) */
+  doorDir(d, room = this.current) {
+    if (d.dir) return d.dir;
+    const cx = d.x + d.w / 2;
+    if (cx < 170) return 'left';
+    if (cx > room.width - 170) return 'right';
+    return 'up';
+  }
+
+  /** Frecce animate sul pavimento che indicano le uscite */
   drawDoors(ctx) {
     const room = this.current;
     if (!room) return;
-    const near = this._near;
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    const t = Date.now() / 1000, sc = room.scale, near = this._near;
     for (const d of room.doors) {
       if (!this.visible(d)) continue;
-      const cx = d.x + d.w / 2;
-      const top = d.top ?? room.floorY - 330 * room.scale;
       const locked = this.doorLocked(d);
       const isNear = near?.obj === d;
-      // alone sulla porta quando sei vicino
-      if (isNear) {
-        const g = ctx.createLinearGradient(0, top, 0, room.floorY);
-        g.addColorStop(0, locked ? 'rgba(200,40,40,0.0)' : 'rgba(255,235,190,0.0)');
-        g.addColorStop(0.5, locked ? 'rgba(200,40,40,0.12)' : 'rgba(255,235,190,0.12)');
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(d.x, top, d.w, room.floorY - top);
-        ctx.strokeStyle = locked ? 'rgba(220,70,70,0.55)' : 'rgba(255,235,190,0.45)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(d.x + 1, top + 1, d.w - 2, room.floorY - top - 2);
+      // passaggi che non portano da nessuna parte: niente freccia, solo un segno da esaminare
+      if (d.requires?.some?.(c => c.flag === 'never')) {
+        const mx = d.x + d.w / 2, my = (d.top ?? room.floorY - 330 * sc) + 40 * sc;
+        const a = 0.4 + Math.max(0, Math.sin(t * 2.4 + mx * 0.01)) * 0.4;
+        ctx.strokeStyle = `rgba(255,245,220,${a})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(mx, my, isNear ? 9 : 6, 0, Math.PI * 2); ctx.stroke();
+        continue;
       }
-      // cartello
-      const label = (d.target ? '▲ ' : '') + d.label.toUpperCase();
-      ctx.font = '600 12px "Courier New", monospace';
-      const tw = ctx.measureText(label).width + 18 + (locked ? 18 : 0);
-      const sy = Math.max(100, top - 16);   // sotto il riquadro dell'obiettivo
-      ctx.fillStyle = isNear ? 'rgba(10,10,12,0.9)' : 'rgba(10,10,12,0.62)';
-      ctx.fillRect(cx - tw / 2, sy - 11, tw, 22);
-      ctx.fillStyle = locked ? 'rgba(200,50,60,0.9)' : 'rgba(230,220,200,0.55)';
-      ctx.fillRect(cx - tw / 2, sy + 10, tw, 2);
-      ctx.fillStyle = locked ? (isNear ? '#ff8a8a' : '#c97a7a') : (isNear ? '#fff4dc' : '#cfc6b8');
-      ctx.fillText(label, cx - (locked ? 9 : 0), sy);
-      if (locked) SpriteLib.drawIcon(ctx, 'padlock', cx + tw / 2 - 14, sy, 16, 0.95);
+      const dir = this.doorDir(d, room);
+      const cx = d.x + d.w / 2;
+      const fy = room.floorY - 14 * sc;
+      const col = locked ? [215, 60, 70] : [245, 236, 220];
+      const base = isNear ? 0.95 : 0.55;
+      const size = Math.max(14, 22 * Math.min(1.4, sc));
+      ctx.save();
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(3, 4.5 * Math.min(1.3, sc));
+      ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 6;
+      for (let i = 0; i < 3; i++) {
+        // le frecce "scorrono" verso la direzione dell'uscita
+        const ph = ((t * 1.2 + i / 3) % 1);
+        const a = base * Math.sin(ph * Math.PI);
+        ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${a})`;
+        ctx.beginPath();
+        if (dir === 'left' || dir === 'right') {
+          const s = dir === 'left' ? -1 : 1;
+          const x = cx + s * (ph - 0.5) * size * 3;
+          ctx.moveTo(x - s * size * 0.5, fy - size * 0.55);
+          ctx.lineTo(x + s * size * 0.3, fy);
+          ctx.lineTo(x - s * size * 0.5, fy + size * 0.55 * 0.5);
+        } else {
+          // freccia "in avanti", schiacciata come se fosse dipinta sul pavimento
+          const y = fy + 8 * sc - ph * size * 1.6;
+          ctx.moveTo(cx - size * 0.9, y + size * 0.35);
+          ctx.lineTo(cx, y - size * 0.15);
+          ctx.lineTo(cx + size * 0.9, y + size * 0.35);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+      if (locked) {
+        const ix = dir === 'up' ? cx + size * 1.5 : cx;
+        const iy = dir === 'up' ? fy - size * 0.6 : fy - size * 1.6;
+        SpriteLib.drawIcon(ctx, 'padlock', ix, iy, Math.max(18, 22 * Math.min(1.3, sc)), isNear ? 1 : 0.75);
+      }
     }
-    ctx.restore();
   }
 
   /** Oggetti e punti da esaminare */
@@ -323,10 +347,10 @@ export class RoomManager {
     if (!room || !n || this.game.input.locked) return;
     const o = n.obj;
     let cx, y;
-    if (n.kind === 'door')      { cx = o.x + o.w / 2; y = (o.top ?? room.floorY - 330 * room.scale) + 26; }
+    if (n.kind === 'door')      { cx = o.x + o.w / 2; y = room.floorY - 70 * Math.max(0.8, room.scale); }
     else if (n.kind === 'npc')  { cx = o.x; y = room.floorY - 300 * room.scale; }
     else { cx = o.x + o.w / 2; y = (o.icon ? (o.iconY ?? room.floorY) - 50 * Math.max(0.8, room.scale) : (o.markY ?? room.floorY - 160) - 26); }
-    const verb = n.kind === 'door' ? (this.doorLocked(o) ? 'Prova' : 'Entra')
+    const verb = n.kind === 'door' ? (o.requires?.some?.(c => c.flag === 'never') ? 'Esamina' : this.doorLocked(o) ? 'Chiuso' : { left: '◄ Vai', right: 'Vai ►', up: '▲ Entra' }[this.doorDir(o, room)])
               : n.kind === 'npc' ? 'Parla'
               : (o.give?.length ? 'Raccogli' : o.doc ? 'Leggi' : 'Esamina');
     const label = `${verb}: ${n.kind === 'door' ? o.label : o.label}`;

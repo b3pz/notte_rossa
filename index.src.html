@@ -2,6 +2,8 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>NOTTE ROSSA</title>
   <meta name="theme-color" content="#060609">
@@ -58,7 +60,7 @@
         <span><b>TAB</b> inventario</span>
         <span><b>M</b> mappa</span>
       </div>
-      <div class="menu-version">v0.3</div>
+      <div class="menu-version">v0.4</div>
     </div>
 
     <!-- SCHERMATA CARICA -->
@@ -102,7 +104,7 @@
       <div class="credits-content">
         <h2 class="screen-title">CREDITI</h2>
         <p>NOTTE ROSSA</p>
-        <p class="dim">Survival horror 2D — v0.3</p>
+        <p class="dim">Survival horror 2D — v0.4</p>
         <p>&nbsp;</p>
         <p>Un gioco di b3pz</p>
         <p class="dim">Storia, direzione artistica e illustrazioni</p>
@@ -150,6 +152,7 @@
     <!-- INVENTARIO -->
     <div id="inventory-screen" class="screen-overlay hidden">
       <div class="inventory-panel">
+        <button class="overlay-close" aria-label="Chiudi">✕ CHIUDI</button>
         <h3 class="inv-title">INVENTARIO</h3>
         <div id="inventory-grid"></div>
         <div id="item-detail">
@@ -157,22 +160,24 @@
           <div id="item-detail-desc"></div>
           <div id="item-detail-actions"></div>
         </div>
-        <div class="inv-hint">[TAB] o [ESC] per chiudere</div>
+        <div class="inv-hint">[TAB], [ESC] o ✕ per chiudere</div>
       </div>
     </div>
 
     <!-- MAPPA -->
     <div id="map-screen" class="screen-overlay hidden">
       <div class="map-panel">
+        <button class="overlay-close" aria-label="Chiudi">✕ CHIUDI</button>
         <h3 class="map-title">MAPPA</h3>
         <canvas id="map-canvas" width="900" height="500"></canvas>
-        <div class="inv-hint">[M] o [ESC] per chiudere</div>
+        <div class="inv-hint">[M], [ESC] o ✕ per chiudere</div>
       </div>
     </div>
 
     <!-- DOCUMENTO -->
     <div id="document-screen" class="screen-overlay hidden">
       <div class="document-panel">
+        <button class="overlay-close" aria-label="Chiudi">✕ CHIUDI</button>
         <div id="doc-header">
           <span id="doc-title"></span>
           <span id="doc-date"></span>
@@ -185,6 +190,7 @@
     <!-- ELENCO DOCUMENTI -->
     <div id="docs-list-screen" class="screen-overlay hidden">
       <div class="inventory-panel">
+        <button class="overlay-close" aria-label="Chiudi">✕ CHIUDI</button>
         <h3 class="inv-title">DOCUMENTI</h3>
         <div id="docs-list"></div>
         <div class="inv-hint">[ESC] per chiudere</div>
@@ -195,6 +201,7 @@
     <div id="pause-screen" class="screen-overlay hidden">
       <div class="pause-panel">
         <h3 class="pause-title">— PAUSA —</h3>
+        <div class="pause-version">versione 0.4</div>
         <button class="menu-btn" id="btn-resume">RIPRENDI</button>
         <button class="menu-btn" id="btn-pause-inv">INVENTARIO</button>
         <button class="menu-btn" id="btn-pause-map">MAPPA</button>

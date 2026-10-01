@@ -67,8 +67,6 @@ export class DialogueManager {
 
     if (this._box) this._box.classList.remove('hidden');
 
-    // Blocca input durante il dialogo
-    this.game.input.lock();
 
     this._typeChar();
   }
@@ -111,7 +109,7 @@ export class DialogueManager {
       this._display(next.speaker, next.text, next.onComplete);
     } else {
       if (this._box) this._box.classList.add('hidden');
-      if (!this.game.events?.isRunning() && !this.game.ui?.hasOpenOverlay()) this.game.input.unlock();
+
     }
 
     if (onC) onC();
@@ -120,11 +118,14 @@ export class DialogueManager {
   /** Chiude immediatamente il dialogo */
   close() {
     clearTimeout(this._typingTimer);
+    // chi aspettava la fine di questi dialoghi deve comunque proseguire
+    const pending = [this._onComplete, ...this._queue.map(q => q.onComplete)].filter(Boolean);
     this._queue   = [];
+    this._onComplete = null;
     this.active   = false;
     this._typing  = false;
     if (this._box) this._box.classList.add('hidden');
-    this.game.input.unlock();
+    for (const fn of pending) { try { fn(); } catch (e) { console.error(e); } }
   }
 
   isActive() { return this.active; }

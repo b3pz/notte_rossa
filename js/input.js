@@ -109,7 +109,9 @@ export class InputManager {
   /** Blocca temporaneamente l'input (es. durante cutscene) */
   lock()   { this._locked = true; }
   unlock() { this._locked = false; }
-  get locked() { return !!this._locked; }
+  /** Bloccato se qualcuno l'ha bloccato esplicitamente O se lo stato del gioco lo richiede
+      (menu aperto, dialogo, scena, cambio stanza...). Calcolato ogni volta: non può "restare incastrato". */
+  get locked() { return !!this._locked || !!(this.lockCheck && this.lockCheck()); }
 
   /** Pulisce tutti i tasti (evita ghost key) */
   flush() {

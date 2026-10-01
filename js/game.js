@@ -56,6 +56,9 @@ export class Game {
     this.dialogue = new DialogueManager(this);
     this.ui       = new UIManager(this);
     this.editor   = new LayoutEditor(this);
+    // i comandi sono bloccati solo finché c'è davvero un motivo
+    this.input.lockCheck = () => !!(this._intro || this._deathShown || this._ended || this._transitioning || this.paused
+      || this.dialogue?.isActive() || this.events?.isRunning() || this.ui?.hasOpenOverlay() || this.editor?.on);
     this.touch    = new TouchControls(this);
     this.roomManager.preload();
 
@@ -81,6 +84,9 @@ export class Game {
     this._lightFadeActive = false;
     this.paused = false;
     this._ended = false;
+    this._intro = false;
+    this._deathShown = false;
+    this.autoWalk = null;
     this.input?.flush();
     this.input?.unlock();
     this.dialogue?.close();
@@ -147,8 +153,8 @@ export class Game {
     this.ui.resetOverlays();
     this.ui.fadeOut(0);
     this._launchGame('train_wagon');
-    this.input.lock();
-    setTimeout(() => this.ui.fadeIn(2200, () => this.events.trigger('tutorial_wagon')), 900);
+    this._intro = true;
+    setTimeout(() => this.ui.fadeIn(2200, () => { this._intro = false; this.events.trigger('tutorial_wagon'); }), 900);
   }
 
   _continueGame() {
@@ -230,7 +236,6 @@ export class Game {
     if (!p.alive) {
       if (!this._deathShown) {
         this._deathShown = true;
-        this.input.lock();
         this.ui.hideInteractPrompt();
         this.ui.showGameOver();
       }
@@ -445,7 +450,7 @@ export class Game {
     const fromRoom = this.roomManager.current?.id;
     if (this._transitioning) return;
     this._transitioning = true;
-    this.input.lock();
+    this.autoWalk = null;
     this.ui.hideInteractPrompt();
     this.audio.playSfx('door_open');
     this.ui.fadeOut(350, () => {
@@ -453,10 +458,7 @@ export class Game {
       this._lightFadeActive = false;
       this.roomManager.loadRoom(roomId, undefined, fromRoom);
       this._initRain();
-      this.ui.fadeIn(350, () => {
-        this._transitioning = false;
-        if (!this.events.isRunning() && !this.dialogue.isActive()) this.input.unlock();
-      });
+      this.ui.fadeIn(350, () => { this._transitioning = false; });
     });
   }
 
@@ -689,7 +691,6 @@ export class Game {
 
   showEnding() {
     this._ended = true;
-    this.input.lock();
     const good = !!this.events.getFlag('data_sent') && this.inventory.hasItem('vial');
     const docs = this.inventory.getDocuments().length;
     const total = Object.keys(DOCUMENTS).length;

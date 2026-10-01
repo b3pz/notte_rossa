@@ -67,6 +67,17 @@ export class UIManager {
       });
     }
     on('btn-save-close', () => this.closeSaveScreen());
+
+    // ✕ CHIUDI in ogni menu, e tocco/clic sullo sfondo scuro fuori dal riquadro
+    document.querySelectorAll('.overlay-close').forEach(b =>
+      b.addEventListener('click', e => { e.stopPropagation(); this._close(b.closest('.screen-overlay')); }));
+    document.querySelectorAll('.screen-overlay').forEach(ov => {
+      if (ov.id === 'gameover-screen') return;
+      ov.addEventListener('click', e => {
+        if (e.target !== ov) return;
+        if (ov === this.$pause) g.togglePause(); else this._close(ov);
+      });
+    });
     on('btn-ending-menu', () => { this.$ending.classList.add('hidden'); g.returnToMenu(); });
 
     document.addEventListener('keydown', e => {
@@ -350,7 +361,6 @@ export class UIManager {
     el.classList.remove('hidden');
     this._stack = this._stack.filter(e => e !== el);
     this._stack.push(el);
-    this.game.input.lock();
     this.hideInteractPrompt();
   }
 
@@ -359,9 +369,6 @@ export class UIManager {
     el.classList.add('hidden');
     this._stack = this._stack.filter(e => e !== el);
     if (el === this.$pause) this.game.paused = false;
-    if (this._stack.length === 0 && !this.game.dialogue.isActive() && !this.game.events.isRunning()) {
-      this.game.input.unlock();
-    }
   }
 
   closeTopOverlay() {

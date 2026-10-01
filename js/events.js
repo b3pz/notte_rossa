@@ -235,16 +235,12 @@ export class EventManager {
 
   async _run(actions) {
     this._running = (this._running || 0) + 1;
-    this.game.input.lock();
     try {
       for (const a of actions) await this._exec(a);
     } catch (e) {
       console.error('[Events] errore nella sequenza', e);
     } finally {
-      this._running--;
-      if (this._running <= 0 && !this.game.dialogue.isActive() && !this.game.ui.hasOpenOverlay()) {
-        this.game.input.unlock();
-      }
+      this._running = Math.max(0, this._running - 1);
     }
   }
 
@@ -256,7 +252,6 @@ export class EventManager {
       case 'dialogue': {
         const txt = (a.touchText && document.body.classList.contains('touch')) ? a.touchText : a.text;
         await new Promise(res => g.dialogue.show(a.speaker, txt, res));
-        g.input.lock();   // la sequenza non è finita
         break;
       }
       case 'wait':        await this._wait(a.sec); break;

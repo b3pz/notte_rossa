@@ -39,7 +39,6 @@ export class LayoutEditor {
   toggle() {
     this.on = !this.on;
     this.game.debug = this.on;
-    if (this.on) this.game.input.lock(); else this.game.input.unlock();
     if (!this._panel) this._buildPanel();
     this._panel.style.display = this.on ? 'block' : 'none';
     this._renderPanel();
