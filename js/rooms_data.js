@@ -490,20 +490,22 @@ export const ROOMS = {
   },
 
   lab_biologico: {
-    name: 'Laboratorio biologico', bg: BGP + 'lab_biologico.png', scale: 1.00, floorY: 666,
-    light: 0.45, map: [2, 5],
+    name: 'Laboratorio biologico', bg: BGV2 + 'lab_biologico.png', layoutW: 1257, keepEdges: true, scale: 1.02, floorY: 640,
+    light: 0.55, map: [2, 5],
     hotspots: [
-      { id: 'bio_tanks', x: 120, w: 260, label: 'Vasche di coltura', markY: 330,
-        text: 'Dentro il liquido verdastro galleggia qualcosa che una volta era una mano.' },
-      { id: 'bio_usb', x: 430, w: 110, label: 'Terminale di ricerca', icon: 'usb', iconY: 470, give: ['usb'],
+      { id: 'bio_cabinet', x: 245, w: 165, label: 'Vetrina dei reagenti', markY: 330,
+        text: 'Flaconi etichettati "R-0", tutti vuoti. Qualcuno li ha svuotati in fretta.' },
+      { id: 'bio_tanks', x: 515, w: 190, label: 'Vasche di coltura', markY: 300,
+        text: 'Dentro il liquido verdastro galleggia qualcosa con troppi arti.\nUno dei tentacoli si muove. Poi più niente.' },
+      { id: 'bio_usb', x: 705, w: 120, label: 'Terminale di ricerca', icon: 'usb', iconY: 420, give: ['usb'],
         text: 'Nella porta del terminale è infilata una chiavetta. "R-0 / dati completi — E.F."' },
     ],
     doors: [
-      { id: 'bio_to_corr', x: 560, w: 160, top: 230, bottom: 470, label: 'Corridoio', target: 'lab_corridoio', noSprite: true },
+      { id: 'bio_to_corr', x: 18, w: 160, top: 235, bottom: 585, label: 'Corridoio', target: 'lab_corridoio', noSprite: true },
     ],
     enemies: [
-      { id: 'bio_cr', type: 'crawler', x: 860, ceiling: true },
-      { id: 'bio_c', type: 'contaminato', x: 1050, patrol: [950, 1180] },
+      { id: 'bio_cr', type: 'crawler', x: 900, ceiling: true },
+      { id: 'bio_c', type: 'contaminato', x: 1050, patrol: [900, 1180] },
     ],
   },
 
