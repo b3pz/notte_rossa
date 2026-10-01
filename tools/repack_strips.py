@@ -172,20 +172,22 @@ def scan(path):
     return figs
 
 
+# Luca: le tavole generate più "massicce" sono ridotte del 10% per non cambiare corporatura
+# rispetto alla camminata (via di mezzo tra altezza e grandezza della testa).
 # Pose curve (camminate, attacchi): altezza ridotta perché la testa sia grande come nella posa "fermo".
 # infermiere_dead.png resta quella originale (5 pose, camice azzurro).
 # Tavole recuperate (ottobre 2026): le strisce nuove erano finite sotto il nome
 # sbagliato. Sorgenti in tools/recover_src/ (copie delle strisce sbagliate),
 # destinazione = nome giusto.  (sorgente, figure, destinazione, altezza figura[, separa per pezzi connessi])
 RECOVER = [
-    ('pistol_sheet.png',   [0, 1],                           'player_aim.png',          272),
-    ('pistol_sheet.png',   [(2, 0, 3), (2, 1, 3), (2, 2, 3)], 'player_shoot.png',        272),
-    ('pistol_sheet.png',   [3, 4, 5, 6],                     'player_reload.png',       272),
-    ('player_idle4.png',   [0, 1, 2, 3],                     'player_idle.png',         274),
-    ('player_sneak6.png',  [0, 1, 2, 3, 4, 5],               'player_sneak.png',        230),
-    ('player_torch6.png',  [0, 1, 2, 3, 4, 5],               'player_flashlight_walk.png', 270),
-    ('shotgun_sheet.png',  [0, 1],                           'player_shotgun_aim.png',  270),
-    ('shotgun_sheet.png',  [2, 3, 4, 5],                     'player_shotgun_shoot.png', 270),
+    ('pistol_sheet.png',   [0, 1],                           'player_aim.png',          245),
+    ('pistol_sheet.png',   [(2, 0, 3), (2, 1, 3), (2, 2, 3)], 'player_shoot.png',        245),
+    ('pistol_sheet.png',   [3, 4, 5, 6],                     'player_reload.png',       245),
+    ('player_idle4.png',   [0, 1, 2, 3],                     'player_idle.png',         247),
+    ('player_sneak6.png',  [0, 1, 2, 3, 4, 5],               'player_sneak.png',        207),
+    ('player_torch6.png',  [0, 1, 2, 3, 4, 5],               'player_flashlight_walk.png', 243),
+    ('shotgun_sheet.png',  [0, 1],                           'player_shotgun_aim.png',  243),
+    ('shotgun_sheet.png',  [2, 3, 4, 5],                     'player_shotgun_shoot.png', 243),
     ('contaminato_dead4.png', [0, 1, 2, 3],                  'contaminato_dead.png',    196),
     ('corridore_run6.png', [0, 1, 2, (3, 0, 2), (3, 1, 2), 4], 'corridore_run.png',     205),
     ('ferroviere_walk6.png', [0, 1, 2, 3, 4, 5],             'ferroviere_walk.png',     206),
@@ -198,9 +200,9 @@ RECOVER = [
     ('tecnico_dead4.png',  [0, 1, 2, 3],                     'tecnico_dead.png',        200),
     # tavole nuove dal kit dei prompt
     ('luca_gun_idle.png',     [0, 1],                         'player_gun_idle.png',     272),
-    ('luca_walk_pistol.png',  [0, 1, 2, 3, 4, 5],             'player_walk_gun.png',     268),
-    ('luca_hurt.png',         [0, 1],                         'player_hurt.png',         250),
-    ('luca_shotgun_walk.png', [0, 1, 2, 3, 4, 5],             'player_walk_shotgun.png', 266, True),
+    ('luca_walk_pistol.png',  [0, 1, 2, 3, 4, 5],             'player_walk_gun.png',     241),
+    ('luca_hurt.png',         [0, 1],                         'player_hurt.png',         225),
+    ('luca_shotgun_walk.png', [0, 1, 2, 3, 4, 5],             'player_walk_shotgun.png', 240, True),
     ('luca_wounded.png',      [0, 1, 2, 3],                   'player_wounded.png',      255),
     ('carmine_talk_new.png',  [0, 1, 2, 1],                   'carmine_talk.png',        266),
     ('carmine_talk_new.png',  [0],                            'carmine_idle.png',        266),

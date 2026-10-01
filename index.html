@@ -6921,7 +6921,9 @@ class Game {
   _drawReticle(ctx) {
     const t = this._target;
     if (!t || !t.alive) return;
-    const cx = t.centerX, cy = t.y + t.height * 0.4;
+    // il Crawler appeso al soffitto è disegnato più in alto del suo corpo "a terra"
+    const top = t.state === 'CEILING' ? t.y - 150 * t.scale : t.y;
+    const cx = t.centerX, cy = top + t.height * 0.4;
     const r = (18 + Math.sin(Date.now() / 120) * 2) * (this.uiScale || 1);
     const rim = Skin.img('reticle');
     if (rim) { ctx.drawImage(rim, cx - r * 1.4, cy - r * 1.4, r * 2.8, r * 2.8); return; }
