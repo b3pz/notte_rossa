@@ -1,7 +1,7 @@
 /* Generato da tools/slice_sprites.py — NON modificare a mano */
 export const SPRITES = {
   "player": {
-    "cellW": 318,
+    "cellW": 321,
     "cellH": 282,
     "humanH": 280,
     "anims": {
@@ -19,7 +19,7 @@ export const SPRITES = {
       },
       "run": {
         "file": "assets/sprites/cut/player_run.png",
-        "frames": 6,
+        "frames": 8,
         "fps": 12,
         "loop": true
       },
@@ -31,68 +31,68 @@ export const SPRITES = {
       },
       "aim": {
         "file": "assets/sprites/cut/player_aim.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 8,
+        "fps": 10,
         "loop": true
       },
       "shoot": {
         "file": "assets/sprites/cut/player_shoot.png",
-        "frames": 3,
-        "fps": 14,
+        "frames": 8,
+        "fps": 12,
         "loop": false
       },
       "reload": {
         "file": "assets/sprites/cut/player_reload.png",
-        "frames": 3,
-        "fps": 5,
+        "frames": 8,
+        "fps": 8,
         "loop": false
       },
       "hurt": {
         "file": "assets/sprites/cut/player_hurt.png",
-        "frames": 2,
-        "fps": 8,
+        "frames": 8,
+        "fps": 12,
         "loop": false
       },
       "wounded": {
         "file": "assets/sprites/cut/player_wounded.png",
-        "frames": 2,
-        "fps": 4,
+        "frames": 8,
+        "fps": 6,
         "loop": true
       },
       "death": {
         "file": "assets/sprites/cut/player_death.png",
-        "frames": 3,
-        "fps": 4,
+        "frames": 8,
+        "fps": 6,
         "loop": false
       },
       "flashlight": {
         "file": "assets/sprites/cut/player_flashlight.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 8,
+        "fps": 10,
         "loop": true
       },
       "push": {
         "file": "assets/sprites/cut/player_push.png",
-        "frames": 3,
-        "fps": 5,
+        "frames": 8,
+        "fps": 10,
         "loop": false
       },
       "crouch": {
         "file": "assets/sprites/cut/player_crouch.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 8,
+        "fps": 10,
         "loop": true
       },
       "sneak": {
         "file": "assets/sprites/cut/player_sneak.png",
-        "frames": 2,
-        "fps": 5,
+        "frames": 8,
+        "fps": 8,
         "loop": true
       },
       "hide": {
         "file": "assets/sprites/cut/player_hide.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 6,
+        "fps": 8,
         "loop": true
       }
     }
@@ -282,26 +282,26 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/carmine_idle.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 6,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/carmine_talk.png",
-        "frames": 4,
-        "fps": 5,
+        "frames": 8,
+        "fps": 8,
         "loop": true
       },
       "check": {
         "file": "assets/sprites/cut/carmine_check.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 6,
         "loop": true
       },
       "scared": {
         "file": "assets/sprites/cut/carmine_scared.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 4,
         "loop": true
       }
     }
@@ -313,20 +313,20 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/elena_idle.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 6,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/elena_talk.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 8,
         "loop": true
       },
       "point": {
         "file": "assets/sprites/cut/elena_point.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 6,
         "loop": true
       },
       "walk": {
@@ -337,8 +337,8 @@ export const SPRITES = {
       },
       "scared": {
         "file": "assets/sprites/cut/elena_scared.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 8,
+        "fps": 4,
         "loop": true
       }
     }
@@ -354,9 +354,15 @@ export const SPRITES = {
         "fps": 3,
         "loop": true
       },
+      "walk": {
+        "file": "assets/sprites/cut/ferroviere_walk.png",
+        "frames": 8,
+        "fps": 8,
+        "loop": true
+      },
       "attack": {
         "file": "assets/sprites/cut/ferroviere_attack.png",
-        "frames": 9,
+        "frames": 8,
         "fps": 8,
         "loop": false
       },
@@ -387,7 +393,7 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/infermiere_walk.png",
-        "frames": 9,
+        "frames": 8,
         "fps": 8,
         "loop": true
       },
@@ -405,7 +411,7 @@ export const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/infermiere_dead.png",
-        "frames": 5,
+        "frames": 8,
         "fps": 4,
         "loop": false
       }
@@ -424,7 +430,7 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/tecnico_walk.png",
-        "frames": 9,
+        "frames": 8,
         "fps": 8,
         "loop": true
       },
@@ -442,7 +448,7 @@ export const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/tecnico_dead.png",
-        "frames": 4,
+        "frames": 8,
         "fps": 4,
         "loop": false
       }
