@@ -369,15 +369,39 @@ export const SPRITES = {
     }
   },
   "infermiere": {
-    "cellW": 124,
+    "cellW": 321,
     "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/infermiere_idle.png",
         "frames": 1,
-        "fps": 1,
+        "fps": 3,
         "loop": true
+      },
+      "walk": {
+        "file": "assets/sprites/cut/infermiere_walk.png",
+        "frames": 9,
+        "fps": 8,
+        "loop": true
+      },
+      "attack": {
+        "file": "assets/sprites/cut/infermiere_attack.png",
+        "frames": 8,
+        "fps": 8,
+        "loop": false
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/infermiere_hurt.png",
+        "frames": 1,
+        "fps": 3,
+        "loop": false
+      },
+      "dead": {
+        "file": "assets/sprites/cut/infermiere_dead.png",
+        "frames": 5,
+        "fps": 4,
+        "loop": false
       }
     }
   },
