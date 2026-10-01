@@ -212,6 +212,12 @@ RECOVER = [
     ('ferroviere_hurt_new.png',  [0, 1],                      'ferroviere_hurt.png',     250),
     ('infermiere_idle_new.png',  [0, 1],                      'infermiere_idle.png',     264),
     ('corridore_idle_new.png',   [0, 1],                      'corridore_idle.png',      190),
+    ('corridore_hurt_new.png',   [0, 1],                      'corridore_hurt.png',      245),
+    # Crawler: scala presa dalla corsa (testa uguale in tutte le tavole)
+    ('crawler_run_new.png',      [0, 1, 2, 3, 4, 5],          'crawler_run.png',         134, True),
+    ('crawler_attack_new.png',   [0, 1, 2, 3],                'crawler_attack.png',      130, True),
+    ('crawler_ceiling_new.png',  [0, 1],                      'crawler_ceiling.png',     137),
+    ('crawler_leap_new.png',     [0, 1, 2],                   'crawler_leap.png',        146),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 
