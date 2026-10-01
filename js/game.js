@@ -222,6 +222,7 @@ export class Game {
     // stato che il giocatore deve conoscere
     p.hasFlashlight = this.inventory.hasItem('flashlight');
     p.armed     = !!this.weapon.equipped;
+    p.weaponId  = this.weapon.equipped?.def?.id || null;
     p.reloading = !!this.weapon.equipped?.isReloading;
 
     this._updateAutoWalk();

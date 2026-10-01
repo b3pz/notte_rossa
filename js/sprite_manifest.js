@@ -1,13 +1,12 @@
-/* Generato da tools/slice_sprites.py — NON modificare a mano */
+/* Generato da tools/slice_sprites.py e tools/repack_strips.py.
+   La cella di ogni animazione = larghezza immagine / frames (piedi sul bordo basso). */
 export const SPRITES = {
   "player": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/player_idle.png",
-        "frames": 1,
+        "frames": 4,
         "fps": 3,
         "loop": true
       },
@@ -19,7 +18,7 @@ export const SPRITES = {
       },
       "run": {
         "file": "assets/sprites/cut/player_run.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 12,
         "loop": true
       },
@@ -31,80 +30,96 @@ export const SPRITES = {
       },
       "aim": {
         "file": "assets/sprites/cut/player_aim.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 2,
+        "fps": 3,
         "loop": true
       },
       "shoot": {
         "file": "assets/sprites/cut/player_shoot.png",
-        "frames": 8,
-        "fps": 12,
+        "frames": 3,
+        "fps": 14,
         "loop": false
       },
       "reload": {
         "file": "assets/sprites/cut/player_reload.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 4,
+        "fps": 6,
         "loop": false
       },
       "hurt": {
         "file": "assets/sprites/cut/player_hurt.png",
-        "frames": 8,
-        "fps": 12,
+        "frames": 2,
+        "fps": 8,
         "loop": false
       },
       "wounded": {
         "file": "assets/sprites/cut/player_wounded.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 2,
+        "fps": 4,
         "loop": true
       },
       "death": {
         "file": "assets/sprites/cut/player_death.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 3,
+        "fps": 4,
         "loop": false
       },
       "flashlight": {
         "file": "assets/sprites/cut/player_flashlight.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "push": {
         "file": "assets/sprites/cut/player_push.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 3,
+        "fps": 5,
         "loop": false
       },
       "crouch": {
         "file": "assets/sprites/cut/player_crouch.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "sneak": {
         "file": "assets/sprites/cut/player_sneak.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "hide": {
         "file": "assets/sprites/cut/player_hide.png",
-        "frames": 6,
-        "fps": 8,
+        "frames": 1,
+        "fps": 3,
         "loop": true
+      },
+      "flashlight_walk": {
+        "file": "assets/sprites/cut/player_flashlight_walk.png",
+        "frames": 6,
+        "fps": 10,
+        "loop": true
+      },
+      "shotgun_aim": {
+        "file": "assets/sprites/cut/player_shotgun_aim.png",
+        "frames": 2,
+        "fps": 3,
+        "loop": true
+      },
+      "shotgun_shoot": {
+        "file": "assets/sprites/cut/player_shotgun_shoot.png",
+        "frames": 4,
+        "fps": 12,
+        "loop": false
       }
     }
   },
   "contaminato": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/contaminato_idle.png",
-        "frames": 2,
+        "frames": 1,
         "fps": 3,
         "loop": true
       },
@@ -128,15 +143,13 @@ export const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/contaminato_dead.png",
-        "frames": 2,
-        "fps": 3,
+        "frames": 4,
+        "fps": 6,
         "loop": false
       }
     }
   },
   "corridore": {
-    "cellW": 315,
-    "cellH": 248,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -174,12 +187,16 @@ export const SPRITES = {
         "frames": 1,
         "fps": 1,
         "loop": false
+      },
+      "run": {
+        "file": "assets/sprites/cut/corridore_run.png",
+        "frames": 6,
+        "fps": 14,
+        "loop": true
       }
     }
   },
   "crawler": {
-    "cellW": 342,
-    "cellH": 187,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -227,8 +244,6 @@ export const SPRITES = {
     }
   },
   "listener": {
-    "cellW": 315,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -276,57 +291,53 @@ export const SPRITES = {
     }
   },
   "carmine": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/carmine_idle.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/carmine_talk.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 4,
+        "fps": 5,
         "loop": true
       },
       "check": {
         "file": "assets/sprites/cut/carmine_check.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "scared": {
         "file": "assets/sprites/cut/carmine_scared.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       }
     }
   },
   "elena": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/elena_idle.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/elena_talk.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "point": {
         "file": "assets/sprites/cut/elena_point.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "walk": {
@@ -337,15 +348,13 @@ export const SPRITES = {
       },
       "scared": {
         "file": "assets/sprites/cut/elena_scared.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       }
     }
   },
   "ferroviere": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -356,33 +365,25 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/ferroviere_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/ferroviere_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/ferroviere_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/ferroviere_dead.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 5,
         "loop": false
       }
     }
   },
   "infermiere": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -393,33 +394,25 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/infermiere_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/infermiere_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/infermiere_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/infermiere_dead.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 5,
+        "fps": 5,
         "loop": false
       }
     }
   },
   "tecnico": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -430,26 +423,20 @@ export const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/tecnico_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/tecnico_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/tecnico_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/tecnico_dead.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 4,
+        "fps": 5,
         "loop": false
       }
     }

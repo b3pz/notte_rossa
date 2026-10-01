@@ -62,7 +62,7 @@ window.__kill = () => { const g = window._notteRossa; for (const e of g.enemyMan
 def main():
     log, errors = [], []
     with sync_playwright() as p:
-        b = p.chromium.launch(args=['--allow-file-access-from-files'])
+        b = p.chromium.launch(args=['--allow-file-access-from-files'], **({'executable_path': os.environ['PW_CHROMIUM']} if os.environ.get('PW_CHROMIUM') else {}))
         pg = b.new_page(viewport={'width': 1280, 'height': 720})
         pg.on('pageerror', lambda e: errors.append(str(e)))
         pg.on('console', lambda m: errors.append(m.text) if m.type in ('error', 'warning') else None)

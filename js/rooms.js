@@ -225,7 +225,8 @@ export class RoomManager {
       const anim = this.game.events.getFlag(`npc_${n.id}_anim`) || n.anim || 'idle';
       const ns = room.scaleAt(n.x), nf = room.floorAt(n.x);
       SpriteLib.drawShadow(ctx, n.x, nf - 2 * ns, 105 * ns, 0.6);
-      SpriteLib.draw(ctx, n.char, anim, 0, n.x, nf, n.facingRight, { scale: ns });
+      const fr = Math.floor(Date.now() / 1000 * (SpriteLib.animDef(n.char, anim)?.fps || 3));
+      SpriteLib.draw(ctx, n.char, anim, fr, n.x, nf, n.facingRight, { scale: ns });
     }
   }
 
@@ -303,8 +304,9 @@ export class RoomManager {
         SpriteLib.drawPropFit(ctx, on ? 'lever_on' : 'lever_off', o.x, o.y, o.h);
       } else if (o.type === 'state') {
         // stato alternativo dello sfondo (armadietto aperto, cassetta aperta...):
+        // condizione: picked (oggetto preso) | door (porta aperta con la chiave) | flag
         // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
-        const on = (o.picked && this.isPicked(o.picked)) || (o.flag && this.check({ flag: o.flag }));
+        const on = (o.picked && this.isPicked(o.picked)) || (o.door && this.isDoorOpen(o.door)) || (o.flag && this.check({ flag: o.flag }));
         if (!on) { o._t0 = 0; continue; }
         const im = this._bgImage(o.src);
         if (!im || !im.complete || !im.naturalWidth) continue;

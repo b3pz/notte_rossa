@@ -17,7 +17,7 @@
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
    props:    { name, x, flip }
-   overlays: { type:'monitor'|'neon'|'lever'|'barricade', ... }
+   overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
    enemies:  { id, type, x, patrol, ceiling, idle, facingRight, showIf, hideIf }
    cond:     { flag } | { notFlag } | { item }
    ============================================= */
@@ -470,7 +470,7 @@ export const ROOMS = {
         keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
     ],
     overlays: [
-      { type: 'state', picked: 'safe_to_maint', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
+      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
     ],
   },
 
@@ -535,7 +535,7 @@ export const ROOMS = {
     light: 0.55, map: [3, 5],
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
-      { type: 'state', flag: 'power_on', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
+      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
     ],
     hotspots: [
       { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },

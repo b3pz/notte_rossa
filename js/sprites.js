@@ -60,7 +60,8 @@ export const SpriteLib = {
     const im = _img(def.file);
     if (!_ready(im)) return false;
 
-    const cw = ch.cellW, chh = ch.cellH;
+    // cella = larghezza della striscia / numero di pose (ogni animazione può avere la sua)
+    const cw = im.naturalWidth / def.frames, chh = im.naturalHeight;
     const f  = ((frame % def.frames) + def.frames) % def.frames;
     const s  = opts.scale ?? 1;
 

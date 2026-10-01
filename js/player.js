@@ -177,13 +177,14 @@ export class Player {
   _pickAnim() {
     if (!this.alive) return 'death';
     if (this._hurtTimer > 0) return 'hurt';
-    if (this.armed && this.reloading) return 'reload';
-    if (this.armed && this.shotTimer > 0) return 'shoot';
-    if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return 'aim';
+    const sg = this.weaponId === 'shotgun';
+    if (this.armed && this.reloading) return sg ? 'shotgun_aim' : 'reload';
+    if (this.armed && this.shotTimer > 0) return sg ? 'shotgun_shoot' : 'shoot';
+    if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return sg ? 'shotgun_aim' : 'aim';
     if (this.vx !== 0) {
       if (this.isCrouching) return 'sneak';
       if (this.isRunning)   return 'run';
-      return 'walk';
+      return this.flashlightOn ? 'flashlight_walk' : 'walk';
     }
     if (this.isCrouching) return 'crouch';
     if (this.flashlightOn) return 'flashlight';
@@ -203,7 +204,7 @@ export class Player {
     if (!def) return;
     this.animTimer += dt;
     // passi sincronizzati con la velocità reale (niente piedi che pattinano)
-    const stride = { walk: 30, run: 72, sneak: 42 }[this.anim];
+    const stride = { walk: 30, flashlight_walk: 40, run: 72, sneak: 42 }[this.anim];
     const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
     const fd = 1 / fps;
     while (this.animTimer >= fd) {

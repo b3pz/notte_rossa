@@ -36,23 +36,23 @@ export const ENEMY_DEFS = {
     damage: 32, cooldown: 2.0, windup: 0.45, range: 100,
     vision: 150, hearing: true, stun: 0.6,
   },
-  // Varianti (una posa sola: il movimento è simulato con oscillazione)
+  // Varianti del Contaminato (camminata, attacco e morte proprie)
   ferroviere: {
-    name: 'Ferroviere', sprite: 'ferroviere', singlePose: true,
+    name: 'Ferroviere', sprite: 'ferroviere',
     width: 80, height: 260, maxHp: 100,
     speed: 45, chaseSpeed: 80,
     damage: 18, cooldown: 1.7, windup: 0.45, range: 95,
     vision: 480, stun: 0.35,
   },
   infermiere: {
-    name: 'Infermiere', sprite: 'infermiere', singlePose: true,
+    name: 'Infermiere', sprite: 'infermiere',
     width: 80, height: 260, maxHp: 90,
     speed: 50, chaseSpeed: 95,
     damage: 16, cooldown: 1.4, windup: 0.4, range: 95,
     vision: 520, stun: 0.35,
   },
   tecnico: {
-    name: 'Tecnico', sprite: 'tecnico', singlePose: true,
+    name: 'Tecnico', sprite: 'tecnico',
     width: 80, height: 260, maxHp: 130,
     speed: 40, chaseSpeed: 75,
     damage: 24, cooldown: 1.9, windup: 0.5, range: 100,

@@ -280,16 +280,15 @@
        È generato da tools/build.py a partire dai file in js/ -->
   <script>
 /* ───── sprite_manifest.js ───── */
-/* Generato da tools/slice_sprites.py — NON modificare a mano */
+/* Generato da tools/slice_sprites.py e tools/repack_strips.py.
+   La cella di ogni animazione = larghezza immagine / frames (piedi sul bordo basso). */
 const SPRITES = {
   "player": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/player_idle.png",
-        "frames": 1,
+        "frames": 4,
         "fps": 3,
         "loop": true
       },
@@ -301,7 +300,7 @@ const SPRITES = {
       },
       "run": {
         "file": "assets/sprites/cut/player_run.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 12,
         "loop": true
       },
@@ -313,80 +312,96 @@ const SPRITES = {
       },
       "aim": {
         "file": "assets/sprites/cut/player_aim.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 2,
+        "fps": 3,
         "loop": true
       },
       "shoot": {
         "file": "assets/sprites/cut/player_shoot.png",
-        "frames": 8,
-        "fps": 12,
+        "frames": 3,
+        "fps": 14,
         "loop": false
       },
       "reload": {
         "file": "assets/sprites/cut/player_reload.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 4,
+        "fps": 6,
         "loop": false
       },
       "hurt": {
         "file": "assets/sprites/cut/player_hurt.png",
-        "frames": 8,
-        "fps": 12,
+        "frames": 2,
+        "fps": 8,
         "loop": false
       },
       "wounded": {
         "file": "assets/sprites/cut/player_wounded.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 2,
+        "fps": 4,
         "loop": true
       },
       "death": {
         "file": "assets/sprites/cut/player_death.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 3,
+        "fps": 4,
         "loop": false
       },
       "flashlight": {
         "file": "assets/sprites/cut/player_flashlight.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "push": {
         "file": "assets/sprites/cut/player_push.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 3,
+        "fps": 5,
         "loop": false
       },
       "crouch": {
         "file": "assets/sprites/cut/player_crouch.png",
-        "frames": 8,
-        "fps": 10,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "sneak": {
         "file": "assets/sprites/cut/player_sneak.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "hide": {
         "file": "assets/sprites/cut/player_hide.png",
-        "frames": 6,
-        "fps": 8,
+        "frames": 1,
+        "fps": 3,
         "loop": true
+      },
+      "flashlight_walk": {
+        "file": "assets/sprites/cut/player_flashlight_walk.png",
+        "frames": 6,
+        "fps": 10,
+        "loop": true
+      },
+      "shotgun_aim": {
+        "file": "assets/sprites/cut/player_shotgun_aim.png",
+        "frames": 2,
+        "fps": 3,
+        "loop": true
+      },
+      "shotgun_shoot": {
+        "file": "assets/sprites/cut/player_shotgun_shoot.png",
+        "frames": 4,
+        "fps": 12,
+        "loop": false
       }
     }
   },
   "contaminato": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/contaminato_idle.png",
-        "frames": 2,
+        "frames": 1,
         "fps": 3,
         "loop": true
       },
@@ -410,15 +425,13 @@ const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/contaminato_dead.png",
-        "frames": 2,
-        "fps": 3,
+        "frames": 4,
+        "fps": 6,
         "loop": false
       }
     }
   },
   "corridore": {
-    "cellW": 315,
-    "cellH": 248,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -456,12 +469,16 @@ const SPRITES = {
         "frames": 1,
         "fps": 1,
         "loop": false
+      },
+      "run": {
+        "file": "assets/sprites/cut/corridore_run.png",
+        "frames": 6,
+        "fps": 14,
+        "loop": true
       }
     }
   },
   "crawler": {
-    "cellW": 342,
-    "cellH": 187,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -509,8 +526,6 @@ const SPRITES = {
     }
   },
   "listener": {
-    "cellW": 315,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -558,57 +573,53 @@ const SPRITES = {
     }
   },
   "carmine": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/carmine_idle.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/carmine_talk.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 4,
+        "fps": 5,
         "loop": true
       },
       "check": {
         "file": "assets/sprites/cut/carmine_check.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "scared": {
         "file": "assets/sprites/cut/carmine_scared.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       }
     }
   },
   "elena": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/elena_idle.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "talk": {
         "file": "assets/sprites/cut/elena_talk.png",
-        "frames": 8,
-        "fps": 8,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "point": {
         "file": "assets/sprites/cut/elena_point.png",
-        "frames": 8,
-        "fps": 6,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       },
       "walk": {
@@ -619,15 +630,13 @@ const SPRITES = {
       },
       "scared": {
         "file": "assets/sprites/cut/elena_scared.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 1,
+        "fps": 3,
         "loop": true
       }
     }
   },
   "ferroviere": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -638,33 +647,25 @@ const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/ferroviere_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/ferroviere_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/ferroviere_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/ferroviere_dead.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 5,
         "loop": false
       }
     }
   },
   "infermiere": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -675,33 +676,25 @@ const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/infermiere_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/infermiere_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/infermiere_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/infermiere_dead.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 5,
+        "fps": 5,
         "loop": false
       }
     }
   },
   "tecnico": {
-    "cellW": 321,
-    "cellH": 282,
     "humanH": 280,
     "anims": {
       "idle": {
@@ -712,26 +705,20 @@ const SPRITES = {
       },
       "walk": {
         "file": "assets/sprites/cut/tecnico_walk.png",
-        "frames": 8,
+        "frames": 6,
         "fps": 8,
         "loop": true
       },
       "attack": {
         "file": "assets/sprites/cut/tecnico_attack.png",
-        "frames": 8,
+        "frames": 4,
         "fps": 8,
-        "loop": false
-      },
-      "hurt": {
-        "file": "assets/sprites/cut/tecnico_hurt.png",
-        "frames": 1,
-        "fps": 3,
         "loop": false
       },
       "dead": {
         "file": "assets/sprites/cut/tecnico_dead.png",
-        "frames": 8,
-        "fps": 4,
+        "frames": 4,
+        "fps": 5,
         "loop": false
       }
     }
@@ -927,7 +914,8 @@ const SpriteLib = {
     const im = _img(def.file);
     if (!_ready(im)) return false;
 
-    const cw = ch.cellW, chh = ch.cellH;
+    // cella = larghezza della striscia / numero di pose (ogni animazione può avere la sua)
+    const cw = im.naturalWidth / def.frames, chh = im.naturalHeight;
     const f  = ((frame % def.frames) + def.frames) % def.frames;
     const s  = opts.scale ?? 1;
 
@@ -2154,13 +2142,14 @@ class Player {
   _pickAnim() {
     if (!this.alive) return 'death';
     if (this._hurtTimer > 0) return 'hurt';
-    if (this.armed && this.reloading) return 'reload';
-    if (this.armed && this.shotTimer > 0) return 'shoot';
-    if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return 'aim';
+    const sg = this.weaponId === 'shotgun';
+    if (this.armed && this.reloading) return sg ? 'shotgun_aim' : 'reload';
+    if (this.armed && this.shotTimer > 0) return sg ? 'shotgun_shoot' : 'shoot';
+    if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return sg ? 'shotgun_aim' : 'aim';
     if (this.vx !== 0) {
       if (this.isCrouching) return 'sneak';
       if (this.isRunning)   return 'run';
-      return 'walk';
+      return this.flashlightOn ? 'flashlight_walk' : 'walk';
     }
     if (this.isCrouching) return 'crouch';
     if (this.flashlightOn) return 'flashlight';
@@ -2180,7 +2169,7 @@ class Player {
     if (!def) return;
     this.animTimer += dt;
     // passi sincronizzati con la velocità reale (niente piedi che pattinano)
-    const stride = { walk: 30, run: 72, sneak: 42 }[this.anim];
+    const stride = { walk: 30, flashlight_walk: 40, run: 72, sneak: 42 }[this.anim];
     const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
     const fd = 1 / fps;
     while (this.animTimer >= fd) {
@@ -2989,23 +2978,23 @@ const ENEMY_DEFS = {
     damage: 32, cooldown: 2.0, windup: 0.45, range: 100,
     vision: 150, hearing: true, stun: 0.6,
   },
-  // Varianti (una posa sola: il movimento è simulato con oscillazione)
+  // Varianti del Contaminato (camminata, attacco e morte proprie)
   ferroviere: {
-    name: 'Ferroviere', sprite: 'ferroviere', singlePose: true,
+    name: 'Ferroviere', sprite: 'ferroviere',
     width: 80, height: 260, maxHp: 100,
     speed: 45, chaseSpeed: 80,
     damage: 18, cooldown: 1.7, windup: 0.45, range: 95,
     vision: 480, stun: 0.35,
   },
   infermiere: {
-    name: 'Infermiere', sprite: 'infermiere', singlePose: true,
+    name: 'Infermiere', sprite: 'infermiere',
     width: 80, height: 260, maxHp: 90,
     speed: 50, chaseSpeed: 95,
     damage: 16, cooldown: 1.4, windup: 0.4, range: 95,
     vision: 520, stun: 0.35,
   },
   tecnico: {
-    name: 'Tecnico', sprite: 'tecnico', singlePose: true,
+    name: 'Tecnico', sprite: 'tecnico',
     width: 80, height: 260, maxHp: 130,
     speed: 40, chaseSpeed: 75,
     damage: 24, cooldown: 1.9, windup: 0.5, range: 100,
@@ -4519,7 +4508,7 @@ class SaveManager {
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
    props:    { name, x, flip }
-   overlays: { type:'monitor'|'neon'|'lever'|'barricade', ... }
+   overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
    enemies:  { id, type, x, patrol, ceiling, idle, facingRight, showIf, hideIf }
    cond:     { flag } | { notFlag } | { item }
    ============================================= */
@@ -4972,7 +4961,7 @@ const ROOMS = {
         keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
     ],
     overlays: [
-      { type: 'state', picked: 'safe_to_maint', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
+      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
     ],
   },
 
@@ -5037,7 +5026,7 @@ const ROOMS = {
     light: 0.55, map: [3, 5],
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
-      { type: 'state', flag: 'power_on', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
+      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
     ],
     hotspots: [
       { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },
@@ -5342,7 +5331,8 @@ class RoomManager {
       const anim = this.game.events.getFlag(`npc_${n.id}_anim`) || n.anim || 'idle';
       const ns = room.scaleAt(n.x), nf = room.floorAt(n.x);
       SpriteLib.drawShadow(ctx, n.x, nf - 2 * ns, 105 * ns, 0.6);
-      SpriteLib.draw(ctx, n.char, anim, 0, n.x, nf, n.facingRight, { scale: ns });
+      const fr = Math.floor(Date.now() / 1000 * (SpriteLib.animDef(n.char, anim)?.fps || 3));
+      SpriteLib.draw(ctx, n.char, anim, fr, n.x, nf, n.facingRight, { scale: ns });
     }
   }
 
@@ -5420,8 +5410,9 @@ class RoomManager {
         SpriteLib.drawPropFit(ctx, on ? 'lever_on' : 'lever_off', o.x, o.y, o.h);
       } else if (o.type === 'state') {
         // stato alternativo dello sfondo (armadietto aperto, cassetta aperta...):
+        // condizione: picked (oggetto preso) | door (porta aperta con la chiave) | flag
         // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
-        const on = (o.picked && this.isPicked(o.picked)) || (o.flag && this.check({ flag: o.flag }));
+        const on = (o.picked && this.isPicked(o.picked)) || (o.door && this.isDoorOpen(o.door)) || (o.flag && this.check({ flag: o.flag }));
         if (!on) { o._t0 = 0; continue; }
         const im = this._bgImage(o.src);
         if (!im || !im.complete || !im.naturalWidth) continue;
@@ -6194,6 +6185,7 @@ class Game {
     // stato che il giocatore deve conoscere
     p.hasFlashlight = this.inventory.hasItem('flashlight');
     p.armed     = !!this.weapon.equipped;
+    p.weaponId  = this.weapon.equipped?.def?.id || null;
     p.reloading = !!this.weapon.equipped?.isReloading;
 
     this._updateAutoWalk();
