@@ -213,8 +213,16 @@ BODY_LEN = 240
 
 
 # ─────────────────────────────────────────────
-def remove_background(rgb):
-    """Ritorna maschera figura (bool) togliendo il bianco collegato ai bordi."""
+def remove_background(rgb, alpha=None):
+    """Ritorna maschera figura (bool) togliendo il bianco collegato ai bordi.
+    Se la tavola è un PNG trasparente (es. ChatGPT) usa direttamente la trasparenza."""
+    if alpha is not None:
+        fg = alpha > 40
+        lab, n = ndimage.label(fg, structure=np.ones((3, 3)))
+        if n:
+            sizes = ndimage.sum(fg, lab, index=np.arange(1, n + 1))
+            fg[np.isin(lab, np.nonzero(sizes < 450)[0] + 1)] = False
+        return fg
     a = rgb.astype(np.int16)
     mn = a.min(axis=2)
     mx = a.max(axis=2)
@@ -277,15 +285,23 @@ def extract(rgb, fg, fig):
 
 def slice_sheet(fname, opts):
     path = os.path.join(ASSETS, fname) if '/' in fname else os.path.join(SRC, fname)
-    img = Image.open(path).convert('RGB')
+    src = Image.open(path)
+    A = None
+    if src.mode in ('RGBA', 'LA', 'P'):
+        al = np.array(src.convert('RGBA'))[..., 3]
+        if al.min() < 200:          # c'è davvero trasparenza
+            A = al
+    img = Image.new('RGB', src.size, 'white')
+    img.paste(src.convert('RGBA'), mask=src.convert('RGBA').split()[3])
     rgb = np.array(img)
+    sub_a = lambda y0, y1, x0, x1: None if A is None else A[y0:y1, x0:x1]
     H, W = rgb.shape[:2]
     frames = []   # (rgba, mask, (x0, y0)) in ordine di lettura
 
     if opts['layout'] == 'boxes':
         for (bx0, by0, bx1, by1) in opts['boxes']:
             sub = rgb[by0:by1, bx0:bx1]
-            fg = remove_background(sub)
+            fg = remove_background(sub, sub_a(by0, by1, bx0, bx1))
             figs = find_figures(fg, min_area=200)
             if not figs:
                 frames.append(None); continue
@@ -303,7 +319,7 @@ def slice_sheet(fname, opts):
                 x1 = min(W, cx1 + 60) if opts.get('overflow') else cx1 - 5
                 y0, y1 = int(r * ch) + 5, int((r + 1) * ch) - 5
                 sub = rgb[y0:y1, x0:x1]
-                fg = remove_background(sub)
+                fg = remove_background(sub, sub_a(y0, y1, x0, x1))
                 figs = find_figures(fg, min_area=1500)
                 # tieni solo figure il cui centro cade nella cella vera
                 figs = [f for f in figs
@@ -314,7 +330,7 @@ def slice_sheet(fname, opts):
                 rgba, mask = extract(sub, fg, big)
                 frames.append((rgba, mask, (x0 + big['sl'][1].start, y0 + big['sl'][0].start)))
     else:
-        fg = remove_background(rgb)
+        fg = remove_background(rgb, A)
         figs = find_figures(fg, min_area=3000)
         # righe: raggruppa per centro verticale
         figs.sort(key=lambda f: (f['sl'][0].start + f['sl'][0].stop) / 2)

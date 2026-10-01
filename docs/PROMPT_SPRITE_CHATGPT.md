@@ -3,7 +3,7 @@
 ## Regole per tutti gli sprite (personaggi e mostri)
 
 1. **Allega sempre come riferimento** la tavola della camminata del protagonista (`assets/sprites/player_walk8.png`), così stile e proporzioni restano gli stessi.
-2. Ogni tavola ha **una sola animazione**, su **sfondo bianco pieno**, senza scritte e senza numeri.
+2. Ogni tavola ha **una sola animazione**, senza scritte e senza numeri. Meglio con **sfondo trasparente** (PNG), altrimenti bianco pieno: il gioco li gestisce tutti e due. Se aprendo l'immagine vedi una scacchiera grigia e bianca **disegnata** al posto della trasparenza, chiedi di rifarla con sfondo bianco.
 3. Il personaggio è **di profilo e guarda a DESTRA**: il gioco lo specchia da solo quando va a sinistra.
 4. **Lascia spazio vuoto tra una figura e l'altra.** Nella camminata alcuni scarponi si toccavano e ho dovuto tagliarli.
 5. Usa il formato orizzontale 1536×1024, con le figure su **2 righe da 4** (o 2 righe da 3 per le animazioni da 6 pose).
@@ -12,7 +12,7 @@
 Parte finale da aggiungere a ogni prompt di sprite:
 
 ```
-Same character and same art style as the attached reference sheet. Full body, strict side view facing right, painterly semi-realistic 2D game sprite, consistent scale, feet on the same baseline, pure flat white background, generous empty space between figures so they never touch, no text, no numbers, no shadows on the ground, 1536x1024, two rows of evenly spaced poses.
+Same character and same art style as the attached reference sheet. Full body, strict side view facing right, painterly semi-realistic 2D game sprite, consistent scale, feet on the same baseline, transparent background (PNG with alpha; if not possible, pure flat white), generous empty space between figures so they never touch, no text, no numbers, no shadows on the ground, 1536x1024, two rows of evenly spaced poses.
 ```
 
 ---
