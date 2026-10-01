@@ -149,10 +149,7 @@ Allega `01_personaggi/elena.png`.
 | `elena_scared.png` | 2 | `Elena stepping back, hand raised: "don't come closer", 2 poses` |
 | `elena_point.png` | 2 | `Elena pointing toward a table to her right, 2 poses` |
 
-### A8. Effetti (oggi disegnati dal codice o assenti)
-
-| File | Pose | Prompt |
-|---|---|---|
+---|---|---|
 | `fx_muzzle_pistol.png` | 3 | `pistol muzzle flash seen from the side, pointing right, 3 frames, transparent` |
 | `fx_muzzle_shotgun.png` | 3 | `large shotgun muzzle blast seen from the side, pointing right, 3 frames` |
 | `fx_blood_hit.png` | 4 | `dark red blood spray from a bullet impact, side view, 4 frames` |
@@ -163,39 +160,119 @@ Allega `01_personaggi/elena.png`.
 
 ## B. GUI — sostituire l'HTML con sprite
 
-Ordine consigliato: B1 → B5 cambiano subito la faccia del gioco.
+**Il codice è già pronto**: ogni file qui sotto, appena esiste in `assets/ui/` (gli effetti in `assets/fx/`), prende il posto della parte HTML corrispondente. Quelli che mancano restano come oggi. Puoi generarli in tavole (te li taglio io) o già singoli con questi nomi.
 
-| # | File | Contenuto | Prompt (+ coda GUI) |
-|---|---|---|---|
-| B1 | `ui_kit.png` | pannello 9-slice, bottone (normale / evidenziato / premuto / disattivato), bottone chiudi ✕, cursore volume (binario + manopola), casella di spunta (vuota/piena) | `UI kit: one large empty panel frame made of dark scratched metal with rivets and a thin red enamel line; four versions of the same rectangular button (normal, highlighted with red glow, pressed, disabled grey); a small square close button with an X; a horizontal slider track and a round knob; a checkbox empty and checked.` |
-| B2 | `logo_notte_rossa.png` | scritta del titolo | `Title logo lettering "NOTTE ROSSA": "NOTTE" in off-white stencil-like condensed letters, "ROSSA" below in glowing blood-red neon-like letters with rain drops, slightly worn, transparent background, 1600x600. Text must read exactly NOTTE ROSSA.` |
-| B3 | `menu_bg.png` | fondale del menu (oggi provvisorio) | `Key art: a man with a backpack seen from behind standing on an empty wet railway platform at night, a stopped regional train with its door open, red emergency light, rain, Italian coastal station, large empty dark area on the left for the menu, painterly semi-realistic, 1920x1080, no text.` |
-| B4 | `hud.png` | barra vita stile monitor ECG (cornice + 3 tracce: verde/giallo/rossa), cornice batteria torcia + icona, targhetta munizioni, etichetta "obiettivo" (nastro adesivo/carta), targhetta nome stanza | `HUD pieces: a small handheld heart-monitor frame for a health bar with three separate ECG line strips (green, amber, red); a flashlight battery gauge frame with a small battery icon; a dark metal plate for an ammo counter; a strip of torn paper held by grey tape for an objective note; a small enamel sign plate for a room name.` |
-| B5 | `dialogo.png` | riquadro dialogo 9-slice + targhetta del nome | `A wide dialogue box frame: dark translucent glass with a worn metal border and a thin red line, plus a separate small name tag plate that sits on its top-left corner.` |
-| B6 | `ritratti.png` | busti 256×256 per i dialoghi | `Character portrait busts, 3/4 view, painterly semi-realistic, dark background vignette, 6 separate squares: Luca neutral, Luca scared, Elena neutral, Elena crying, Carmine talking, Carmine terrified.` Allega i riferimenti dei personaggi. Aggiungi `ritratto_radio.png`: `an old cassette recorder / emergency radio icon portrait` per le voci registrate e `???` al telefono. |
-| B7 | `tasti.png` | tasti tastiera E, SPAZIO, TAB, F, R, M, SHIFT, C, ESC; pulsanti gamepad A B X Y; lucchetto; frecce uscita ◄ ► ▲ | `Keyboard keycap icons, worn off-white plastic with dark letters: E, SPACE, TAB, F, R, M, SHIFT, C, ESC; gamepad face buttons A, B, X, Y as round dark buttons with coloured letters; a small padlock icon; three painted floor arrows (left, right, forward) in off-white road paint.` (qui il testo serve: controlla che le lettere siano giuste) |
-| B8 | `inventario.png` | sfondo zaino aperto 1280×720, casella (vuota/selezionata), riquadro descrizione | `Inventory screen background: the inside of an open brown canvas backpack seen from above, dark lining, space for a 5x4 grid; separate: an empty item slot square (dark worn fabric with stitched border), the same slot highlighted with a red stitched border, a wide description plate.` |
-| B9 | `documenti.png` | 6 carte 900×1200: dattiloscritto con timbro (ordinanza), quaderno a righe scritto a mano (diario, taccuino), modulo clinico (cartella, referto), carta da lettera (lettera di Elena), biglietto del treno, stampa da computer (direttiva) | `Six separate blank paper sheets, front view, no readable text: an official typed municipal document with a faded stamp area; a lined notebook page with coffee stains; a hospital clinical record form with empty boxes; a soft cream letter paper, slightly creased; a small Italian regional train ticket; a dot-matrix computer printout with perforated edges. Slight wear, water drops.` (il testo lo metto io sopra) |
-| B10 | `radio_salvataggio.png` | illustrazione della radio d'emergenza (schermata Salva) | `An old military-style emergency radio on a metal desk, front view, dial glowing amber, small red LED, 900x600.` |
-| B11 | `mappa_porto_salvo.png` | mappa disegnata a mano 1600×1000 | `Hand-drawn tourist map of a small Italian coastal town named Porto Salvo on aged paper: railway station top-left, a main street, an alley, a hospital with a red cross, a metro line drawn in red dashes going underground, a harbour with piers at the bottom, sea "Mar Tirreno", hill on the right. Labels in Italian: Stazione Centrale, Via Ferrante, Ospedale San Rocco, Porto, Molo 4.` |
-| B12 | `schermate.png` | Game over ("SEI MORTO"), cartello capitolo, finale ALBA, finale NOTTE (1920×1080 ciascuna) | `Game over screen: dark wet floor, a dropped flashlight still on, blood drops, red lettering "SEI MORTO"` — `Ending ALBA: a small wooden fishing boat leaving a harbour at dawn, the town burning red behind` — `Ending NOTTE: the same boat at night, the town burning, darker, hopeless` — `Chapter card background: a strip of dark film with red light leaks, empty centre for text`. |
-| B13 | `touch.png` | pulsanti per telefono: spara (mirino), zaino, pausa, torcia, ricarica, usa | `Round touch-screen buttons, dark translucent glass with a thin red ring, icons: crosshair, backpack, pause, flashlight, reload arrows, hand.` |
-| B14 | `mirino.png` | mirino rosso, "!" di allarme, segno di colpo | `A red circular crosshair reticle, a red exclamation-mark alert sign, a small white hit-marker cross.` |
+Regole: PNG con **trasparenza**; i pezzi "9-slice" (pannello, bottone, dialogo, notifica) hanno **angoli e bordi decorati entro 64 px** (bottone: entro 24 px) e **centro uniforme**, perché il centro viene stirato. Dimensioni consigliate tra parentesi.
+
+### B1. Kit di base (prompt: `UI kit: …` sotto)
+| File | Cosa | Misura |
+|---|---|---|
+| `panel.png` | pannello vuoto 9-slice (inventario, pausa, salva, opzioni, carica, crediti, finale) | 512×512 |
+| `button.png` · `button_hover.png` · `button_disabled.png` | bottone normale / evidenziato / disattivato, 9-slice | 384×96 |
+| `close.png` | bottone chiudi ✕ | 96×96 |
+| `slider_track.png` · `slider_knob.png` | binario del volume · manopola | 512×28 · 64×64 |
+| `check_off.png` · `check_on.png` | casella vuota · spuntata | 64×64 |
+| `notification.png` | targhetta per gli avvisi ("Raccolto: …"), 9-slice | 384×96 |
+
+`UI kit: one large empty panel frame made of dark scratched metal with rivets and a thin red enamel line, empty uniform dark centre; three versions of the same rectangular button (normal, highlighted with red glow, disabled grey); a small square close button with an X; a horizontal slider track and a round knob; a checkbox empty and checked; a small notification plate.`
+
+### B2. Menu e titolo
+| File | Cosa | Prompt |
+|---|---|---|
+| `logo.png` | scritta NOTTE ROSSA (sostituisce il titolo nel menu e quello cinematografico) 1600×600 | `Title logo lettering "NOTTE ROSSA": "NOTTE" in off-white condensed stencil letters, "ROSSA" below in glowing blood-red neon letters with rain drops, slightly worn, transparent background. Text must read exactly NOTTE ROSSA.` |
+| `menu_bg.png` | fondale del menu 1920×1080 (sostituisce quello provvisorio; la figura di Luca sovrapposta sparisce) | `Key art: a young man with a backpack seen from behind on an empty wet railway platform at night, a stopped regional train with its door open, red emergency light, rain, Italian coastal station, large empty dark area on the left for the menu, painterly semi-realistic, no text.` |
+
+### B3. HUD
+| File | Cosa | Misura |
+|---|---|---|
+| `hud_health.png` | cornice tipo monitor cardiaco per la vita | 460×148 |
+| `hud_ecg_fine.png` · `hud_ecg_caution.png` · `hud_ecg_danger.png` | traccia ECG verde / ambra / rossa su fondo trasparente, **ripetibile in orizzontale** (scorre) | 388×60 |
+| `hud_battery.png` | cornice batteria torcia (spazio vuoto a destra per la barra) | 400×80 |
+| `hud_ammo.png` | targhetta per le munizioni | 320×100 |
+| `hud_objective.png` | striscia di carta strappata con nastro (testo scuro sopra) | 700×160 |
+| `hud_room.png` | targhetta smaltata per il nome della stanza | 500×70 |
+
+`HUD pieces: a small handheld heart-monitor frame; three separate seamless horizontal ECG line strips (green, amber, red) on transparent background; a flashlight battery gauge frame with a small battery icon on the left; a dark metal plate for an ammo counter; a strip of torn paper held by grey tape; a small enamel sign plate.`
+
+### B4. Dialoghi e ritratti
+| File | Cosa |
+|---|---|
+| `dialog.png` | riquadro del dialogo 9-slice (1024×320) |
+| `dialog_name.png` | targhetta del nome di chi parla (400×80) |
+| `portrait_luca.png` · `portrait_luca_scared.png` | Luca normale · spaventato (al telefono) |
+| `portrait_elena.png` · `portrait_elena_sad.png` | Elena · in lacrime (morso, addio) |
+| `portrait_carmine.png` · `portrait_carmine_scared.png` | Carmine · terrorizzato (primo incontro) |
+| `portrait_tape.png` | registratore a cassette (voce registrata di Elena) |
+| `portrait_phone.png` | cornetta del telefono pubblico ("???") |
+| `portrait_radio.png` | radio (annunci della Protezione Civile) |
+
+Ritratti 512×512, busto 3/4, sfondo scuro sfumato: `Character portrait bust, 3/4 view, painterly semi-realistic, dark vignette background, square: …` + descrizione del personaggio. Se manca la versione "scared/sad" si usa quella normale.
+
+### B5. Inventario, radio, schermate
+| File | Cosa | Prompt |
+|---|---|---|
+| `inv_bg.png` | sfondo dell'inventario 1280×860: zaino aperto visto dall'alto | `The inside of an open brown canvas backpack seen from above, dark lining, empty central area, worn straps on the edges.` |
+| `inv_slot.png` · `inv_slot_sel.png` | casella vuota · selezionata (192×192) | `An empty square item slot of dark worn fabric with a stitched border; the same slot with a red stitched border.` |
+| `inv_detail.png` | targhetta per la descrizione dell'oggetto (1100×200) | `A wide dark leather label with stitched edges.` |
+| `radio.png` | radio d'emergenza della schermata Salva (900×600) | `An old military emergency radio on a metal desk, front view, amber glowing dial, small red LED.` |
+| `gameover.png` | schermata di morte 1920×1080, **con la scritta** | `Dark wet floor, a dropped flashlight still on, blood drops, red lettering "SEI MORTO", empty bottom area for buttons.` |
+| `chapter.png` | fascia dietro il titolo del capitolo (1920×300) | `A strip of dark film with red light leaks, empty centre for text.` |
+| `ending_alba.png` · `ending_notte.png` | finali 1920×1080 | `A small wooden fishing boat leaving a harbour at dawn, the town burning red behind` · `the same boat at night, the town burning, darker, hopeless` |
+
+### B6. Documenti — sì, un foglio per tipo (sostituiscono il riquadro nero)
+Il testo lo scrive il gioco sopra il foglio, quindi **fogli senza testo leggibile**, 900×1200, margini vuoti di almeno 60 px.
+
+| File | Documenti che lo usano |
+|---|---|
+| `paper_ticket.png` | biglietto del treno |
+| `paper_typed.png` | ordinanza del sindaco, registro di movimento, avviso della metro |
+| `paper_notebook.png` | promemoria di Carmine, diario di Giulia, appunti di Elena, registro del capotreno, taccuino del soldato |
+| `paper_clinical.png` | cartella clinica, protocollo campioni, referto autoptico |
+| `paper_letter.png` | biglietto di Luigi, nota dell'officina, lettera di Elena |
+| `paper_printout.png` | manuale del generatore, registro accessi, direttiva riservata |
+
+`Blank paper sheet, front view, no readable text, slight wear and water drops: [an official typed municipal document with a faded stamp area | a lined notebook page with coffee stains | a hospital clinical record form with empty boxes | a soft cream letter paper, slightly creased | a small Italian regional train ticket, landscape | a dot-matrix computer printout with perforated edges].`
+
+**Font (facoltativi)**: metti in `assets/fonts/` `typewriter.woff2` (es. *Special Elite*) e `handwriting.woff2` (es. *Caveat*), gratuiti su Google Fonts: il testo dei documenti diventa a macchina o a mano a seconda del foglio.
+
+### B7. Nella scena e sul telefono
+| File | Cosa |
+|---|---|
+| `prompt.png` | targhetta del suggerimento "Raccogli: …" sopra gli oggetti (400×80) |
+| `key_e.png` · `key_touch.png` | tasto E · dito/cerchio per il telefono (96×96) |
+| `reticle.png` | mirino rosso sul nemico (192×192) |
+| `arrow_left.png` · `arrow_right.png` · `arrow_up.png` | frecce dipinte sul pavimento per le uscite (240×160) |
+| `padlock.png` | lucchetto delle porte chiuse (96×96) |
+| `touch_shoot.png` · `touch_use.png` · `touch_bag.png` · `touch_pause.png` | pulsanti rotondi del telefono (256×256) |
+
+`Game UI icons: an off-white keyboard keycap with the letter E; a round touch target; a red circular crosshair reticle; three arrows painted on a floor in worn off-white road paint (left, right, forward); a small rusty padlock; four round touch-screen buttons of dark glass with a thin red ring and icons: crosshair, hand, backpack, pause.`
+
+### B8. Effetti (cartella `assets/fx/`)
+Striscia orizzontale di **fotogrammi quadrati** (es. 4 fotogrammi = 1024×256).
+
+| File | Cosa |
+|---|---|
+| `fx_muzzle_pistol.png` (3) · `fx_muzzle_shotgun.png` (3) | vampata vista di lato, verso destra |
+| `fx_blood_hit.png` (4) | spruzzo di sangue scuro dal colpo |
+| `fx_dust_drop.png` (4) | polvere a terra quando il Crawler atterra |
+
+La mappa di Porto Salvo è disegnata dal codice e segue le stanze: **non serve** un'immagine.
 
 ---
 
 ## C. OGGETTI DI SCENA (stati "aperto" dei fondali)
 
-Già fatti: deposito, degenze, officina, alimentari, atrio, sala server, generatori, rifugio.
-Da fare se vuoi che si vedano gli oggetti presi:
+Già nel gioco: biglietteria, armadio B3 **e** cassetta rossa (si aprono ognuno quando prendi il suo oggetto), mobiletto delle degenze, armadietto 7, cassaforte, porta della sala server, porta del laboratorio, generatore acceso.
+Il codice usa solo la zona dell'oggetto, con i bordi sfumati: non importa se ChatGPT cambia un po' il resto dell'immagine.
 
-| File | Stanza | Prompt (carica il fondale originale da `03_fondali/`) |
+Pronti nel codice, mancano le immagini (carica il fondale da `03_fondali/` e chiedi la modifica):
+
+| File (in `assets/backgrounds/v2/`) | Quando appare | Prompt |
 |---|---|---|
-| `station_storage_open2.png` | Servizi tecnici | `Edit this image: the red key box on the wall is open and empty. Keep EVERYTHING else exactly identical.` |
-| `hospital_surgery_open.png` | Sala operatoria | `Edit this image: the tall refrigerator door is open, a shelf inside empty. Keep everything else identical.` |
-| `lab_biologico_open.png` | Lab biologico | `Edit this image: the USB stick in the terminal is gone, the screen shows a red "NO DATA". Keep everything else identical.` |
-| `camera_centrale_after.png` | Camera centrale | `Edit this image: on the table a folded letter and an old rusty key; alarm red light stronger. Keep everything else identical.` |
-| `station_control_open.png` | Sala controllo | `Edit this image: the big lever on the right panel is pulled down, a green light above it. Keep everything else identical.` |
+| `hospital_surgery_open.png` | prendi la provetta | `Edit this image: the tall refrigerator door is open, the shelf inside empty. Keep everything else identical.` |
+| `lab_biologico_open.png` | prendi la chiavetta | `Edit this image: the USB stick in the terminal is gone, the screen shows a red "NO DATA". Keep everything else identical.` |
+| `station_control_open.png` | alzi la serranda | `Edit this image: the big lever on the right panel is pulled down, a green light above it. Keep everything else identical.` |
+| `camera_centrale_after.png` | Elena se n'è andata | `Edit this image: on the table a folded letter and an old rusty key; the red alarm light stronger. Keep everything else identical.` |
 
 ---
 

@@ -1,0 +1,4 @@
+Font facoltativi per i documenti (gratuiti su Google Fonts):
+  typewriter.woff2 (o .ttf)   -> es. "Special Elite"  (macchina da scrivere: ordinanze, registri, referti)
+  handwriting.woff2 (o .ttf)  -> es. "Caveat"         (scrittura a mano: diari, biglietti, lettere)
+Poi lancia: python3 tools/build.py

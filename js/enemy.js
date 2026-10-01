@@ -355,6 +355,11 @@ export class Enemy {
       ctx.fillRect(this.x, this.alive ? this.y : this.footY - 30, this.width, this.alive ? this.height : 30);
     }
 
+
+  }
+
+  /** Indicatori sopra il nemico (non prendono la luce della stanza) */
+  drawUI(ctx) {
     // "!" quando ti nota
     if (this.alive && this._alertTimer > 0) {
       const top = (this.state === AI_STATE.CEILING ? this.y - 150 * this.scale : this.y) - 50 * this.scale;
@@ -413,6 +418,7 @@ export class EnemyManager {
   _voice(e, was, dt) {
     const s = e.state;
     if (s === AI_STATE.DROP && was !== AI_STATE.DROP) this._sound(e, 'crawler_drop');
+    else if (was === AI_STATE.DROP && s !== AI_STATE.DROP) this.game.spawnFx?.('fx_dust_drop', e.centerX, e.footY - 30 * e.scale, 140 * e.scale, false, 0.4);
     else if (s === AI_STATE.CHASE && was !== AI_STATE.CHASE && was !== AI_STATE.ATTACK && was !== AI_STATE.STUNNED) {
       this._sound(e, e.type === 'listener' ? 'listener_shriek' : e.type === 'corridore' ? 'runner_scream' : 'enemy_alert');
     } else if (s === AI_STATE.ATTACK && was !== AI_STATE.ATTACK) this._sound(e, 'enemy_attack', 0.8);
@@ -439,7 +445,8 @@ export class EnemyManager {
     const hasShotgun = inv.hasItem('shotgun');
     const low9 = inv.countItem('ammo_pistol_small') + (g.weapon._mags?.pistol ?? 0) < 12;
     const lowSh = hasShotgun && inv.countItem('ammo_shells') < 6;
-    const chance = (low9 || lowSh) ? 0.8 : 0.4;
+    // solo se sei a corto: le munizioni devono restare preziose
+    const chance = (low9 || lowSh) ? 0.75 : 0.1;
     if (Math.random() > chance) return;
     const shells = hasShotgun && (lowSh || Math.random() < 0.35);
     this._dropN = (this._dropN || 0) + 1;
@@ -456,6 +463,10 @@ export class EnemyManager {
     // prima i morti, poi i vivi
     for (const e of this.enemies) if (!e.alive) e.draw(ctx);
     for (const e of this.enemies) if (e.alive)  e.draw(ctx);
+  }
+
+  drawUI(ctx) {
+    for (const e of this.enemies) e.drawUI(ctx);
     if (this.game.debug) {
       ctx.lineWidth = 1;
       for (const e of this.enemies) {

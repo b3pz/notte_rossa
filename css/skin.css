@@ -1,0 +1,221 @@
+/* =============================================
+   NOTTE ROSSA — skin.css
+   Interfaccia a sprite. Ogni regola vale solo se esiste
+   l'immagine assets/ui/<nome>.png (il body riceve la classe
+   "ui-<nome>", vedi js/skin.js). Senza immagini il gioco
+   resta com'è.
+
+   9-slice (pannelli, bottoni, dialogo): l'immagine sorgente ha
+   angoli e bordi entro 64 px (bottoni: 24 px); il centro si stira.
+   ============================================= */
+
+/* font dei documenti 'NR Typewriter' e 'NR Hand': li registra js/skin.js se ci sono in assets/fonts/ */
+
+/* ── PANNELLI ── */
+body.ui-panel .inventory-panel,
+body.ui-panel .map-panel,
+body.ui-panel .pause-panel,
+body.ui-panel .save-panel,
+body.ui-panel .ending-panel,
+body.ui-panel .load-content,
+body.ui-panel .options-content,
+body.ui-panel .credits-content,
+body.ui-panel .document-panel {
+  background: transparent !important;
+  border: 30px solid transparent !important;
+  border-image: url('../assets/ui/panel.png') 64 fill / 30px stretch !important;
+  box-shadow: none !important;
+}
+
+/* ── BOTTONI ── */
+body.ui-button .menu-btn,
+body.ui-button .item-action-btn {
+  background: transparent !important;
+  border: 12px solid transparent !important;
+  border-image: url('../assets/ui/button.png') 24 fill / 12px stretch !important;
+  box-shadow: none !important;
+}
+body.ui-button_hover .menu-btn:hover:not(:disabled),
+body.ui-button_hover .menu-btn:focus-visible,
+body.ui-button_hover .item-action-btn:hover {
+  border-image-source: url('../assets/ui/button_hover.png') !important;
+}
+body.ui-button_disabled .menu-btn:disabled {
+  border-image-source: url('../assets/ui/button_disabled.png') !important;
+  opacity: 1 !important;
+}
+body.ui-close .overlay-close {
+  background: url('../assets/ui/close.png') center / contain no-repeat !important;
+  border: none !important;
+  width: 46px; height: 46px; min-height: 46px;
+  font-size: 0 !important; color: transparent !important; padding: 0 !important;
+}
+
+/* ── CURSORI E CASELLE (opzioni) ── */
+body.ui-slider_track input[type=range] {
+  -webkit-appearance: none; appearance: none; background: transparent; height: 26px;
+}
+body.ui-slider_track input[type=range]::-webkit-slider-runnable-track {
+  height: 14px; background: url('../assets/ui/slider_track.png') center / 100% 100% no-repeat;
+}
+body.ui-slider_track input[type=range]::-moz-range-track {
+  height: 14px; background: url('../assets/ui/slider_track.png') center / 100% 100% no-repeat;
+}
+body.ui-slider_knob input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; margin-top: -6px; border: none;
+  background: url('../assets/ui/slider_knob.png') center / contain no-repeat;
+}
+body.ui-slider_knob input[type=range]::-moz-range-thumb {
+  width: 26px; height: 26px; border: none; background: url('../assets/ui/slider_knob.png') center / contain no-repeat;
+}
+body.ui-check_off input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin: 0;
+  background: url('../assets/ui/check_off.png') center / contain no-repeat; cursor: pointer;
+}
+body.ui-check_on input[type=checkbox]:checked { background-image: url('../assets/ui/check_on.png'); }
+
+/* ── MENU ── */
+body.ui-logo #main-menu .menu-title,
+body.ui-logo #cinematic-title {
+  background: url('../assets/ui/logo.png') left center / contain no-repeat;
+  width: min(62vw, 880px); height: clamp(140px, 28vh, 320px);
+}
+body.ui-logo #cinematic-title { background-position: center; margin: 0 auto; }
+body.ui-logo #main-menu .menu-title span,
+body.ui-logo #cinematic-title span { visibility: hidden; }
+body.ui-menu_bg .mm-photo { background-image: url('../assets/ui/menu_bg.png') !important; }
+body.ui-menu_bg .mm-figure { display: none; }
+
+/* ── HUD ── */
+body.ui-hud_health #hud-health {
+  background: url('../assets/ui/hud_health.png') center / 100% 100% no-repeat;
+  width: 230px; height: 74px; padding: 14px 18px 10px; box-sizing: border-box; gap: 2px;
+}
+body.ui-hud_health #hud-health-bar { width: 100%; height: 30px; background: none; border-radius: 0; }
+body.ui-hud_ecg_fine #hud-health-fill {
+  background: url('../assets/ui/hud_ecg_fine.png') 0 center / 194px 100% repeat-x !important;
+  border-radius: 0; animation: nr-ecg 1.6s linear infinite;
+}
+body.ui-hud_ecg_caution #hud-health-fill.caution { background-image: url('../assets/ui/hud_ecg_caution.png') !important; animation-duration: 1.1s; }
+body.ui-hud_ecg_danger #hud-health-fill.danger  { background-image: url('../assets/ui/hud_ecg_danger.png') !important; animation: nr-ecg 0.7s linear infinite; }
+@keyframes nr-ecg { to { background-position-x: -194px; } }
+
+body.ui-hud_battery #hud-flashlight {
+  background: url('../assets/ui/hud_battery.png') center / 100% 100% no-repeat;
+  padding: 10px 16px 10px 46px;
+}
+body.ui-hud_ammo #hud-ammo {
+  background: url('../assets/ui/hud_ammo.png') center / 100% 100% no-repeat;
+  padding: 12px 22px; display: flex; align-items: center; gap: 6px;
+}
+body.ui-hud_objective #hud-objective {
+  background: url('../assets/ui/hud_objective.png') center / 100% 100% no-repeat !important;
+  border: none !important; box-shadow: none !important; padding: 16px 28px 14px !important;
+}
+body.ui-hud_objective #hud-objective-text { color: #2a2420 !important; }
+body.ui-hud_room #hud-room {
+  background: url('../assets/ui/hud_room.png') center / 100% 100% no-repeat;
+  padding: 6px 24px;
+}
+body.ui-notification #notification {
+  background: transparent !important;
+  border: 12px solid transparent !important;
+  border-image: url('../assets/ui/notification.png') 32 fill / 12px stretch !important;
+}
+
+/* ── DIALOGO ── */
+body.ui-dialog #dialogue-box {
+  background: transparent !important;
+  border: 26px solid transparent !important;
+  border-image: url('../assets/ui/dialog.png') 64 fill / 26px stretch !important;
+  box-shadow: none !important;
+}
+body.ui-dialog_name #dialogue-speaker:not(:empty) {
+  display: inline-block;
+  background: url('../assets/ui/dialog_name.png') center / 100% 100% no-repeat;
+  padding: 5px 26px;
+}
+#dialogue-portrait { display: none; }
+#dialogue-box.has-portrait { padding-left: 176px !important; min-height: 150px; }
+#dialogue-box.has-portrait #dialogue-portrait {
+  display: block; position: absolute; left: 14px; bottom: 12px;
+  width: 140px; height: 140px; object-fit: cover;
+}
+#dialogue-box.has-portrait #dialogue-speaker { text-align: left; }
+body.touch #dialogue-box.has-portrait { padding-left: 120px !important; min-height: 110px; }
+body.touch #dialogue-box.has-portrait #dialogue-portrait { width: 96px; height: 96px; }
+
+/* ── INVENTARIO ── */
+body.ui-inv_bg .inventory-panel {
+  background: url('../assets/ui/inv_bg.png') center / 100% 100% no-repeat !important;
+  border: none !important; border-image: none !important; padding: 56px 64px !important;
+}
+body.ui-inv_slot .inv-slot {
+  background: url('../assets/ui/inv_slot.png') center / 100% 100% no-repeat !important;
+  border: none !important;
+}
+body.ui-inv_slot_sel .inv-slot.selected {
+  background-image: url('../assets/ui/inv_slot_sel.png') !important; box-shadow: none !important;
+}
+body.ui-inv_detail #item-detail {
+  background: url('../assets/ui/inv_detail.png') center / 100% 100% no-repeat;
+  border: none; padding: 16px 22px;
+}
+
+/* ── RADIO (SALVA) ── */
+body.ui-radio .save-icon-img { content: url('../assets/ui/radio.png'); width: min(360px, 60vw); height: auto; }
+
+/* ── GAME OVER, CAPITOLO, FINALI ── */
+body.ui-gameover #gameover-screen { background: url('../assets/ui/gameover.png') center / cover no-repeat !important; }
+body.ui-gameover .gameover-title { visibility: hidden; }
+body.ui-gameover .gameover-panel { justify-content: flex-end; height: 100%; padding-bottom: 8vh; box-sizing: border-box; }
+body.ui-chapter #chapter-card { background: url('../assets/ui/chapter.png') center / 100% auto no-repeat; }
+body.ui-ending_alba  #ending-screen.alba  { background: url('../assets/ui/ending_alba.png')  center / cover no-repeat !important; }
+body.ui-ending_notte #ending-screen.notte { background: url('../assets/ui/ending_notte.png') center / cover no-repeat !important; }
+body.ui-ending_alba #ending-screen.alba .ending-panel,
+body.ui-ending_notte #ending-screen.notte .ending-panel { background: rgba(0, 0, 0, 0.55) !important; }
+
+/* ── DOCUMENTI: un foglio per tipo ── */
+.document-panel.paper-typed #doc-body,
+.document-panel.paper-printout #doc-body,
+.document-panel.paper-clinical #doc-body,
+.document-panel.paper-ticket #doc-body { font-family: 'NR Typewriter', 'Courier New', monospace; }
+.document-panel.paper-notebook #doc-body,
+.document-panel.paper-letter #doc-body { font-family: 'NR Hand', 'Courier New', monospace; }
+body.font-hand .document-panel.paper-notebook #doc-body,
+body.font-hand .document-panel.paper-letter #doc-body { font-size: 1.35em; line-height: 1.55; }
+
+body.ui-paper_typed    .document-panel.paper-typed,
+body.ui-paper_notebook .document-panel.paper-notebook,
+body.ui-paper_clinical .document-panel.paper-clinical,
+body.ui-paper_letter   .document-panel.paper-letter,
+body.ui-paper_ticket   .document-panel.paper-ticket,
+body.ui-paper_printout .document-panel.paper-printout {
+  border: none !important; border-image: none !important; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+  background-position: center !important; background-size: 100% 100% !important; background-repeat: no-repeat !important;
+  padding: 64px 70px !important;
+}
+body.ui-paper_typed    .document-panel.paper-typed    { background-image: url('../assets/ui/paper_typed.png') !important; }
+body.ui-paper_notebook .document-panel.paper-notebook { background-image: url('../assets/ui/paper_notebook.png') !important; }
+body.ui-paper_clinical .document-panel.paper-clinical { background-image: url('../assets/ui/paper_clinical.png') !important; }
+body.ui-paper_letter   .document-panel.paper-letter   { background-image: url('../assets/ui/paper_letter.png') !important; }
+body.ui-paper_ticket   .document-panel.paper-ticket   { background-image: url('../assets/ui/paper_ticket.png') !important; }
+body.ui-paper_printout .document-panel.paper-printout { background-image: url('../assets/ui/paper_printout.png') !important; }
+body[class*="ui-paper_"] .document-panel[class*="paper-"] #doc-body,
+body[class*="ui-paper_"] .document-panel[class*="paper-"] #doc-title,
+body[class*="ui-paper_"] .document-panel[class*="paper-"] #doc-date { color: #2b241d !important; text-shadow: none !important; }
+
+/* ── TELEFONO ── */
+body.ui-touch_bag   #tc-bag,
+body.ui-touch_pause #tc-pause,
+body.ui-touch_shoot #tc-action.aim,
+body.ui-touch_use   #tc-action.use { background-color: transparent !important; border: none !important; background-position: center !important; background-size: contain !important; background-repeat: no-repeat !important; }
+body.ui-touch_bag   #tc-bag          { background-image: url('../assets/ui/touch_bag.png') !important; }
+body.ui-touch_pause #tc-pause        { background-image: url('../assets/ui/touch_pause.png') !important; }
+body.ui-touch_shoot #tc-action.aim   { background-image: url('../assets/ui/touch_shoot.png') !important; }
+body.ui-touch_use   #tc-action.use   { background-image: url('../assets/ui/touch_use.png') !important; }
+body.ui-touch_bag #tc-bag > *, body.ui-touch_pause #tc-pause > *,
+body.ui-touch_shoot #tc-action.aim > *, body.ui-touch_use #tc-action.use > * { visibility: hidden; }
+
+/* durante un dialogo l'HUD in basso si fa da parte */
+body.nr-dialog #hud-health, body.nr-dialog #hud-ammo { opacity: 0.15; transition: opacity 0.3s; }

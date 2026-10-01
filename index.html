@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/skin.css">
 </head>
 <body>
   <div id="game-wrapper">
@@ -149,6 +150,7 @@
 
     <!-- BOX DIALOGO -->
     <div id="dialogue-box" class="hidden">
+      <img id="dialogue-portrait" alt="">
       <div id="dialogue-speaker"></div>
       <div id="dialogue-text"></div>
       <div id="dialogue-continue">[SPAZIO] ▼</div>
@@ -1014,6 +1016,101 @@ const SpriteLib = {
     ctx.globalAlpha *= alpha;
     ctx.drawImage(im, cx - size / 2, cy - size / 2, size, size);
     ctx.restore();
+  },
+};
+
+/* ───── skin.js ───── */
+/* =============================================
+   NOTTE ROSSA — skin.js
+   Interfaccia "a sprite": ogni pezzo usa l'immagine
+   assets/ui/<nome>.png se esiste, altrimenti resta
+   lo stile HTML/CSS di oggi. Per ogni immagine trovata
+   il <body> riceve la classe "ui-<nome>" (vedi css/skin.css)
+   e il codice può disegnarla (Skin.img).
+   ============================================= */
+
+const UI_FILES = [
+  // kit di base (pannelli e bottoni sono 9-slice: bordi entro 64 px)
+  'panel', 'button', 'button_hover', 'button_disabled', 'close',
+  'slider_track', 'slider_knob', 'check_off', 'check_on',
+  // menu
+  'logo', 'menu_bg',
+  // HUD
+  'hud_health', 'hud_ecg_fine', 'hud_ecg_caution', 'hud_ecg_danger',
+  'hud_battery', 'hud_ammo', 'hud_objective', 'hud_room', 'notification',
+  // dialoghi e ritratti
+  'dialog', 'dialog_name',
+  'portrait_luca', 'portrait_luca_scared', 'portrait_elena', 'portrait_elena_sad',
+  'portrait_carmine', 'portrait_carmine_scared', 'portrait_tape', 'portrait_phone', 'portrait_radio',
+  // schermate
+  'inv_bg', 'inv_slot', 'inv_slot_sel', 'inv_detail',
+  'radio', 'gameover', 'chapter', 'ending_alba', 'ending_notte',
+  // documenti
+  'paper_typed', 'paper_notebook', 'paper_clinical', 'paper_letter', 'paper_ticket', 'paper_printout',
+  // nella scena (canvas)
+  'prompt', 'key_e', 'key_touch', 'reticle', 'arrow_left', 'arrow_right', 'arrow_up', 'padlock',
+  // telefono
+  'touch_shoot', 'touch_bag', 'touch_pause', 'touch_use',
+];
+
+// effetti a fotogrammi: assets/fx/<nome>.png, striscia orizzontale di fotogrammi quadrati
+const FX_FILES = ['fx_muzzle_pistol', 'fx_muzzle_shotgun', 'fx_blood_hit', 'fx_dust_drop'];
+
+// chi parla -> ritratto (si può forzare con "portrait" nel dialogo)
+const PORTRAITS = {
+  'LUCA': 'luca', 'ELENA': 'elena', 'CARMINE': 'carmine',
+  'ELENA (registrazione)': 'tape', '???': 'phone', 'RADIO': 'radio',
+};
+
+const _skinImg = {}, _skinOk = new Set();
+
+const Skin = {
+  /** Carica le immagini presenti (tools/build.py scrive l'elenco dei file che esistono) */
+  init() {
+    const present = ["assets/ui/icons.png", "assets/ui/menu_figure.png"];
+    const load = (key, src) => {
+      if (present && !present.includes(src)) return;
+      const im = new Image();
+      im.onload = () => { _skinOk.add(key); document.body.classList.add('ui-' + key); };
+      im.src = src;
+      _skinImg[key] = im;
+    };
+    for (const n of UI_FILES) load(n, `assets/ui/${n}.png`);
+    for (const n of FX_FILES) load(n, `assets/fx/${n}.png`);
+    // font dei documenti (facoltativi): assets/fonts/typewriter.(woff2|ttf), handwriting.(woff2|ttf)
+    if (typeof FontFace === 'undefined') return;
+    for (const [family, base] of [['NR Typewriter', 'typewriter'], ['NR Hand', 'handwriting']]) {
+      for (const ext of ['woff2', 'ttf']) {
+        const src = `assets/fonts/${base}.${ext}`;
+        if (!present || !present.includes(src)) continue;
+        new FontFace(family, `url(${src})`).load().then(f => { document.fonts.add(f); document.body.classList.add(base === 'handwriting' ? 'font-hand' : 'font-typewriter'); }).catch(() => {});
+        break;
+      }
+    }
+  },
+
+  has(name) { return _skinOk.has(name); },
+  img(name) { return _skinOk.has(name) ? _skinImg[name] : null; },
+
+  portraitFor(speaker, forced) {
+    for (const k of [forced, PORTRAITS[speaker]]) if (k && _skinOk.has('portrait_' + k)) return `assets/ui/portrait_${k}.png`;
+    return null;
+  },
+
+  /** Disegna il fotogramma "t" (0..1) di un effetto, centrato in (x, y), alto h. Ritorna false se manca. */
+  drawFx(ctx, name, t, x, y, h, flip = false, alpha = 1) {
+    const im = this.img(name);
+    if (!im) return false;
+    const n = Math.max(1, Math.round(im.naturalWidth / im.naturalHeight));
+    const fw = im.naturalWidth / n, f = Math.min(n - 1, Math.floor(t * n));
+    const w = h * fw / im.naturalHeight;
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.translate(x, y);
+    if (flip) ctx.scale(-1, 1);
+    ctx.drawImage(im, f * fw, 0, fw, im.naturalHeight, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    return true;
   },
 };
 
@@ -1897,6 +1994,7 @@ class CollisionManager {
    Sistema dialogo cinematografico
    ============================================= */
 
+
 class DialogueManager {
   constructor(game) {
     this.game     = game;
@@ -1914,6 +2012,7 @@ class DialogueManager {
     this._speaker = document.getElementById('dialogue-speaker');
     this._text    = document.getElementById('dialogue-text');
     this._cont    = document.getElementById('dialogue-continue');
+    this._portrait = document.getElementById('dialogue-portrait');
 
     // Avanzamento con SPACE o click
     this._box?.addEventListener('click',    () => this.advance());
@@ -1928,12 +2027,12 @@ class DialogueManager {
   }
 
   /** Mostra un dialogo (o lo accoda) */
-  show(speaker, text, onComplete = null) {
+  show(speaker, text, onComplete = null, portrait = null) {
     if (this.active) {
-      this._queue.push({ speaker, text, onComplete });
+      this._queue.push({ speaker, text, onComplete, portrait });
       return;
     }
-    this._display(speaker, text, onComplete);
+    this._display(speaker, text, onComplete, portrait);
   }
 
   /** Mostra una sequenza di dialoghi */
@@ -1947,7 +2046,7 @@ class DialogueManager {
     next(0);
   }
 
-  _display(speaker, text, onComplete) {
+  _display(speaker, text, onComplete, portrait = null) {
     this.active      = true;
     this._fullText   = text;
     this._charIdx    = 0;
@@ -1956,10 +2055,15 @@ class DialogueManager {
     this._typing     = true;
 
     this._speaker.textContent = speaker || '';
+    // ritratto di chi parla (assets/ui/portrait_*.png), se c'è
+    const pic = Skin.portraitFor(speaker, portrait);
+    this._box?.classList.toggle('has-portrait', !!pic);
+    if (pic && this._portrait) this._portrait.src = pic;
     this._text.textContent    = '';
     this._cont.style.opacity  = '0';
 
     if (this._box) this._box.classList.remove('hidden');
+    document.body.classList.add('nr-dialog');
 
 
     this._typeChar();
@@ -2000,10 +2104,10 @@ class DialogueManager {
 
     if (this._queue.length > 0) {
       const next = this._queue.shift();
-      this._display(next.speaker, next.text, next.onComplete);
+      this._display(next.speaker, next.text, next.onComplete, next.portrait);
     } else {
       if (this._box) this._box.classList.add('hidden');
-
+      document.body.classList.remove('nr-dialog');
     }
 
     if (onC) onC();
@@ -2019,6 +2123,7 @@ class DialogueManager {
     this.active   = false;
     this._typing  = false;
     if (this._box) this._box.classList.add('hidden');
+    document.body.classList.remove('nr-dialog');
     for (const fn of pending) { try { fn(); } catch (e) { console.error(e); } }
   }
 
@@ -2116,6 +2221,7 @@ class Player {
     }
     if (this._hurtTimer > 0) this._hurtTimer -= dt;
     if (this.shotTimer  > 0) this.shotTimer  -= dt;
+    if (this.interactTimer > 0) this.interactTimer -= dt;
     if (this.aimTimer   > 0) this.aimTimer   -= dt;
 
     if (!this.alive) {
@@ -2202,20 +2308,25 @@ class Player {
 
   /* ── ANIMAZIONE ── */
   _pickAnim() {
+    // le animazioni "facoltative" si usano appena esiste la loro striscia nel manifest
+    const has = (a) => SpriteLib.has('player', a);
+    const or = (a, b) => has(a) ? a : b;
     if (!this.alive) return 'death';
     if (this._hurtTimer > 0) return 'hurt';
     const sg = this.weaponId === 'shotgun';
-    if (this.armed && this.reloading) return sg ? 'shotgun_aim' : 'reload';
+    if (this.armed && this.reloading) return sg ? or('shotgun_reload', 'shotgun_aim') : 'reload';
     if (this.armed && this.shotTimer > 0) return sg ? 'shotgun_shoot' : 'shoot';
     if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return sg ? 'shotgun_aim' : 'aim';
     if (this.vx !== 0) {
       if (this.isCrouching) return 'sneak';
-      if (this.isRunning)   return 'run';
+      if (this.isRunning)   return this.armed ? or(sg ? 'run_shotgun' : 'run_gun', 'run') : 'run';
+      if (this.armed)       return or(sg ? 'walk_shotgun' : 'walk_gun', this.flashlightOn ? 'flashlight_walk' : 'walk');
       return this.flashlightOn ? 'flashlight_walk' : 'walk';
     }
+    if (this.interactTimer > 0 && has('interact')) return 'interact';
     if (this.isCrouching) return 'crouch';
+    if (this.armed) return sg ? or('shotgun_idle', 'gun_idle') : 'gun_idle';
     if (this.flashlightOn) return 'flashlight';
-    if (this.armed) return 'gun_idle';
     if (this.healthState === HEALTH_STATE.DANGER) return 'wounded';
     return 'idle';
   }
@@ -2231,7 +2342,7 @@ class Player {
     if (!def) return;
     this.animTimer += dt;
     // passi sincronizzati con la velocità reale (niente piedi che pattinano)
-    const stride = { walk: 30, flashlight_walk: 40, run: 72, sneak: 42 }[this.anim];
+    const stride = { walk: 30, walk_gun: 34, walk_shotgun: 34, flashlight_walk: 40, run: 72, run_gun: 72, run_shotgun: 72, sneak: 42 }[this.anim];
     const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
     const fd = 1 / fps;
     while (this.animTimer >= fd) {
@@ -2395,8 +2506,11 @@ const ITEMS = {
     description: 'Vecchia chiave arrugginita. Il gozzo di papà, ormeggiato al molo 4.' },
 };
 
+// paper = foglio su cui appare (assets/ui/paper_<tipo>.png):
+// typed (dattiloscritto) · notebook (quaderno a mano) · clinical (modulo clinico)
+// letter (carta da lettera) · ticket (biglietto) · printout (stampa da computer)
 const DOCUMENTS = {
-  doc_ticket: { id: 'doc_ticket', title: 'Biglietto ferroviario', date: '14 ottobre',
+  doc_ticket: { id: 'doc_ticket', paper: 'ticket', title: 'Biglietto ferroviario', date: '14 ottobre',
     text:
 `Treno 847 — Partenza 21:55
 Destinazione: Porto Salvo Centrale
@@ -2408,7 +2522,7 @@ Valido solo per il giorno indicato.
 Sul retro, a penna, con la calligrafia di Elena:
 "Non dovevi venire."` },
 
-  doc_ordinanza: { id: 'doc_ordinanza', title: 'Ordinanza n. 114', date: '14 ottobre, 22:47',
+  doc_ordinanza: { id: 'doc_ordinanza', paper: 'typed', title: 'Ordinanza n. 114', date: '14 ottobre, 22:47',
     text:
 `COMUNE DI PORTO SALVO — ORDINANZA CONTINGIBILE E URGENTE
 
@@ -2425,7 +2539,7 @@ disorientamento, febbre o comportamento aggressivo.
 
 IL SINDACO` },
 
-  doc_storage_note: { id: 'doc_storage_note', title: 'Nota del deposito', date: '14 ottobre',
+  doc_storage_note: { id: 'doc_storage_note', paper: 'notebook', title: 'Nota del deposito', date: '14 ottobre',
     text:
 `PROMEMORIA — turno serale, Carmine
 
@@ -2439,7 +2553,7 @@ Io sono lì. Chiudo da dentro.
 
 NON FARE RUMORE.` },
 
-  doc_turni: { id: 'doc_turni', title: 'Registro di movimento', date: '14 ottobre',
+  doc_turni: { id: 'doc_turni', paper: 'typed', title: 'Registro di movimento', date: '14 ottobre',
     text:
 `22:31  Treno 847 — ritardo 12'.
 22:40  Ordine RFI: sospendere tutta la circolazione.
@@ -2451,7 +2565,7 @@ NON FARE RUMORE.` },
 
 (a matita) — è lui. il fratello della dottoressa.` },
 
-  doc_luigi: { id: 'doc_luigi', title: 'Biglietto di Luigi', date: '14 ottobre',
+  doc_luigi: { id: 'doc_luigi', paper: 'letter', title: 'Biglietto di Luigi', date: '14 ottobre',
     text:
 `Giulia,
 ho chiuso il negozio. Mia moglie ha la febbre
@@ -2464,7 +2578,7 @@ del condominio. La combinazione la sai.
 Se non torno, prendi quello che ti serve.
 — Luigi` },
 
-  doc_diario_giulia: { id: 'doc_diario_giulia', title: 'Diario di Giulia Conti', date: '12-14 ottobre',
+  doc_diario_giulia: { id: 'doc_diario_giulia', paper: 'notebook', title: 'Diario di Giulia Conti', date: '12-14 ottobre',
     text:
 `12 ott — Al San Rocco ci hanno detto di non parlare
 del reparto chiuso al piano -2. La dottoressa Ferri
@@ -2480,7 +2594,7 @@ cassaforte per le medicine di mamma:
 Stanotte torno in ospedale. Lascio qui la chiave
 del reparto, non voglio che la trovino addosso a me.` },
 
-  doc_cartella: { id: 'doc_cartella', title: 'Cartella clinica — Pz. 0', date: '9 ottobre',
+  doc_cartella: { id: 'doc_cartella', paper: 'clinical', title: 'Cartella clinica — Pz. 0', date: '9 ottobre',
     text:
 `OSPEDALE SAN ROCCO — Reparto isolamento
 
@@ -2496,7 +2610,7 @@ Ore 04:00: l'infermiere presenta gli stessi sintomi.
 
 Firma: Dott.ssa E. Ferri` },
 
-  doc_ricerca_elena: { id: 'doc_ricerca_elena', title: 'Appunti della Dott.ssa Ferri', date: '13 ottobre',
+  doc_ricerca_elena: { id: 'doc_ricerca_elena', paper: 'notebook', title: 'Appunti della Dott.ssa Ferri', date: '13 ottobre',
     text:
 `PROGETTO ROSSO — appunti personali (NON per la direzione)
 
@@ -2512,7 +2626,7 @@ Se i dati escono, qualcuno fuori potrà fare la cura.
 
 Luca, se mai leggerai questo: non venire.` },
 
-  doc_formula: { id: 'doc_formula', title: 'Protocollo campioni', date: '14 ottobre',
+  doc_formula: { id: 'doc_formula', paper: 'clinical', title: 'Protocollo campioni', date: '14 ottobre',
     text:
 `CAMPIONE R-0 — conservare a 4°C
 Frigo chirurgico, ripiano 2.
@@ -2523,7 +2637,7 @@ Senza entrambi, nessuna sintesi è possibile.
 
 — E.F.` },
 
-  doc_autopsia: { id: 'doc_autopsia', title: 'Referto autoptico', date: '14 ottobre',
+  doc_autopsia: { id: 'doc_autopsia', paper: 'clinical', title: 'Referto autoptico', date: '14 ottobre',
     text:
 `Soggetto: infermiere, 34 anni.
 
@@ -2536,7 +2650,7 @@ Alcuni soggetti "ascoltano" invece di guardare.
 
 Consiglio a chi legge: muoviti piano.` },
 
-  doc_avviso_metro: { id: 'doc_avviso_metro', title: 'Avviso ai viaggiatori', date: '14 ottobre',
+  doc_avviso_metro: { id: 'doc_avviso_metro', paper: 'typed', title: 'Avviso ai viaggiatori', date: '14 ottobre',
     text:
 `METRO PORTO SALVO — AVVISO
 
@@ -2550,7 +2664,7 @@ oltre il tunnel, nella sala tecnica.
 (scritto sopra con il pennarello)
 IL LABORATORIO È SOTTO DI NOI` },
 
-  doc_registro_metro: { id: 'doc_registro_metro', title: 'Registro del capotreno', date: '14 ottobre',
+  doc_registro_metro: { id: 'doc_registro_metro', paper: 'notebook', title: 'Registro del capotreno', date: '14 ottobre',
     text:
 `23:05 — Fermati in banchina B. Niente corrente.
 23:20 — Passeggeri agitati. Una signora con la febbre.
@@ -2559,7 +2673,7 @@ IL LABORATORIO È SOTTO DI NOI` },
 00:10 — Vado a piedi nel tunnel verso la sala tecnica.
         Se non torno, non seguitemi.` },
 
-  doc_taccuino: { id: 'doc_taccuino', title: 'Taccuino di un soldato', date: '15 ottobre, 00:40',
+  doc_taccuino: { id: 'doc_taccuino', paper: 'notebook', title: 'Taccuino di un soldato', date: '15 ottobre, 00:40',
     text:
 `Ordini: sigillare gli accessi al laboratorio.
 All'alba "bonifica" dall'alto.
@@ -2570,7 +2684,7 @@ Nessuno ci ha detto che si rialzano.
 Marchi è rimasto indietro. L'ho sentito
 chiamarmi per mezz'ora. Poi ha smesso.` },
 
-  doc_manuale: { id: 'doc_manuale', title: 'Manuale del generatore', date: '—',
+  doc_manuale: { id: 'doc_manuale', paper: 'printout', title: 'Manuale del generatore', date: '—',
     text:
 `GENERATORE DI EMERGENZA — LINEA 3
 
@@ -2581,7 +2695,7 @@ chiamarmi per mezz'ora. Poi ha smesso.` },
 
 ATTENZIONE: l'avvio è molto rumoroso.` },
 
-  doc_officina: { id: 'doc_officina', title: 'Nota in officina', date: '14 ottobre',
+  doc_officina: { id: 'doc_officina', paper: 'letter', title: 'Nota in officina', date: '14 ottobre',
     text:
 `Dottoressa Ferri,
 come mi ha chiesto ho lasciato la sua tessera
@@ -2592,7 +2706,7 @@ Il laboratorio si apre solo con la corrente
 del generatore. Non torni giù da sola.
 — Sandro, manutenzione` },
 
-  doc_accessi: { id: 'doc_accessi', title: 'Registro accessi', date: '15 ottobre',
+  doc_accessi: { id: 'doc_accessi', paper: 'printout', title: 'Registro accessi', date: '15 ottobre',
     text:
 `LABORATORIO — ACCESSI LIVELLO 3
 
@@ -2604,7 +2718,7 @@ del generatore. Non torni giù da sola.
 
 Nessuna uscita successiva.` },
 
-  doc_classificato: { id: 'doc_classificato', title: 'Direttiva riservata', date: '14 ottobre',
+  doc_classificato: { id: 'doc_classificato', paper: 'printout', title: 'Direttiva riservata', date: '14 ottobre',
     text:
 `CLASSIFICATO — PROGETTO ROSSO
 
@@ -2617,7 +2731,7 @@ In caso di perdita di contenimento:
 Nessun dato deve lasciare Porto Salvo.
 — Dir. Amati` },
 
-  doc_lettera_elena: { id: 'doc_lettera_elena', title: 'Lettera di Elena', date: '15 ottobre',
+  doc_lettera_elena: { id: 'doc_lettera_elena', paper: 'letter', title: 'Lettera di Elena', date: '15 ottobre',
     text:
 `Luca,
 
@@ -2885,7 +2999,7 @@ class WeaponSystem {
       const step = b.vx * dt;
       b.x += step;
       b.travel += Math.abs(step);
-      if (b.travel > b.range || b.x < -50 || b.x > 1330) { this.bullets.splice(i, 1); continue; }
+      if (b.travel > b.range || b.x < -50 || b.x > (this.game.roomManager?.current?.width ?? 1280) + 50) { this.bullets.splice(i, 1); continue; }
 
       // Colpisce il primo nemico vivo attraversato (tutta l'altezza: corsia unica)
       let hit = null;
@@ -2899,7 +3013,9 @@ class WeaponSystem {
         // il fucile perde forza con la distanza
         const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
         hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
-        this._blood(b.x, Math.max(hit.y + hit.height * 0.15, Math.min(hit.y + hit.height * 0.6, b.y)), Math.sign(b.vx), hit.scale || 1);
+        const by = Math.max(hit.y + hit.height * 0.15, Math.min(hit.y + hit.height * 0.6, b.y));
+        this._blood(b.x, by, Math.sign(b.vx), hit.scale || 1);
+        this.game.spawnFx?.('fx_blood_hit', b.x + Math.sign(b.vx) * 20 * (hit.scale || 1), by, 120 * (hit.scale || 1), b.vx < 0, 0.3);
         if (!hit.alive) em.onEnemyKilled(hit);
         this.bullets.splice(i, 1);
       }
@@ -2929,7 +3045,10 @@ class WeaponSystem {
         knock: w.def.knock, travel: 0, pellet: w.def.pellets > 1,
       });
     }
-    this._flash = 0.06;
+    // vampata: sprite se c'è (assets/fx), altrimenti disegnata
+    const sc = this.game.player?.scale || 1, big = w.def.id === 'shotgun';
+    const fxOk = this.game.spawnFx?.(big ? 'fx_muzzle_shotgun' : 'fx_muzzle_pistol', fromX + dir * (big ? 50 : 30) * sc, fromY, (big ? 110 : 70) * sc, dir < 0, 0.09);
+    this._flash = fxOk ? 0 : 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
     this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_shot' : 'shot');
     this.game.camera?.shake(w.def.shake, 0.12);
@@ -3359,6 +3478,11 @@ class Enemy {
       ctx.fillRect(this.x, this.alive ? this.y : this.footY - 30, this.width, this.alive ? this.height : 30);
     }
 
+
+  }
+
+  /** Indicatori sopra il nemico (non prendono la luce della stanza) */
+  drawUI(ctx) {
     // "!" quando ti nota
     if (this.alive && this._alertTimer > 0) {
       const top = (this.state === AI_STATE.CEILING ? this.y - 150 * this.scale : this.y) - 50 * this.scale;
@@ -3417,6 +3541,7 @@ class EnemyManager {
   _voice(e, was, dt) {
     const s = e.state;
     if (s === AI_STATE.DROP && was !== AI_STATE.DROP) this._sound(e, 'crawler_drop');
+    else if (was === AI_STATE.DROP && s !== AI_STATE.DROP) this.game.spawnFx?.('fx_dust_drop', e.centerX, e.footY - 30 * e.scale, 140 * e.scale, false, 0.4);
     else if (s === AI_STATE.CHASE && was !== AI_STATE.CHASE && was !== AI_STATE.ATTACK && was !== AI_STATE.STUNNED) {
       this._sound(e, e.type === 'listener' ? 'listener_shriek' : e.type === 'corridore' ? 'runner_scream' : 'enemy_alert');
     } else if (s === AI_STATE.ATTACK && was !== AI_STATE.ATTACK) this._sound(e, 'enemy_attack', 0.8);
@@ -3443,7 +3568,8 @@ class EnemyManager {
     const hasShotgun = inv.hasItem('shotgun');
     const low9 = inv.countItem('ammo_pistol_small') + (g.weapon._mags?.pistol ?? 0) < 12;
     const lowSh = hasShotgun && inv.countItem('ammo_shells') < 6;
-    const chance = (low9 || lowSh) ? 0.8 : 0.4;
+    // solo se sei a corto: le munizioni devono restare preziose
+    const chance = (low9 || lowSh) ? 0.75 : 0.1;
     if (Math.random() > chance) return;
     const shells = hasShotgun && (lowSh || Math.random() < 0.35);
     this._dropN = (this._dropN || 0) + 1;
@@ -3460,6 +3586,10 @@ class EnemyManager {
     // prima i morti, poi i vivi
     for (const e of this.enemies) if (!e.alive) e.draw(ctx);
     for (const e of this.enemies) if (e.alive)  e.draw(ctx);
+  }
+
+  drawUI(ctx) {
+    for (const e of this.enemies) e.drawUI(ctx);
     if (this.game.debug) {
       ctx.lineWidth = 1;
       for (const e of this.enemies) {
@@ -3483,7 +3613,7 @@ class EnemyManager {
    ============================================= */
 
 const LUCA = 'LUCA', ELENA = 'ELENA', CARMINE = 'CARMINE', TAPE = 'ELENA (registrazione)';
-const say = (speaker, text) => ({ type: 'dialogue', speaker, text });
+const say = (speaker, text, portrait) => ({ type: 'dialogue', speaker, text, portrait });
 const narr = (text) => ({ type: 'dialogue', speaker: '', text });
 
 class EventManager {
@@ -3518,7 +3648,7 @@ class EventManager {
       { type: 'set_flag', flag: 'phone_ringing', value: false },
       { type: 'sfx', id: 'ui_confirm' },
       say('???', '...Luca?'),
-      say(LUCA, 'Elena! Elena, sono in stazione. Il treno si è fermato, non c\'è nessuno. Dove sei?'),
+      say(LUCA, 'Elena! Elena, sono in stazione. Il treno si è fermato, non c\'è nessuno. Dove sei?', 'luca_scared'),
       say('???', 'Non uscire dalla stazione. Mi senti? Non uscire.'),
       say('???', 'Vai su, in sala controllo. C\'è Carmine, il ferroviere. Ha una cosa per te...'),
       say('???', 'Ho sbagliato tutto, Luca. Perdonami.'),
@@ -3532,6 +3662,7 @@ class EventManager {
       { type: 'respawn' },
       narr('Dal treno è sceso qualcuno. Barcolla. Non è un passeggero.'),
       narr('Sei disarmato. L\'atrio è a destra.'),
+      { type: 'autosave' },
     ]});
 
     R('got_flashlight', { once: true, actions: [
@@ -3552,7 +3683,7 @@ class EventManager {
     R('talk_carmine', { actions: [
       { type: 'branch', if: { notFlag: 'carmine_talked' }, then: [
         { type: 'npc_anim', id: 'carmine', anim: 'talk' },
-        say(CARMINE, 'Fermo! Fermo... ah. Sei tu. Hai la stessa faccia della dottoressa.'),
+        say(CARMINE, 'Fermo! Fermo... ah. Sei tu. Hai la stessa faccia della dottoressa.', 'carmine_scared'),
         say(LUCA, 'Elena. Mia sorella. Dov\'è?'),
         say(CARMINE, 'È passata di qua due ore fa, prima che chiudessero tutto. Andava al San Rocco, l\'ospedale.'),
         say(CARMINE, 'Diceva che doveva «far uscire i dati». Mi ha lasciato questo. Ha detto: se viene, daglielo.'),
@@ -3608,6 +3739,8 @@ class EventManager {
     /* ── CAPITOLO 4 ── */
     R('enter_metro', { trigger: 'room_enter', room: 'metro_ingresso', once: true, delay: 0.6, actions: [
       { type: 'chapter', text: 'CAPITOLO 4 — SOTTERRANEI' },
+      narr('Il passaggio dell\'obitorio sbuca nella metro. Niente corrente, solo l\'acqua che gocciola.'),
+      narr('Elena diceva che il laboratorio è qui sotto. Per arrivarci serve la luce.'),
     ]});
 
     R('start_generator', { once: true, actions: [
@@ -3636,6 +3769,7 @@ class EventManager {
     /* ── CAPITOLO 5 ── */
     R('enter_lab', { trigger: 'room_enter', room: 'lab_ingresso', once: true, delay: 0.6, actions: [
       { type: 'chapter', text: 'CAPITOLO 5 — PROGETTO ROSSO' },
+      narr('Il posto dove lavorava Elena. Sulla porta, una goccia rossa e la scritta PROGETTO ROSSO.'),
     ]});
 
     R('upload_data', { once: true, actions: [
@@ -3654,7 +3788,7 @@ class EventManager {
       say(ELENA, 'Luca... lo sapevo che saresti venuto. Non avvicinarti troppo.'),
       say(LUCA, 'Elena, andiamo via. Adesso.'),
       { type: 'npc_anim', id: 'elena', anim: 'scared' },
-      say(ELENA, 'Mi hanno morsa quattro ore fa. Sento la febbre che sale. Tra poco non sarò più io.'),
+      say(ELENA, 'Mi hanno morsa quattro ore fa. Sento la febbre che sale. Tra poco non sarò più io.', 'elena_sad'),
       { type: 'npc_anim', id: 'elena', anim: 'talk' },
       say(ELENA, 'Ho visto la trasmissione partire. I dati sono fuori. Adesso qualcuno può fare una cura.'),
       { type: 'branch', if: { item: 'vial' },
@@ -3662,7 +3796,7 @@ class EventManager {
         else: [say(ELENA, 'Ma il campione R-0 è rimasto al San Rocco. Senza, fuori ci metteranno anni.')] },
       say(ELENA, 'All\'alba parte la procedura ALBA: bruceranno tutto. Io tengo aperta la galleria verso il porto.'),
       { type: 'npc_anim', id: 'elena', anim: 'point' },
-      say(ELENA, 'La chiave della barca è sul tavolo. Vai, Luca. Non voltarti.'),
+      say(ELENA, 'La chiave della barca è sul tavolo. Vai, Luca. Non voltarti.', 'elena_sad'),
       { type: 'fade_out', ms: 900 },
       { type: 'set_flag', flag: 'elena_gone' },
       { type: 'set_flag', flag: 'elena_talked' },
@@ -3732,7 +3866,7 @@ class EventManager {
     switch (a.type) {
       case 'dialogue': {
         const txt = (a.touchText && document.body.classList.contains('touch')) ? a.touchText : a.text;
-        await new Promise(res => g.dialogue.show(a.speaker, txt, res));
+        await new Promise(res => g.dialogue.show(a.speaker, txt, res, a.portrait));
         break;
       }
       case 'wait':        await this._wait(a.sec); break;
@@ -3751,7 +3885,11 @@ class EventManager {
       case 'lights_fade': g.startLightFade(a.duration); break;
       case 'set_light':   if (g.roomManager.current) g.roomManager.current.lightLevel = a.value; break;
       case 'title':       g.showCinematicTitle(a.duration); break;
-      case 'chapter':     g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text); await this._wait(2.6); break;
+      case 'chapter':
+        g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text);
+        await this._exec({ type: 'autosave' });
+        await this._wait(2.6); break;
+      case 'autosave':    if (g.save.autoSave()) g.ui.showNotification('Salvataggio automatico'); break;
       case 'respawn':     g.roomManager.respawnEnemies(); break;
       case 'spawn': {
         const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scaleAt(a.x) });
@@ -4207,6 +4345,9 @@ class UIManager {
     $('doc-title').textContent = doc.title || '—';
     $('doc-date').textContent  = doc.date || '';
     $('doc-body').textContent  = doc.text || '';
+    // tipo di foglio (assets/ui/paper_<tipo>.png): dattiloscritto, quaderno, cartella clinica...
+    const panel = this.$docScreen.querySelector('.document-panel');
+    panel.className = 'document-panel' + (doc.paper ? ' paper-' + doc.paper : '');
     this._open(this.$docScreen);
   }
 
@@ -4345,8 +4486,10 @@ class UIManager {
   showGameOver() { setTimeout(() => this.$gameOver.classList.remove('hidden'), 1600); }
   hideGameOver() { this.$gameOver.classList.add('hidden'); }
 
-  showEnding({ title, text, stats }) {
+  showEnding({ title, text, stats, kind }) {
     this.hideHUD();
+    this.$ending.classList.remove('alba', 'notte');
+    if (kind) this.$ending.classList.add(kind);
     $('ending-title').textContent = title;
     $('ending-text').textContent  = text;
     $('ending-stats').textContent = stats;
@@ -4424,6 +4567,7 @@ class UIManager {
 
 const SAVE_KEY_PREFIX = 'notterossa_save_';
 const NUM_SLOTS       = 3;
+const AUTO_SLOT       = 3;     // salvataggio automatico (inizio di ogni capitolo)
 
 class SaveManager {
   constructor(game) {
@@ -4433,8 +4577,11 @@ class SaveManager {
   }
 
   /** Salva la partita nello slot indicato */
+  /** Salvataggio automatico (slot a parte, non sovrascrive quelli del giocatore) */
+  autoSave() { return this.saveGame(AUTO_SLOT); }
+
   saveGame(slot = 0) {
-    if (slot < 0 || slot >= NUM_SLOTS) return false;
+    if (slot < 0 || slot > AUTO_SLOT) return false;
     const data = this._buildSaveData(slot);
     try {
       localStorage.setItem(SAVE_KEY_PREFIX + slot, JSON.stringify(data));
@@ -4468,7 +4615,7 @@ class SaveManager {
   loadLast() {
     // Cerca lo slot più recente
     let latest = null, latestSlot = 0;
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
       if (!raw) continue;
       const d = JSON.parse(raw);
@@ -4481,7 +4628,7 @@ class SaveManager {
   /** Slot con il salvataggio più recente, o null */
   latestSlot() {
     let best = null, bestT = -1;
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
       if (!raw) continue;
       try { const d = JSON.parse(raw); if (d.timestamp > bestT) { bestT = d.timestamp; best = i; } } catch (e) {}
@@ -4491,12 +4638,12 @@ class SaveManager {
 
   /** Restituisce info sugli slot (per la UI "Carica") */
   getSlotsInfo() {
-    return Array.from({ length: NUM_SLOTS }, (_, i) => {
+    return Array.from({ length: AUTO_SLOT + 1 }, (_, i) => {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
-      if (!raw) return { slot: i, empty: true };
+      if (!raw) return { slot: i, empty: true, auto: i === AUTO_SLOT };
       const d = JSON.parse(raw);
       return {
-        slot: i, empty: false,
+        slot: i, empty: false, auto: i === AUTO_SLOT,
         room: d.roomName || '—',
         time: d.playTime || 0,
         date: new Date(d.timestamp).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }),
@@ -4505,7 +4652,7 @@ class SaveManager {
   }
 
   hasSaveData() {
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       if (localStorage.getItem(SAVE_KEY_PREFIX + i)) return true;
     }
     return false;
@@ -4595,6 +4742,7 @@ class SaveManager {
    hotspots: { id, x, w, label, markY, icon, iconY, give, doc, text,
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
+   tint:     colore della luce della stanza sui personaggi (calcolato dal fondale)
    ambient:  suono in loop (assets/audio/<id>.mp3), steps: concrete|wet|metal|tile
    props:    { name, x, flip }
    overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
@@ -4613,7 +4761,7 @@ const ROOMS = {
 
   train_wagon: {
     name: 'Treno 847 — Vagone 4', bg: BGV2 + 'train_wagon.png', layoutW: 1400, keepEdges: true, scale: 1.25, floorY: 660,
-    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal',
+    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal', tint: '#4a6e8b',
     hotspots: [
       { id: 'window_wagon', x: 555, w: 245, label: 'Finestrino', markY: 290,
         text: 'Pioggia. Il binario 1 di Porto Salvo è deserto.\nNessun capotreno, nessun annuncio.' },
@@ -4636,7 +4784,7 @@ const ROOMS = {
     scale: 0.74, floorY: 540,
     floorLine: [[300, 500], [1319, 592]],          // linea dei piedi (segue il marciapiede)
     scaleLine: [[300, 0.70], [1319, 0.84]],        // più vicino alla telecamera = più grande
-    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet', tint: '#528380',
     props: [{ name: 'body_0', x: 890 }],
     hotspots: [
       { id: 'body_conductor', x: 820, w: 150, label: 'Il capotreno', markY: 520,
@@ -4662,7 +4810,7 @@ const ROOMS = {
     // NUOVO SFONDO LATERALE (v2)
     name: 'Atrio', bg: BGV2 + 'station_hall.png', layoutW: 2782, keepEdges: true,
     scale: 0.92, floorY: 640,
-    light: 0.72, map: [2, 0], ambient: 'station_ambient', steps: 'tile',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.5, map: [2, 0], ambient: 'station_ambient', steps: 'tile', tint: '#169cbf',
     hotspots: [
       { id: 'ticket_booth', x: 660, w: 320, label: 'Biglietteria', markY: 360, give: ['flashlight', 'battery'],
         text: 'La biglietteria è chiusa. Dalla fessura della serranda si vede il cassetto dei soldi, aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
@@ -4681,20 +4829,20 @@ const ROOMS = {
       { id: 'hall_contaminato', type: 'contaminato', x: 2000, patrol: [1850, 2200], showIf: { flag: 'has_pistol' } },
     ],
     overlays: [
-      { type: 'state', picked: 'ticket_booth', src: BGV2 + 'station_hall_open.png', x: 0, y: 0, w: 2782, h: 720 },
+      { type: 'state', picked: 'ticket_booth', src: BGV2 + 'station_hall_open.png', x: 690, y: 150, w: 300, h: 520, feather: 18 },
     ],
   },
 
   station_storage: {
     name: 'Servizi tecnici', bg: BGV2 + 'station_storage.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 600,
-    light: 0.5, map: [1, 1], ambient: 'room_hum', steps: 'tile',
+    light: 0.5, darkFlag: 'lights_out', darkLight: 0.38, map: [1, 1], ambient: 'room_hum', steps: 'tile', tint: '#448f92',
     props: [{ name: 'body_1', x: 350 }],
     hotspots: [
       { id: 'guard_body', x: 285, w: 130, label: 'La guardia', markY: 560,
-        give: ['bandage', ['ammo_pistol_small', 10]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
+        give: ['bandage', ['ammo_pistol_small', 6]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
       { id: 'document_note_storage', x: 425, w: 90, label: 'Foglio sul quadro', icon: 'note', iconY: 300, doc: 'doc_storage_note' },
       { id: 'shelf_pistol', x: 545, w: 145, label: 'Armadio B3', icon: 'pistol', iconY: 400,
-        give: ['pistol', ['ammo_pistol_small', 32]], event: 'got_pistol' },
+        give: ['pistol', ['ammo_pistol_small', 16]], event: 'got_pistol' },
       { id: 'cart_storage', x: 695, w: 70, label: 'Carrello delle pulizie', markY: 470,
         text: 'Sul pavimento, impronte scalze che vanno verso il buio.' },
       { id: 'crate_key', x: 770, w: 105, label: 'Cassetta rossa', icon: 'key_station', iconY: 290, give: ['key_station'] },
@@ -4705,13 +4853,14 @@ const ROOMS = {
         lockedText: 'Il corridoio finisce contro un muro di casse.', requires: NEVER },
     ],
     overlays: [
-      { type: 'state', picked: 'shelf_pistol', src: BGV2 + 'station_storage_open.png', x: 0, y: 0, w: 1289, h: 720 },
+      { type: 'state', picked: 'crate_key', src: BGV2 + 'station_storage_open.png', x: 785, y: 205, w: 115, h: 145, feather: 12 },
+      { type: 'state', picked: 'shelf_pistol', src: BGV2 + 'station_storage_open.png', x: 535, y: 215, w: 170, h: 340, feather: 18 },
     ],
   },
 
   station_control: {
     name: 'Sala controllo', bg: BGV2 + 'station_control.png', layoutW: 1472, keepEdges: true, scale: 1.42, floorY: 665,
-    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete',
+    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete', tint: '#2595b0',
     npcs: [
       { id: 'carmine', char: 'carmine', x: 800, anim: 'scared', facingRight: false, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
     ],
@@ -4726,11 +4875,14 @@ const ROOMS = {
     doors: [
       { id: 'control_to_hall', x: 95, w: 140, top: 150, bottom: 665, label: 'Scala — Atrio', target: 'station_hall', noSprite: true },
     ],
+    overlays: [
+      { type: 'state', flag: 'shutter_open', src: BGV2 + 'station_control_open.png', x: 0, y: 0, w: 1472, h: 720 },
+    ],
   },
 
   station_exit: {
     name: 'Uscita della stazione', bg: BGV2 + 'station_exit.png', layoutW: 1360, keepEdges: true, scale: 1.12, floorY: 668,
-    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet',
+    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet', tint: '#428893',
     props: [{ name: 'body_1', x: 1170 }],
     hotspots: [
       { id: 'exit_map', x: 290, w: 190, label: 'Piantina a terra', icon: 'city_map', iconY: 655, give: ['city_map'],
@@ -4738,7 +4890,7 @@ const ROOMS = {
       { id: 'exit_phone', x: 370, w: 80, label: 'Telefono a gettoni', markY: 330,
         text: 'Il telefono a gettoni. Alzi la cornetta: nessun segnale.\nSolo un respiro, lontano. Riattacchi.' },
       { id: 'police_body', x: 1090, w: 170, label: 'Il poliziotto', markY: 610,
-        give: [['ammo_pistol_small', 16]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
+        give: [['ammo_pistol_small', 8]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
     ],
     doors: [
       { id: 'exit_to_hall', x: 95, w: 180, top: 235, bottom: 620, label: 'Atrio', target: 'station_hall', noSprite: true },
@@ -4753,11 +4905,11 @@ const ROOMS = {
 
   city_street: {
     name: 'Via Ferrante', bg: BGV2 + 'city_street.png', layoutW: 2587, keepEdges: true, scale: 0.85, floorY: 625,
-    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
+    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet', tint: '#357ca1',
     props: [{ name: 'body_3', x: 1060, flip: true }],
     hotspots: [
       { id: 'car_glovebox', x: 1700, w: 110, label: 'Cinquecento con la portiera aperta', markY: 520,
-        give: ['battery', ['ammo_pistol_small', 12]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
+        give: ['battery', ['ammo_pistol_small', 6]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
     ],
     doors: [
       { id: 'street_to_station', x: 190, w: 120, top: 300, bottom: 555, label: 'Stazione', target: 'station_exit', noSprite: true },
@@ -4773,7 +4925,7 @@ const ROOMS = {
 
   alimentari: {
     name: 'Alimentari da Luigi', bg: BGV2 + 'alimentari.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile',
+    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile', tint: '#2b99aa',
     props: [{ name: 'body_3', x: 420 }],
     hotspots: [
       { id: 'shop_crowbar', x: 215, w: 110, label: 'Dietro il bancone', icon: 'crowbar', iconY: 480, give: ['crowbar'] },
@@ -4782,7 +4934,7 @@ const ROOMS = {
       { id: 'shop_meds', x: 500, w: 100, label: 'Scaffale farmacia', markY: 260, give: ['painkillers'] },
       { id: 'shop_safe', x: 605, w: 85, label: 'Cassaforte sotto la cassa', icon: 'padlock', iconY: 525,
         requires: [{ flag: 'knows_safe_code' }], failText: 'Una cassaforte a combinazione. Quattro cifre.\nNon la conosci.',
-        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 16]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
+        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 8]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
       { id: 'shop_batteries', x: 885, w: 260, label: 'Frigoriferi', markY: 380, give: ['battery'],
         text: 'I frigo sono spenti. Tra le bottiglie qualcuno ha nascosto delle batterie.' },
     ],
@@ -4792,7 +4944,7 @@ const ROOMS = {
         lockedText: 'La porta del retro è inchiodata dall\'interno.', requires: NEVER },
     ],
     overlays: [
-      { type: 'state', picked: 'shop_safe', src: BGV2 + 'alimentari_open.png', x: 0, y: 0, w: 1289, h: 720 },
+      { type: 'state', picked: 'shop_safe', src: BGV2 + 'alimentari_open.png', x: 575, y: 420, w: 150, h: 200, feather: 18 },
     ],
     enemies: [
       { id: 'shop_crawler', type: 'crawler', x: 950, ceiling: true },
@@ -4801,7 +4953,7 @@ const ROOMS = {
 
   apartment: {
     name: 'Palazzo Conti — Int. 4', bg: BGV2 + 'apartment.png', layoutW: 1418, keepEdges: true, scale: 1.32, floorY: 682,
-    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete',
+    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete', tint: '#3b8c9b',
     overlays: [{ type: 'monitor', x: 404, y: 474, w: 92, h: 74 }],
     hotspots: [
       { id: 'apt_diary', x: 40, w: 260, label: 'Diario sul divano', icon: 'note', iconY: 520, doc: 'doc_diario_giulia',
@@ -4824,12 +4976,12 @@ const ROOMS = {
 
   city_alley: {
     name: 'Vicolo dei Pescatori', bg: BGV2 + 'city_alley.png', layoutW: 1388, keepEdges: true, scale: 1.1, floorY: 645,
-    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
+    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet', tint: '#3587a0',
     props: [{ name: 'body_4', x: 560 }],
     hotspots: [
       { id: 'alley_woman', x: 470, w: 180, label: 'Una donna', markY: 610,
         text: 'Una donna in cappotto. La borsa è ancora a tracolla. Dentro, solo le chiavi di casa.' },
-      { id: 'alley_dumpster', x: 780, w: 170, label: 'Cassonetto', markY: 440, give: [['ammo_pistol_small', 16]],
+      { id: 'alley_dumpster', x: 780, w: 170, label: 'Cassonetto', markY: 440, give: [['ammo_pistol_small', 8]],
         text: 'Qualcuno ha buttato una scatola di munizioni ancora piena. O l\'ha nascosta.' },
     ],
     doors: [
@@ -4847,15 +4999,15 @@ const ROOMS = {
 
   hospital_corridor: {
     name: 'San Rocco — Corridoio', bg: BGV2 + 'hospital_corridor.png', layoutW: 2711, keepEdges: true, scale: 1.08, floorY: 655,
-    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile',
+    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile', tint: '#3194a5',
     props: [{ name: 'body_2', x: 2170 }],
     hotspots: [
       { id: 'hosp_cart', x: 1040, w: 240, label: 'Carrello medicazioni', icon: 'note', iconY: 455,
-        give: ['bandage', ['ammo_pistol_small', 12]], doc: 'doc_cartella' },
+        give: ['bandage', ['ammo_pistol_small', 6]], doc: 'doc_cartella' },
     ],
     doors: [
       { id: 'corr_to_alley', x: 385, w: 165, top: 230, bottom: 600, label: 'Vicolo', target: 'city_alley', noSprite: true },
-      { id: 'corr_to_ward', x: 770, w: 190, top: 240, bottom: 610, label: 'Degenze', target: 'hospital_ward', noSprite: true,
+      { id: 'corr_to_ward', x: 770, w: 190, top: 240, bottom: 610, label: 'Scale — Degenze 2° piano', target: 'hospital_ward', noSprite: true,
         keyId: 'key_hospital', lockedText: 'Porta del reparto degenze. Chiusa a chiave.' },
       { id: 'corr_to_morgue', x: 1545, w: 200, top: 270, bottom: 555, label: 'Scale — Obitorio', target: 'hospital_morgue', noSprite: true,
         requires: [{ item: 'shotgun' }], failText: 'Le scale scendono verso l\'obitorio. Da laggiù arrivano dei versi, tanti.\nCon una pistola sola non scendi.' },
@@ -4865,16 +5017,17 @@ const ROOMS = {
     enemies: [
       { id: 'corr_inf1', type: 'infermiere', x: 1250, patrol: [1050, 1450] },
       { id: 'corr_inf2', type: 'infermiere', x: 2050, patrol: [1900, 2250] },
+      { id: 'surg_corridore', type: 'corridore', x: 2600, idle: true, facingRight: false, showIf: { item: 'badge' } },
     ],
   },
 
   hospital_ward: {
     name: 'Degenze — 2° piano', bg: BGV2 + 'hospital_ward.png', layoutW: 2701, keepEdges: true, scale: 1.32, floorY: 685,
-    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile',
+    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile', tint: '#3092a5',
     props: [{ name: 'body_2', x: 2060, flip: true }],
     hotspots: [
       { id: 'ward_locker', x: 420, w: 180, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 420,
-        give: ['shotgun', ['ammo_shells', 16]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
+        give: ['shotgun', ['ammo_shells', 10]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
       { id: 'ward_notes', x: 680, w: 210, label: 'Cartellina sul letto', icon: 'note', iconY: 500, doc: 'doc_ricerca_elena' },
       { id: 'ward_bed', x: 1180, w: 240, label: 'Letto', markY: 470,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
@@ -4889,13 +5042,13 @@ const ROOMS = {
       { id: 'ward_inf', type: 'infermiere', x: 2400, patrol: [2250, 2600] },
     ],
     overlays: [
-      { type: 'state', picked: 'ward_locker', src: BGV2 + 'hospital_ward_open.png', x: 0, y: 0, w: 2701, h: 720 },
+      { type: 'state', picked: 'ward_locker', src: BGV2 + 'hospital_ward_open.png', x: 370, y: 255, w: 210, h: 340, feather: 18 },
     ],
   },
 
   hospital_surgery: {
     name: 'Sala operatoria', bg: BGV2 + 'hospital_surgery.png', layoutW: 1451, keepEdges: true, scale: 1.22, floorY: 670,
-    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile',
+    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile', tint: '#409495',
     hotspots: [
       { id: 'surg_terminal', x: 270, w: 190, label: 'Terminale [SALVA]', markY: 380, event: 'open_save' },
       { id: 'surg_table', x: 580, w: 420, label: 'Tavolo operatorio', markY: 450,
@@ -4907,17 +5060,17 @@ const ROOMS = {
     doors: [
       { id: 'surg_to_corr', x: 60, w: 180, top: 150, bottom: 680, label: 'Corridoio', target: 'hospital_corridor', noSprite: true },
     ],
-    enemies: [
-      { id: 'surg_corridore', type: 'corridore', x: 1150, idle: true, facingRight: false },
+    overlays: [
+      { type: 'state', picked: 'surg_fridge', src: BGV2 + 'hospital_surgery_open.png', x: 0, y: 0, w: 1451, h: 720 },
     ],
   },
 
   hospital_morgue: {
     name: 'Obitorio', bg: BGV2 + 'hospital_morgue.png', layoutW: 1360, keepEdges: true, scale: 1.15, floorY: 655,
-    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile',
+    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile', tint: '#429093',
     hotspots: [
       { id: 'morgue_report', x: 260, w: 350, label: 'Tavolo autoptico', icon: 'note', iconY: 430,
-        doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
+        doc: 'doc_autopsia', give: [['ammo_shells', 4]] },
       { id: 'morgue_drawer', x: 745, w: 190, label: 'Celle frigorifere', markY: 420,
         text: 'Una cella è aperta. Vuota. Il lenzuolo è sul pavimento.' },
     ],
@@ -4935,7 +5088,7 @@ const ROOMS = {
 
   metro_ingresso: {
     name: 'Metro — Ingresso', bg: BGV2 + 'metro_ingresso.png', layoutW: 1592, keepEdges: true, scale: 1.1, floorY: 660,
-    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile',
+    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile', tint: '#2da0a8',
     hotspots: [
       { id: 'metro_notice', x: 305, w: 155, label: 'Avviso', icon: 'note', iconY: 360, doc: 'doc_avviso_metro' },
       { id: 'metro_turnstiles', x: 470, w: 270, label: 'Tornelli', markY: 450,
@@ -4954,11 +5107,11 @@ const ROOMS = {
 
   metro_banchina: {
     name: 'Metro — Banchina B', bg: BGV2 + 'metro_banchina.png', layoutW: 3047, keepEdges: true, scale: 0.98, floorY: 665,
-    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete',
+    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete', tint: '#3c8b99',
     props: [{ name: 'body_5', x: 1900 }],
     hotspots: [
       { id: 'mb_train', x: 1380, w: 140, label: 'Carrozze abbandonate', markY: 470,
-        give: ['medikit_small', ['ammo_pistol_small', 12]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
+        give: ['medikit_small', ['ammo_pistol_small', 6]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
       { id: 'mb_log', x: 1820, w: 170, label: 'Il capotreno', icon: 'note', iconY: 640, doc: 'doc_registro_metro' },
       { id: 'mb_phone', x: 2330, w: 90, label: 'Colonnina SOS [SALVA]', markY: 420, event: 'open_save' },
     ],
@@ -4974,11 +5127,11 @@ const ROOMS = {
 
   metro_tunnel: {
     name: 'Tunnel Linea 3', bg: BGV2 + 'metro_tunnel.png', layoutW: 2617, keepEdges: true, scale: 0.92, floorY: 600,
-    light: 0.3, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete',
+    light: 0.3, poweredFlag: 'power_on', poweredLight: 0.48, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete', tint: '#419194',
     props: [{ name: 'body_0', x: 720 }],
     hotspots: [
       { id: 'tunnel_notebook', x: 630, w: 180, label: 'Il soldato', icon: 'note', iconY: 575,
-        doc: 'doc_taccuino', give: [['ammo_pistol_small', 16]] },
+        doc: 'doc_taccuino', give: [['ammo_pistol_small', 8]] },
     ],
     doors: [
       { id: 'tunnel_to_mb', x: 0, w: 150, top: 160, bottom: 600, label: 'Banchina B', target: 'metro_banchina', noSprite: true },
@@ -4992,7 +5145,7 @@ const ROOMS = {
 
   sala_generatori: {
     name: 'Sala generatori', bg: BGV2 + 'sala_generatori.png', layoutW: 2732, keepEdges: true, scale: 0.85, floorY: 650,
-    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal',
+    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal', tint: '#3b8e9a',
     hotspots: [
       { id: 'generator', x: 520, w: 680, label: 'Generatore di emergenza', markY: 330, event: 'start_generator',
         requires: [{ item: 'fuse' }], failText: 'Il vano del fusibile principale è vuoto.\nSenza un fusibile da 30A non parte.',
@@ -5016,10 +5169,10 @@ const ROOMS = {
 
   stanza_manutenzione: {
     name: 'Officina', bg: BGV2 + 'stanza_manutenzione.png', layoutW: 1672, keepEdges: true, scale: 1.26, floorY: 670,
-    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete',
+    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete', tint: '#36889f',
     hotspots: [
       { id: 'maint_bench', x: 700, w: 510, label: 'Banco da lavoro', icon: 'note', iconY: 440,
-        doc: 'doc_officina', give: [['ammo_shells', 8]] },
+        doc: 'doc_officina', give: [['ammo_shells', 4]] },
       { id: 'maint_locker', x: 1345, w: 110, label: 'Armadietto 7', icon: 'card', iconY: 400, give: ['card'] },
     ],
     doors: [
@@ -5028,7 +5181,7 @@ const ROOMS = {
         requires: [{ flag: 'power_on' }], failText: 'Porta blindata a comando elettrico. Senza corrente non si apre.' },
     ],
     overlays: [
-      { type: 'state', picked: 'maint_locker', src: BGV2 + 'stanza_manutenzione_open.png', x: 0, y: 0, w: 1672, h: 720 },
+      { type: 'state', picked: 'maint_locker', src: BGV2 + 'stanza_manutenzione_open.png', x: 1300, y: 130, w: 200, h: 530, feather: 18 },
     ],
     enemies: [
       { id: 'maint_listener', type: 'listener', x: 1100, idle: true, facingRight: false },
@@ -5037,10 +5190,10 @@ const ROOMS = {
 
   safe_room: {
     name: 'Il rifugio di Elena', bg: BGV2 + 'safe_room.png', layoutW: 1303, keepEdges: true, scale: 1.3, floorY: 680,
-    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete',
+    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete', tint: '#957c40',
     hotspots: [
       { id: 'safe_shelf', x: 265, w: 270, label: 'Scaffale', markY: 400,
-        give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
+        give: ['medikit_small', ['ammo_shells', 4], ['ammo_pistol_small', 8]] },
       { id: 'safe_radio', x: 640, w: 120, label: 'Radio di Elena [SALVA]', markY: 400, event: 'open_save' },
       { id: 'safe_recorder', x: 780, w: 130, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 370, event: 'elena_tape_2' },
     ],
@@ -5050,7 +5203,7 @@ const ROOMS = {
         keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
     ],
     overlays: [
-      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
+      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 1140, y: 125, w: 163, h: 580, feather: 18 },
     ],
   },
 
@@ -5058,7 +5211,7 @@ const ROOMS = {
 
   lab_ingresso: {
     name: 'Laboratorio — Ingresso', bg: BGV2 + 'lab_ingresso.png', layoutW: 1559, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile', tint: '#3f8c96',
     hotspots: [
       { id: 'lab_papers', x: 1150, w: 260, label: 'Fogli a terra', markY: 600,
         text: 'Moduli di evacuazione. Tutti firmati "Dir. Amati". Nessuno compilato.' },
@@ -5074,10 +5227,10 @@ const ROOMS = {
 
   lab_corridoio: {
     name: 'Laboratorio — Corridoio', bg: BGV2 + 'lab_corridoio.png', layoutW: 2587, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile', tint: '#368da0',
     hotspots: [
       { id: 'lc_log', x: 335, w: 60, label: 'Registro accessi', icon: 'note', iconY: 390, doc: 'doc_accessi' },
-      { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
+      { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 4], ['ammo_pistol_small', 6]] },
     ],
     doors: [
       { id: 'lc_to_li', x: 110, w: 215, top: 200, bottom: 595, label: 'Ingresso', target: 'lab_ingresso', noSprite: true },
@@ -5092,7 +5245,7 @@ const ROOMS = {
 
   lab_biologico: {
     name: 'Laboratorio biologico', bg: BGV2 + 'lab_biologico.png', layoutW: 1257, keepEdges: true, scale: 1.02, floorY: 640,
-    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile', tint: '#56805a',
     hotspots: [
       { id: 'bio_cabinet', x: 245, w: 165, label: 'Vetrina dei reagenti', markY: 330,
         text: 'Flaconi etichettati "R-0", tutti vuoti. Qualcuno li ha svuotati in fretta.' },
@@ -5108,14 +5261,17 @@ const ROOMS = {
       { id: 'bio_cr', type: 'crawler', x: 900, ceiling: true },
       { id: 'bio_c', type: 'contaminato', x: 1050, patrol: [900, 1180] },
     ],
+    overlays: [
+      { type: 'state', picked: 'bio_usb', src: BGV2 + 'lab_biologico_open.png', x: 0, y: 0, w: 1257, h: 720 },
+    ],
   },
 
   sala_server: {
-    name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal',
+    name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640, alarmFlag: 'core_alarm',
+    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal', tint: '#39729c',
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
-      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
+      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 590, y: 225, w: 270, h: 385, feather: 18 },
     ],
     hotspots: [
       { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },
@@ -5134,8 +5290,8 @@ const ROOMS = {
   },
 
   camera_centrale: {
-    name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650,
-    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal',
+    name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650, alarmFlag: 'core_alarm',
+    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal', tint: '#397c9c',
     npcs: [
       { id: 'elena', char: 'elena', x: 930, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
     ],
@@ -5155,17 +5311,20 @@ const ROOMS = {
       { id: 'core_run1', type: 'corridore', x: 260, facingRight: true, showIf: { flag: 'core_alarm' } },
       { id: 'core_run2', type: 'contaminato', x: 380, facingRight: true, showIf: { flag: 'core_alarm' } },
     ],
+    overlays: [
+      { type: 'state', flag: 'elena_gone', src: BGV2 + 'camera_centrale_after.png', x: 0, y: 0, w: 1418, h: 720 },
+    ],
   },
 
   /* ═══════════ CAPITOLO 6 — IL PORTO ═══════════ */
 
   porto: {
     name: 'Porto commerciale', bg: BGV2 + 'porto.png', layoutW: 2261, keepEdges: true, scale: 0.78, floorY: 630,
-    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
+    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet', tint: '#3c859a',
     props: [{ name: 'body_5', x: 1200 }],
     hotspots: [
       { id: 'port_container', x: 840, w: 160, label: 'Container aperto', markY: 330,
-        give: [['ammo_shells', 8], 'medikit_small'] },
+        give: [['ammo_shells', 4], 'medikit_small'] },
     ],
     doors: [
       { id: 'port_to_core', x: 100, w: 280, top: 280, bottom: 600, label: 'Galleria', target: 'camera_centrale', noSprite: true,
@@ -5181,7 +5340,7 @@ const ROOMS = {
 
   molo_finale: {
     name: 'Molo 4', bg: BGV2 + 'molo_finale.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 650,
-    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
+    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet', tint: '#4a788b',
     hotspots: [
       { id: 'the_boat', x: 90, w: 520, label: 'Bitta — il gozzo di papà', markY: 430, event: 'ending',
         requires: [{ item: 'key_rusty' }], failText: 'Alla bitta è legato il gozzo di papà, con una catena e un lucchetto.' },
@@ -5203,6 +5362,9 @@ const ROOMS = {
    e disegna sfondo, porte, oggetti e indicatori.
    ============================================= */
 
+
+// fondali presenti (tools/build.py): gli stati "aperto" non ancora disegnati si saltano senza errori
+const BG_PRESENT = ["assets/backgrounds/v2/alimentari.png", "assets/backgrounds/v2/alimentari_open.png", "assets/backgrounds/v2/alimentari_originale.png", "assets/backgrounds/v2/apartment.png", "assets/backgrounds/v2/apartment_originale.png", "assets/backgrounds/v2/camera_centrale.png", "assets/backgrounds/v2/camera_centrale_originale.png", "assets/backgrounds/v2/city_alley.png", "assets/backgrounds/v2/city_alley_originale.png", "assets/backgrounds/v2/city_street.png", "assets/backgrounds/v2/city_street_originale.png", "assets/backgrounds/v2/hospital_corridor.png", "assets/backgrounds/v2/hospital_corridor_originale.png", "assets/backgrounds/v2/hospital_morgue.png", "assets/backgrounds/v2/hospital_morgue_originale.png", "assets/backgrounds/v2/hospital_surgery.png", "assets/backgrounds/v2/hospital_surgery_originale.png", "assets/backgrounds/v2/hospital_ward.png", "assets/backgrounds/v2/hospital_ward_open.png", "assets/backgrounds/v2/hospital_ward_originale.png", "assets/backgrounds/v2/lab_biologico.png", "assets/backgrounds/v2/lab_biologico_originale.png", "assets/backgrounds/v2/lab_corridoio.png", "assets/backgrounds/v2/lab_corridoio_originale.png", "assets/backgrounds/v2/lab_ingresso.png", "assets/backgrounds/v2/lab_ingresso_originale.png", "assets/backgrounds/v2/metro_banchina.png", "assets/backgrounds/v2/metro_banchina_originale.png", "assets/backgrounds/v2/metro_ingresso.png", "assets/backgrounds/v2/metro_ingresso_originale.png", "assets/backgrounds/v2/metro_tunnel.png", "assets/backgrounds/v2/metro_tunnel_originale.png", "assets/backgrounds/v2/molo_finale.png", "assets/backgrounds/v2/molo_finale_originale.png", "assets/backgrounds/v2/porto.png", "assets/backgrounds/v2/porto_originale.png", "assets/backgrounds/v2/safe_room.png", "assets/backgrounds/v2/safe_room_open.png", "assets/backgrounds/v2/safe_room_originale.png", "assets/backgrounds/v2/sala_generatori.png", "assets/backgrounds/v2/sala_generatori_on.png", "assets/backgrounds/v2/sala_generatori_originale.png", "assets/backgrounds/v2/sala_server.png", "assets/backgrounds/v2/sala_server_open.png", "assets/backgrounds/v2/sala_server_originale.png", "assets/backgrounds/v2/stanza_manutenzione.png", "assets/backgrounds/v2/stanza_manutenzione_open.png", "assets/backgrounds/v2/stanza_manutenzione_originale.png", "assets/backgrounds/v2/station_control.png", "assets/backgrounds/v2/station_control_originale.png", "assets/backgrounds/v2/station_exit.png", "assets/backgrounds/v2/station_exit_originale.png", "assets/backgrounds/v2/station_hall.png", "assets/backgrounds/v2/station_hall_open.png", "assets/backgrounds/v2/station_hall_originale.png", "assets/backgrounds/v2/station_platform.png", "assets/backgrounds/v2/station_platform_originale.png", "assets/backgrounds/v2/station_storage.png", "assets/backgrounds/v2/station_storage_open.png", "assets/backgrounds/v2/station_storage_originale.png", "assets/backgrounds/v2/train_wagon.png", "assets/backgrounds/v2/train_wagon_originale.png"];
 
 const VIEW_W = 1280;
 const VIEW_H = 720;
@@ -5416,6 +5578,12 @@ class RoomManager {
 
     this._drawOverlays(ctx, room);
     this._drawDoorSprites(ctx, room);
+  }
+
+  /** Cadaveri e persone (disegnati nel livello dei personaggi, che prende la luce della stanza) */
+  drawActors(ctx) {
+    const room = this.current;
+    if (!room) return;
     for (const pr of room.props) { const s = room.scaleAt(pr.x); SpriteLib.drawProp(ctx, pr.name, pr.x, room.floorAt(pr.x) + 18 * s, pr.flip, 1, s); }
     for (const n of room.npcs) {
       if (!this.visible(n)) continue;
@@ -5505,13 +5673,14 @@ class RoomManager {
         // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
         const on = (o.picked && this.isPicked(o.picked)) || (o.door && this.isDoorOpen(o.door)) || (o.flag && this.check({ flag: o.flag }));
         if (!on) { o._t0 = 0; continue; }
+        if (BG_PRESENT && !BG_PRESENT.includes(o.src)) continue;
         const im = this._bgImage(o.src);
         if (!im || !im.complete || !im.naturalWidth) continue;
         if (!o._t0) o._t0 = t;
-        const k = im.naturalHeight / VIEW_H;
+        if (!o._cut) o._cut = this._cutOverlay(im, o, room);
         ctx.save();
         ctx.globalAlpha *= Math.min(1, (t - o._t0) / 0.35);
-        ctx.drawImage(im, o.x * k, o.y * k, o.w * k, o.h * k, o.x, o.y, o.w, o.h);
+        ctx.drawImage(o._cut, o.x, o.y);
         ctx.restore();
       } else if (o.type === 'barricade') {
         const d = room.doors.find(d => d.id === o.door);
@@ -5522,6 +5691,33 @@ class RoomManager {
         SpriteLib.drawPropBox(ctx, open ? 'barricade_broken' : 'barricade_closed', r.x, r.y, r.w, r.h, 1);
       }
     }
+  }
+
+  /**
+   * Ritaglio del fondale "modificato" nel riquadro x,y,w,h (coordinate della stanza),
+   * con i bordi sfumati (feather) così non si vede la cucitura.
+   * Il fondale modificato viene adattato alla larghezza della stanza anche se
+   * ChatGPT lo ha restituito con proporzioni leggermente diverse.
+   */
+  _cutOverlay(im, o, room) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(o.w)); c.height = Math.max(1, Math.round(o.h));
+    const g = c.getContext('2d');
+    const kx = im.naturalWidth / room.width, ky = im.naturalHeight / VIEW_H;
+    g.drawImage(im, o.x * kx, o.y * ky, o.w * kx, o.h * ky, 0, 0, c.width, c.height);
+    const f = o.feather || 0;
+    if (f > 0) {
+      g.globalCompositeOperation = 'destination-in';
+      const fade = (x0, y0, x1, y1) => {
+        const gr = g.createLinearGradient(x0, y0, x1, y1);
+        gr.addColorStop(0, 'rgba(0,0,0,0)');
+        gr.addColorStop(Math.min(1, f / Math.hypot(x1 - x0, y1 - y0)), 'rgba(0,0,0,1)');
+        gr.addColorStop(1, 'rgba(0,0,0,1)');
+        g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
+      };
+      fade(0, 0, c.width, 0); fade(c.width, 0, 0, 0); fade(0, 0, 0, c.height); fade(0, c.height, 0, 0);
+    }
+    return c;
   }
 
   /** Direzione di un'uscita: a sinistra, a destra o "dentro" (porta / passaggio in fondo) */
@@ -5556,6 +5752,19 @@ class RoomManager {
       const col = locked ? [215, 60, 70] : [245, 236, 220];
       const base = isNear ? 0.95 : 0.55;
       const size = Math.max(14, 22 * Math.min(1.4, sc)) * (this.game.uiScale || 1) * 0.8;
+      const arrowImg = Skin.img('arrow_' + dir);
+      if (arrowImg) {
+        // freccia dipinta: pulsa e scivola verso l'uscita
+        const ph = (t * 1.2) % 1, a = base * (0.55 + 0.45 * Math.sin(ph * Math.PI));
+        const h = size * 1.9, w = h * arrowImg.naturalWidth / arrowImg.naturalHeight;
+        const off = dir === 'left' ? -(ph - 0.5) * size : dir === 'right' ? (ph - 0.5) * size : 0;
+        const oy = dir === 'up' ? -(ph - 0.5) * size * 0.6 : 0;
+        ctx.save();
+        if (locked) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-50deg)';
+        ctx.globalAlpha = a;
+        ctx.drawImage(arrowImg, cx + off - w / 2, fy + oy - h / 2, w, h);
+        ctx.restore();
+      } else {
       ctx.save();
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.lineWidth = Math.max(3, 4.5 * Math.min(1.3, sc));
@@ -5582,10 +5791,13 @@ class RoomManager {
         ctx.stroke();
       }
       ctx.restore();
+      }
       if (locked) {
         const ix = dir === 'up' ? cx + size * 1.5 : cx;
         const iy = dir === 'up' ? fy - size * 0.6 : fy - size * 1.6;
-        SpriteLib.drawIcon(ctx, 'padlock', ix, iy, Math.max(18, 22 * Math.min(1.3, sc)), isNear ? 1 : 0.75);
+        const ps = Math.max(18, 22 * Math.min(1.3, sc)), pimg = Skin.img('padlock');
+        if (pimg) { ctx.save(); ctx.globalAlpha = isNear ? 1 : 0.75; ctx.drawImage(pimg, ix - ps / 2, iy - ps / 2, ps, ps); ctx.restore(); }
+        else SpriteLib.drawIcon(ctx, 'padlock', ix, iy, ps, isNear ? 1 : 0.75);
       }
     }
   }
@@ -5654,16 +5866,24 @@ class RoomManager {
     const w = tw + 52 * k, h = 28 * k;
     const x = Math.max(this.game.camera.x + 6, Math.min(this.game.camera.x + VIEW_W - w - 6, cx - w / 2));
     y = Math.max(h / 2 + 8, y);
-    ctx.fillStyle = 'rgba(8,8,10,0.88)';
-    ctx.fillRect(x, y - h / 2, w, h);
-    ctx.strokeStyle = 'rgba(192,21,42,0.8)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y - h / 2 + 0.5, w - 1, h - 1);
-    ctx.fillStyle = '#c0152a';
-    ctx.fillRect(x + 6 * k, y - 9 * k, 22 * k, 18 * k);
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText(document.body.classList.contains('touch') ? '●' : 'E', x + 17 * k, y + 1);
+    const plate = Skin.img('prompt'), touch = document.body.classList.contains('touch');
+    const key = Skin.img(touch ? 'key_touch' : 'key_e');
+    if (plate) ctx.drawImage(plate, x - 6 * k, y - h / 2 - 5 * k, w + 12 * k, h + 10 * k);
+    else {
+      ctx.fillStyle = 'rgba(8,8,10,0.88)';
+      ctx.fillRect(x, y - h / 2, w, h);
+      ctx.strokeStyle = 'rgba(192,21,42,0.8)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, y - h / 2 + 0.5, w - 1, h - 1);
+    }
+    if (key) ctx.drawImage(key, x + 4 * k, y - 12 * k, 26 * k, 24 * k);
+    else {
+      ctx.fillStyle = '#c0152a';
+      ctx.fillRect(x + 6 * k, y - 9 * k, 22 * k, 18 * k);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(touch ? '●' : 'E', x + 17 * k, y + 1);
+    }
     ctx.textAlign = 'left';
     ctx.fillStyle = '#efe6d8';
     ctx.fillText(label, x + 38 * k, y + 1);
@@ -6098,8 +6318,14 @@ class Game {
     this._darkCanvas.width = CANVAS_W;
     this._darkCanvas.height = CANVAS_H;
     this._darkCtx = this._darkCanvas.getContext('2d');
+    // livello dei personaggi: prende il colore della luce della stanza
+    this._actCanvas = document.createElement('canvas');
+    this._actCanvas.width = CANVAS_W;
+    this._actCanvas.height = CANVAS_H;
+    this._actCtx = this._actCanvas.getContext('2d');
 
     SpriteLib.preload();
+    Skin.init();
 
     // Sistemi creati una volta sola (legano eventi DOM)
     this.input    = new InputManager();
@@ -6136,6 +6362,7 @@ class Game {
     this.enemyManager = new EnemyManager(this);
     this.events       = new EventManager(this);
     this._playTime    = 0;
+    this._fx          = [];
     this._transitioning = false;
     this._lightFadeActive = false;
     this.paused = false;
@@ -6149,6 +6376,13 @@ class Game {
   }
 
   itemName(id) { return ITEMS[id]?.name || id; }
+
+  /** Effetto a fotogrammi (assets/fx/<name>.png). Ritorna false se l'immagine non c'è. */
+  spawnFx(name, x, y, h, flip = false, dur = 0.25) {
+    if (!Skin.has(name)) return false;
+    this._fx.push({ name, x, y, h, flip, dur, t: 0 });
+    return true;
+  }
 
   /* ══════════ MENU ══════════ */
   _bindMenuEvents() {
@@ -6175,7 +6409,7 @@ class Game {
     for (const s of this.save.getSlotsInfo()) {
       const el = document.createElement('div');
       el.className = 'save-slot' + (s.empty ? ' empty' : '');
-      el.innerHTML = `<span class="slot-name">SLOT ${s.slot + 1} — ${s.empty ? 'Vuoto' : s.room}</span>
+      el.innerHTML = `<span class="slot-name">${s.auto ? 'AUTOMATICO' : `SLOT ${s.slot + 1}`} — ${s.empty ? 'Vuoto' : s.room}</span>
         ${s.empty ? '' : `<span class="slot-info">${s.date} — ${this._formatTime(s.time)}</span>`}`;
       if (!s.empty) el.addEventListener('click', () => { this.audio.resume(); this._loadSlot(s.slot); });
       box.appendChild(el);
@@ -6302,6 +6536,8 @@ class Game {
     }
     this.weapon.update(dt);
     this.enemyManager.update(dt);
+    for (const f of this._fx) f.t += dt / f.dur;
+    this._fx = this._fx.filter(f => f.t < 1);
     this._updateRain(dt);
 
     if (!p.alive) {
@@ -6433,6 +6669,7 @@ class Game {
     const once = h.once ?? !!(h.give?.length || h.doc);
     if (once) rm.markPickedUp(h.id);
     if (gained.length) {
+      this.player.interactTimer = 0.6;
       this.audio.playSfx('pickup');
       this.ui.showNotification('Raccolto: ' + gained.join(', '));
     }
@@ -6510,7 +6747,12 @@ class Game {
     if (!this.roomManager.isDoorOpen('alley_to_hospital')) return has('crowbar')
       ? 'Forza la porta sbarrata del San Rocco nel vicolo'
       : 'L\'ospedale è oltre il vicolo, ma la porta è sbarrata: cerca qualcosa per fare leva';
+    // il fusibile è in città: meglio prenderlo prima di scendere sottoterra
+    const fuseHint = f('knows_safe_code') && !has('fuse') && !f('power_on') && !visited('hospital_morgue');
+    if (fuseHint && ['city_street', 'alimentari', 'apartment', 'city_alley'].includes(this.roomManager.current?.id))
+      return 'Apri la cassaforte di Luigi (1-4-1-0): Alimentari, Via Ferrante';
     if (!visited('hospital_morgue')) {
+      if (fuseHint && has('shotgun')) return 'Prima di scendere: il fusibile nella cassaforte di Luigi (1-4-1-0), in città';
       if (!has('shotgun')) return has('key_hospital') || this.roomManager.isDoorOpen('corr_to_ward')
         ? 'Esplora le Degenze del San Rocco' : 'Trova la chiave del reparto Degenze (Palazzo Conti)';
       if (!has('vial')) return 'Il campione R-0 è in sala operatoria (serve un badge) — oppure scendi all\'obitorio';
@@ -6594,13 +6836,25 @@ class Game {
 
     // 1. Sfondo + porte basse (dietro il giocatore)
     this.roomManager.drawBackground(ctx);
+    this.camera.restoreTransform(ctx);
 
-    // 2. Nemici e armi (sotto il giocatore per y)
-    this.enemyManager.draw(ctx);
+    // 2. Personaggi su un livello a parte, tinto con la luce della stanza
+    const ac = this._actCtx;
+    ac.setTransform(1, 0, 0, 1, 0, 0);
+    ac.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    this.camera.applyTransform(ac);
+    this.roomManager.drawActors(ac);
+    this.enemyManager.draw(ac);
+    this.player.draw(ac);
+    this.camera.restoreTransform(ac);
+    this._tintActors(ac, room);
+    ctx.drawImage(this._actCanvas, 0, 0);
 
-    // 3. Giocatore (in base alla sua Y per depth-sorting)
-    this.player.draw(ctx);
+    // 3. Proiettili, sangue e vampate (luce propria: non tinti)
+    this.camera.applyTransform(ctx);
     this.weapon.draw(ctx);
+    this.enemyManager.drawUI(ctx);
+    for (const f of this._fx) Skin.drawFx(ctx, f.name, f.t, f.x, f.y, f.h, f.flip);
 
     // 4. Porte alte / overlay frontali (davanti al giocatore per y)
     this.roomManager.drawFrontDoors(ctx);
@@ -6623,12 +6877,30 @@ class Game {
     this.camera.restoreTransform(ctx);
   }
 
+  /** Colora i personaggi con la luce della stanza (tint), rosso pulsante durante l'allarme */
+  _tintActors(ac, room) {
+    let tint = room.tint, a = room.tintAlpha ?? 0.2;
+    if (room.alarmFlag && this.events.getFlag(room.alarmFlag)) {
+      const k = 0.5 + 0.5 * Math.sin(Date.now() / 260);
+      tint = '#c0152a'; a = 0.12 + 0.18 * k;
+    }
+    if (!tint || a <= 0) return;
+    ac.save();
+    ac.globalCompositeOperation = 'source-atop';
+    ac.globalAlpha = a;
+    ac.fillStyle = tint;
+    ac.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    ac.restore();
+  }
+
   /** Mirino sul nemico che verrà colpito */
   _drawReticle(ctx) {
     const t = this._target;
     if (!t || !t.alive) return;
     const cx = t.centerX, cy = t.y + t.height * 0.4;
     const r = (18 + Math.sin(Date.now() / 120) * 2) * (this.uiScale || 1);
+    const rim = Skin.img('reticle');
+    if (rim) { ctx.drawImage(rim, cx - r * 1.4, cy - r * 1.4, r * 2.8, r * 2.8); return; }
     ctx.save();
     ctx.strokeStyle = 'rgba(230,40,50,0.85)';
     ctx.lineWidth = 2;
@@ -6803,6 +7075,7 @@ class Game {
         text: good
           ? `Il gozzo esce dal porto mentre il cielo comincia a schiarire.\nAlle tue spalle Porto Salvo brucia di una luce rossa: la procedura ALBA è cominciata.\n\nNella tasca, avvolta nella garza, la provetta R-0 è ancora fredda.\n\nTre settimane dopo, a Ginevra, dai dati trasmessi dal laboratorio e dal campione che hai portato fuori nasce il primo anticorpo.\nIl protocollo porta un nome solo: FERRI.`
           : `Il gozzo esce dal porto mentre il cielo comincia a schiarire.\nAlle tue spalle Porto Salvo brucia di una luce rossa: la procedura ALBA è cominciata.\n\nI dati di Elena sono arrivati fuori. Ma senza il campione originale, la sintesi non parte.\n\nIn primavera, un'altra città si accende di rosso.\nPoi un'altra.`,
+        kind: good ? 'alba' : 'notte',
         stats: `Tempo: ${this._formatTime(this._playTime)}   ·   Documenti: ${docs}/${total}`,
       });
     });

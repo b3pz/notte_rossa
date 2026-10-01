@@ -181,6 +181,9 @@ export class UIManager {
     $('doc-title').textContent = doc.title || '—';
     $('doc-date').textContent  = doc.date || '';
     $('doc-body').textContent  = doc.text || '';
+    // tipo di foglio (assets/ui/paper_<tipo>.png): dattiloscritto, quaderno, cartella clinica...
+    const panel = this.$docScreen.querySelector('.document-panel');
+    panel.className = 'document-panel' + (doc.paper ? ' paper-' + doc.paper : '');
     this._open(this.$docScreen);
   }
 
@@ -319,8 +322,10 @@ export class UIManager {
   showGameOver() { setTimeout(() => this.$gameOver.classList.remove('hidden'), 1600); }
   hideGameOver() { this.$gameOver.classList.add('hidden'); }
 
-  showEnding({ title, text, stats }) {
+  showEnding({ title, text, stats, kind }) {
     this.hideHUD();
+    this.$ending.classList.remove('alba', 'notte');
+    if (kind) this.$ending.classList.add(kind);
     $('ending-title').textContent = title;
     $('ending-text').textContent  = text;
     $('ending-stats').textContent = stats;

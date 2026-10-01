@@ -7,6 +7,10 @@
 
 import { ROOMS } from './rooms_data.js';
 import { SpriteLib } from './sprites.js';
+import { Skin } from './skin.js';
+
+// fondali presenti (tools/build.py): gli stati "aperto" non ancora disegnati si saltano senza errori
+const BG_PRESENT = /*__BG_FILES__*/null;
 
 export const VIEW_W = 1280;
 export const VIEW_H = 720;
@@ -221,6 +225,12 @@ export class RoomManager {
 
     this._drawOverlays(ctx, room);
     this._drawDoorSprites(ctx, room);
+  }
+
+  /** Cadaveri e persone (disegnati nel livello dei personaggi, che prende la luce della stanza) */
+  drawActors(ctx) {
+    const room = this.current;
+    if (!room) return;
     for (const pr of room.props) { const s = room.scaleAt(pr.x); SpriteLib.drawProp(ctx, pr.name, pr.x, room.floorAt(pr.x) + 18 * s, pr.flip, 1, s); }
     for (const n of room.npcs) {
       if (!this.visible(n)) continue;
@@ -310,13 +320,14 @@ export class RoomManager {
         // dal fondale "modificato" si copia solo il riquadro x,y,w,h, con una breve dissolvenza
         const on = (o.picked && this.isPicked(o.picked)) || (o.door && this.isDoorOpen(o.door)) || (o.flag && this.check({ flag: o.flag }));
         if (!on) { o._t0 = 0; continue; }
+        if (BG_PRESENT && !BG_PRESENT.includes(o.src)) continue;
         const im = this._bgImage(o.src);
         if (!im || !im.complete || !im.naturalWidth) continue;
         if (!o._t0) o._t0 = t;
-        const k = im.naturalHeight / VIEW_H;
+        if (!o._cut) o._cut = this._cutOverlay(im, o, room);
         ctx.save();
         ctx.globalAlpha *= Math.min(1, (t - o._t0) / 0.35);
-        ctx.drawImage(im, o.x * k, o.y * k, o.w * k, o.h * k, o.x, o.y, o.w, o.h);
+        ctx.drawImage(o._cut, o.x, o.y);
         ctx.restore();
       } else if (o.type === 'barricade') {
         const d = room.doors.find(d => d.id === o.door);
@@ -327,6 +338,33 @@ export class RoomManager {
         SpriteLib.drawPropBox(ctx, open ? 'barricade_broken' : 'barricade_closed', r.x, r.y, r.w, r.h, 1);
       }
     }
+  }
+
+  /**
+   * Ritaglio del fondale "modificato" nel riquadro x,y,w,h (coordinate della stanza),
+   * con i bordi sfumati (feather) così non si vede la cucitura.
+   * Il fondale modificato viene adattato alla larghezza della stanza anche se
+   * ChatGPT lo ha restituito con proporzioni leggermente diverse.
+   */
+  _cutOverlay(im, o, room) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(o.w)); c.height = Math.max(1, Math.round(o.h));
+    const g = c.getContext('2d');
+    const kx = im.naturalWidth / room.width, ky = im.naturalHeight / VIEW_H;
+    g.drawImage(im, o.x * kx, o.y * ky, o.w * kx, o.h * ky, 0, 0, c.width, c.height);
+    const f = o.feather || 0;
+    if (f > 0) {
+      g.globalCompositeOperation = 'destination-in';
+      const fade = (x0, y0, x1, y1) => {
+        const gr = g.createLinearGradient(x0, y0, x1, y1);
+        gr.addColorStop(0, 'rgba(0,0,0,0)');
+        gr.addColorStop(Math.min(1, f / Math.hypot(x1 - x0, y1 - y0)), 'rgba(0,0,0,1)');
+        gr.addColorStop(1, 'rgba(0,0,0,1)');
+        g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
+      };
+      fade(0, 0, c.width, 0); fade(c.width, 0, 0, 0); fade(0, 0, 0, c.height); fade(0, c.height, 0, 0);
+    }
+    return c;
   }
 
   /** Direzione di un'uscita: a sinistra, a destra o "dentro" (porta / passaggio in fondo) */
@@ -361,6 +399,19 @@ export class RoomManager {
       const col = locked ? [215, 60, 70] : [245, 236, 220];
       const base = isNear ? 0.95 : 0.55;
       const size = Math.max(14, 22 * Math.min(1.4, sc)) * (this.game.uiScale || 1) * 0.8;
+      const arrowImg = Skin.img('arrow_' + dir);
+      if (arrowImg) {
+        // freccia dipinta: pulsa e scivola verso l'uscita
+        const ph = (t * 1.2) % 1, a = base * (0.55 + 0.45 * Math.sin(ph * Math.PI));
+        const h = size * 1.9, w = h * arrowImg.naturalWidth / arrowImg.naturalHeight;
+        const off = dir === 'left' ? -(ph - 0.5) * size : dir === 'right' ? (ph - 0.5) * size : 0;
+        const oy = dir === 'up' ? -(ph - 0.5) * size * 0.6 : 0;
+        ctx.save();
+        if (locked) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-50deg)';
+        ctx.globalAlpha = a;
+        ctx.drawImage(arrowImg, cx + off - w / 2, fy + oy - h / 2, w, h);
+        ctx.restore();
+      } else {
       ctx.save();
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.lineWidth = Math.max(3, 4.5 * Math.min(1.3, sc));
@@ -387,10 +438,13 @@ export class RoomManager {
         ctx.stroke();
       }
       ctx.restore();
+      }
       if (locked) {
         const ix = dir === 'up' ? cx + size * 1.5 : cx;
         const iy = dir === 'up' ? fy - size * 0.6 : fy - size * 1.6;
-        SpriteLib.drawIcon(ctx, 'padlock', ix, iy, Math.max(18, 22 * Math.min(1.3, sc)), isNear ? 1 : 0.75);
+        const ps = Math.max(18, 22 * Math.min(1.3, sc)), pimg = Skin.img('padlock');
+        if (pimg) { ctx.save(); ctx.globalAlpha = isNear ? 1 : 0.75; ctx.drawImage(pimg, ix - ps / 2, iy - ps / 2, ps, ps); ctx.restore(); }
+        else SpriteLib.drawIcon(ctx, 'padlock', ix, iy, ps, isNear ? 1 : 0.75);
       }
     }
   }
@@ -459,16 +513,24 @@ export class RoomManager {
     const w = tw + 52 * k, h = 28 * k;
     const x = Math.max(this.game.camera.x + 6, Math.min(this.game.camera.x + VIEW_W - w - 6, cx - w / 2));
     y = Math.max(h / 2 + 8, y);
-    ctx.fillStyle = 'rgba(8,8,10,0.88)';
-    ctx.fillRect(x, y - h / 2, w, h);
-    ctx.strokeStyle = 'rgba(192,21,42,0.8)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y - h / 2 + 0.5, w - 1, h - 1);
-    ctx.fillStyle = '#c0152a';
-    ctx.fillRect(x + 6 * k, y - 9 * k, 22 * k, 18 * k);
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText(document.body.classList.contains('touch') ? '●' : 'E', x + 17 * k, y + 1);
+    const plate = Skin.img('prompt'), touch = document.body.classList.contains('touch');
+    const key = Skin.img(touch ? 'key_touch' : 'key_e');
+    if (plate) ctx.drawImage(plate, x - 6 * k, y - h / 2 - 5 * k, w + 12 * k, h + 10 * k);
+    else {
+      ctx.fillStyle = 'rgba(8,8,10,0.88)';
+      ctx.fillRect(x, y - h / 2, w, h);
+      ctx.strokeStyle = 'rgba(192,21,42,0.8)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, y - h / 2 + 0.5, w - 1, h - 1);
+    }
+    if (key) ctx.drawImage(key, x + 4 * k, y - 12 * k, 26 * k, 24 * k);
+    else {
+      ctx.fillStyle = '#c0152a';
+      ctx.fillRect(x + 6 * k, y - 9 * k, 22 * k, 18 * k);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(touch ? '●' : 'E', x + 17 * k, y + 1);
+    }
     ctx.textAlign = 'left';
     ctx.fillStyle = '#efe6d8';
     ctx.fillText(label, x + 38 * k, y + 1);

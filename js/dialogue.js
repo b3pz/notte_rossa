@@ -3,6 +3,8 @@
    Sistema dialogo cinematografico
    ============================================= */
 
+import { Skin } from './skin.js';
+
 export class DialogueManager {
   constructor(game) {
     this.game     = game;
@@ -20,6 +22,7 @@ export class DialogueManager {
     this._speaker = document.getElementById('dialogue-speaker');
     this._text    = document.getElementById('dialogue-text');
     this._cont    = document.getElementById('dialogue-continue');
+    this._portrait = document.getElementById('dialogue-portrait');
 
     // Avanzamento con SPACE o click
     this._box?.addEventListener('click',    () => this.advance());
@@ -34,12 +37,12 @@ export class DialogueManager {
   }
 
   /** Mostra un dialogo (o lo accoda) */
-  show(speaker, text, onComplete = null) {
+  show(speaker, text, onComplete = null, portrait = null) {
     if (this.active) {
-      this._queue.push({ speaker, text, onComplete });
+      this._queue.push({ speaker, text, onComplete, portrait });
       return;
     }
-    this._display(speaker, text, onComplete);
+    this._display(speaker, text, onComplete, portrait);
   }
 
   /** Mostra una sequenza di dialoghi */
@@ -53,7 +56,7 @@ export class DialogueManager {
     next(0);
   }
 
-  _display(speaker, text, onComplete) {
+  _display(speaker, text, onComplete, portrait = null) {
     this.active      = true;
     this._fullText   = text;
     this._charIdx    = 0;
@@ -62,10 +65,15 @@ export class DialogueManager {
     this._typing     = true;
 
     this._speaker.textContent = speaker || '';
+    // ritratto di chi parla (assets/ui/portrait_*.png), se c'è
+    const pic = Skin.portraitFor(speaker, portrait);
+    this._box?.classList.toggle('has-portrait', !!pic);
+    if (pic && this._portrait) this._portrait.src = pic;
     this._text.textContent    = '';
     this._cont.style.opacity  = '0';
 
     if (this._box) this._box.classList.remove('hidden');
+    document.body.classList.add('nr-dialog');
 
 
     this._typeChar();
@@ -106,10 +114,10 @@ export class DialogueManager {
 
     if (this._queue.length > 0) {
       const next = this._queue.shift();
-      this._display(next.speaker, next.text, next.onComplete);
+      this._display(next.speaker, next.text, next.onComplete, next.portrait);
     } else {
       if (this._box) this._box.classList.add('hidden');
-
+      document.body.classList.remove('nr-dialog');
     }
 
     if (onC) onC();
@@ -125,6 +133,7 @@ export class DialogueManager {
     this.active   = false;
     this._typing  = false;
     if (this._box) this._box.classList.add('hidden');
+    document.body.classList.remove('nr-dialog');
     for (const fn of pending) { try { fn(); } catch (e) { console.error(e); } }
   }
 

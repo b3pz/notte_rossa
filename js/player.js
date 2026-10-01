@@ -89,6 +89,7 @@ export class Player {
     }
     if (this._hurtTimer > 0) this._hurtTimer -= dt;
     if (this.shotTimer  > 0) this.shotTimer  -= dt;
+    if (this.interactTimer > 0) this.interactTimer -= dt;
     if (this.aimTimer   > 0) this.aimTimer   -= dt;
 
     if (!this.alive) {
@@ -175,20 +176,25 @@ export class Player {
 
   /* ── ANIMAZIONE ── */
   _pickAnim() {
+    // le animazioni "facoltative" si usano appena esiste la loro striscia nel manifest
+    const has = (a) => SpriteLib.has('player', a);
+    const or = (a, b) => has(a) ? a : b;
     if (!this.alive) return 'death';
     if (this._hurtTimer > 0) return 'hurt';
     const sg = this.weaponId === 'shotgun';
-    if (this.armed && this.reloading) return sg ? 'shotgun_aim' : 'reload';
+    if (this.armed && this.reloading) return sg ? or('shotgun_reload', 'shotgun_aim') : 'reload';
     if (this.armed && this.shotTimer > 0) return sg ? 'shotgun_shoot' : 'shoot';
     if (this.isAiming || (this.armed && this.aimTimer > 0 && this.vx === 0)) return sg ? 'shotgun_aim' : 'aim';
     if (this.vx !== 0) {
       if (this.isCrouching) return 'sneak';
-      if (this.isRunning)   return 'run';
+      if (this.isRunning)   return this.armed ? or(sg ? 'run_shotgun' : 'run_gun', 'run') : 'run';
+      if (this.armed)       return or(sg ? 'walk_shotgun' : 'walk_gun', this.flashlightOn ? 'flashlight_walk' : 'walk');
       return this.flashlightOn ? 'flashlight_walk' : 'walk';
     }
+    if (this.interactTimer > 0 && has('interact')) return 'interact';
     if (this.isCrouching) return 'crouch';
+    if (this.armed) return sg ? or('shotgun_idle', 'gun_idle') : 'gun_idle';
     if (this.flashlightOn) return 'flashlight';
-    if (this.armed) return 'gun_idle';
     if (this.healthState === HEALTH_STATE.DANGER) return 'wounded';
     return 'idle';
   }
@@ -204,7 +210,7 @@ export class Player {
     if (!def) return;
     this.animTimer += dt;
     // passi sincronizzati con la velocità reale (niente piedi che pattinano)
-    const stride = { walk: 30, flashlight_walk: 40, run: 72, sneak: 42 }[this.anim];
+    const stride = { walk: 30, walk_gun: 34, walk_shotgun: 34, flashlight_walk: 40, run: 72, run_gun: 72, run_shotgun: 72, sneak: 42 }[this.anim];
     const fps = stride ? Math.max(2.5, Math.abs(this.vx) / (stride * this.scale)) : def.fps;
     const fd = 1 / fps;
     while (this.animTimer >= fd) {

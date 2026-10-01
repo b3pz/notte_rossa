@@ -86,7 +86,7 @@ export class WeaponSystem {
       const step = b.vx * dt;
       b.x += step;
       b.travel += Math.abs(step);
-      if (b.travel > b.range || b.x < -50 || b.x > 1330) { this.bullets.splice(i, 1); continue; }
+      if (b.travel > b.range || b.x < -50 || b.x > (this.game.roomManager?.current?.width ?? 1280) + 50) { this.bullets.splice(i, 1); continue; }
 
       // Colpisce il primo nemico vivo attraversato (tutta l'altezza: corsia unica)
       let hit = null;
@@ -100,7 +100,9 @@ export class WeaponSystem {
         // il fucile perde forza con la distanza
         const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
         hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
-        this._blood(b.x, Math.max(hit.y + hit.height * 0.15, Math.min(hit.y + hit.height * 0.6, b.y)), Math.sign(b.vx), hit.scale || 1);
+        const by = Math.max(hit.y + hit.height * 0.15, Math.min(hit.y + hit.height * 0.6, b.y));
+        this._blood(b.x, by, Math.sign(b.vx), hit.scale || 1);
+        this.game.spawnFx?.('fx_blood_hit', b.x + Math.sign(b.vx) * 20 * (hit.scale || 1), by, 120 * (hit.scale || 1), b.vx < 0, 0.3);
         if (!hit.alive) em.onEnemyKilled(hit);
         this.bullets.splice(i, 1);
       }
@@ -130,7 +132,10 @@ export class WeaponSystem {
         knock: w.def.knock, travel: 0, pellet: w.def.pellets > 1,
       });
     }
-    this._flash = 0.06;
+    // vampata: sprite se c'è (assets/fx), altrimenti disegnata
+    const sc = this.game.player?.scale || 1, big = w.def.id === 'shotgun';
+    const fxOk = this.game.spawnFx?.(big ? 'fx_muzzle_shotgun' : 'fx_muzzle_pistol', fromX + dir * (big ? 50 : 30) * sc, fromY, (big ? 110 : 70) * sc, dir < 0, 0.09);
+    this._flash = fxOk ? 0 : 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
     this.game.audio?.playSfx(w.def.id === 'shotgun' ? 'shotgun_shot' : 'shot');
     this.game.camera?.shake(w.def.shake, 0.12);

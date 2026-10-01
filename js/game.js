@@ -20,6 +20,7 @@ import { ITEMS, DOCUMENTS } from './items.js';
 import { SpriteLib }        from './sprites.js';
 import { LayoutEditor }     from './editor.js';
 import { TouchControls }    from './touch.js';
+import { Skin }             from './skin.js';
 
 const CANVAS_W = 1280;
 const CANVAS_H =  720;
@@ -44,8 +45,14 @@ export class Game {
     this._darkCanvas.width = CANVAS_W;
     this._darkCanvas.height = CANVAS_H;
     this._darkCtx = this._darkCanvas.getContext('2d');
+    // livello dei personaggi: prende il colore della luce della stanza
+    this._actCanvas = document.createElement('canvas');
+    this._actCanvas.width = CANVAS_W;
+    this._actCanvas.height = CANVAS_H;
+    this._actCtx = this._actCanvas.getContext('2d');
 
     SpriteLib.preload();
+    Skin.init();
 
     // Sistemi creati una volta sola (legano eventi DOM)
     this.input    = new InputManager();
@@ -82,6 +89,7 @@ export class Game {
     this.enemyManager = new EnemyManager(this);
     this.events       = new EventManager(this);
     this._playTime    = 0;
+    this._fx          = [];
     this._transitioning = false;
     this._lightFadeActive = false;
     this.paused = false;
@@ -95,6 +103,13 @@ export class Game {
   }
 
   itemName(id) { return ITEMS[id]?.name || id; }
+
+  /** Effetto a fotogrammi (assets/fx/<name>.png). Ritorna false se l'immagine non c'è. */
+  spawnFx(name, x, y, h, flip = false, dur = 0.25) {
+    if (!Skin.has(name)) return false;
+    this._fx.push({ name, x, y, h, flip, dur, t: 0 });
+    return true;
+  }
 
   /* ══════════ MENU ══════════ */
   _bindMenuEvents() {
@@ -121,7 +136,7 @@ export class Game {
     for (const s of this.save.getSlotsInfo()) {
       const el = document.createElement('div');
       el.className = 'save-slot' + (s.empty ? ' empty' : '');
-      el.innerHTML = `<span class="slot-name">SLOT ${s.slot + 1} — ${s.empty ? 'Vuoto' : s.room}</span>
+      el.innerHTML = `<span class="slot-name">${s.auto ? 'AUTOMATICO' : `SLOT ${s.slot + 1}`} — ${s.empty ? 'Vuoto' : s.room}</span>
         ${s.empty ? '' : `<span class="slot-info">${s.date} — ${this._formatTime(s.time)}</span>`}`;
       if (!s.empty) el.addEventListener('click', () => { this.audio.resume(); this._loadSlot(s.slot); });
       box.appendChild(el);
@@ -248,6 +263,8 @@ export class Game {
     }
     this.weapon.update(dt);
     this.enemyManager.update(dt);
+    for (const f of this._fx) f.t += dt / f.dur;
+    this._fx = this._fx.filter(f => f.t < 1);
     this._updateRain(dt);
 
     if (!p.alive) {
@@ -379,6 +396,7 @@ export class Game {
     const once = h.once ?? !!(h.give?.length || h.doc);
     if (once) rm.markPickedUp(h.id);
     if (gained.length) {
+      this.player.interactTimer = 0.6;
       this.audio.playSfx('pickup');
       this.ui.showNotification('Raccolto: ' + gained.join(', '));
     }
@@ -456,7 +474,12 @@ export class Game {
     if (!this.roomManager.isDoorOpen('alley_to_hospital')) return has('crowbar')
       ? 'Forza la porta sbarrata del San Rocco nel vicolo'
       : 'L\'ospedale è oltre il vicolo, ma la porta è sbarrata: cerca qualcosa per fare leva';
+    // il fusibile è in città: meglio prenderlo prima di scendere sottoterra
+    const fuseHint = f('knows_safe_code') && !has('fuse') && !f('power_on') && !visited('hospital_morgue');
+    if (fuseHint && ['city_street', 'alimentari', 'apartment', 'city_alley'].includes(this.roomManager.current?.id))
+      return 'Apri la cassaforte di Luigi (1-4-1-0): Alimentari, Via Ferrante';
     if (!visited('hospital_morgue')) {
+      if (fuseHint && has('shotgun')) return 'Prima di scendere: il fusibile nella cassaforte di Luigi (1-4-1-0), in città';
       if (!has('shotgun')) return has('key_hospital') || this.roomManager.isDoorOpen('corr_to_ward')
         ? 'Esplora le Degenze del San Rocco' : 'Trova la chiave del reparto Degenze (Palazzo Conti)';
       if (!has('vial')) return 'Il campione R-0 è in sala operatoria (serve un badge) — oppure scendi all\'obitorio';
@@ -540,13 +563,25 @@ export class Game {
 
     // 1. Sfondo + porte basse (dietro il giocatore)
     this.roomManager.drawBackground(ctx);
+    this.camera.restoreTransform(ctx);
 
-    // 2. Nemici e armi (sotto il giocatore per y)
-    this.enemyManager.draw(ctx);
+    // 2. Personaggi su un livello a parte, tinto con la luce della stanza
+    const ac = this._actCtx;
+    ac.setTransform(1, 0, 0, 1, 0, 0);
+    ac.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    this.camera.applyTransform(ac);
+    this.roomManager.drawActors(ac);
+    this.enemyManager.draw(ac);
+    this.player.draw(ac);
+    this.camera.restoreTransform(ac);
+    this._tintActors(ac, room);
+    ctx.drawImage(this._actCanvas, 0, 0);
 
-    // 3. Giocatore (in base alla sua Y per depth-sorting)
-    this.player.draw(ctx);
+    // 3. Proiettili, sangue e vampate (luce propria: non tinti)
+    this.camera.applyTransform(ctx);
     this.weapon.draw(ctx);
+    this.enemyManager.drawUI(ctx);
+    for (const f of this._fx) Skin.drawFx(ctx, f.name, f.t, f.x, f.y, f.h, f.flip);
 
     // 4. Porte alte / overlay frontali (davanti al giocatore per y)
     this.roomManager.drawFrontDoors(ctx);
@@ -569,12 +604,30 @@ export class Game {
     this.camera.restoreTransform(ctx);
   }
 
+  /** Colora i personaggi con la luce della stanza (tint), rosso pulsante durante l'allarme */
+  _tintActors(ac, room) {
+    let tint = room.tint, a = room.tintAlpha ?? 0.2;
+    if (room.alarmFlag && this.events.getFlag(room.alarmFlag)) {
+      const k = 0.5 + 0.5 * Math.sin(Date.now() / 260);
+      tint = '#c0152a'; a = 0.12 + 0.18 * k;
+    }
+    if (!tint || a <= 0) return;
+    ac.save();
+    ac.globalCompositeOperation = 'source-atop';
+    ac.globalAlpha = a;
+    ac.fillStyle = tint;
+    ac.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    ac.restore();
+  }
+
   /** Mirino sul nemico che verrà colpito */
   _drawReticle(ctx) {
     const t = this._target;
     if (!t || !t.alive) return;
     const cx = t.centerX, cy = t.y + t.height * 0.4;
     const r = (18 + Math.sin(Date.now() / 120) * 2) * (this.uiScale || 1);
+    const rim = Skin.img('reticle');
+    if (rim) { ctx.drawImage(rim, cx - r * 1.4, cy - r * 1.4, r * 2.8, r * 2.8); return; }
     ctx.save();
     ctx.strokeStyle = 'rgba(230,40,50,0.85)';
     ctx.lineWidth = 2;
@@ -749,6 +802,7 @@ export class Game {
         text: good
           ? `Il gozzo esce dal porto mentre il cielo comincia a schiarire.\nAlle tue spalle Porto Salvo brucia di una luce rossa: la procedura ALBA è cominciata.\n\nNella tasca, avvolta nella garza, la provetta R-0 è ancora fredda.\n\nTre settimane dopo, a Ginevra, dai dati trasmessi dal laboratorio e dal campione che hai portato fuori nasce il primo anticorpo.\nIl protocollo porta un nome solo: FERRI.`
           : `Il gozzo esce dal porto mentre il cielo comincia a schiarire.\nAlle tue spalle Porto Salvo brucia di una luce rossa: la procedura ALBA è cominciata.\n\nI dati di Elena sono arrivati fuori. Ma senza il campione originale, la sintesi non parte.\n\nIn primavera, un'altra città si accende di rosso.\nPoi un'altra.`,
+        kind: good ? 'alba' : 'notte',
         stats: `Tempo: ${this._formatTime(this._playTime)}   ·   Documenti: ${docs}/${total}`,
       });
     });

@@ -60,8 +60,11 @@ export const ITEMS = {
     description: 'Vecchia chiave arrugginita. Il gozzo di papà, ormeggiato al molo 4.' },
 };
 
+// paper = foglio su cui appare (assets/ui/paper_<tipo>.png):
+// typed (dattiloscritto) · notebook (quaderno a mano) · clinical (modulo clinico)
+// letter (carta da lettera) · ticket (biglietto) · printout (stampa da computer)
 export const DOCUMENTS = {
-  doc_ticket: { id: 'doc_ticket', title: 'Biglietto ferroviario', date: '14 ottobre',
+  doc_ticket: { id: 'doc_ticket', paper: 'ticket', title: 'Biglietto ferroviario', date: '14 ottobre',
     text:
 `Treno 847 — Partenza 21:55
 Destinazione: Porto Salvo Centrale
@@ -73,7 +76,7 @@ Valido solo per il giorno indicato.
 Sul retro, a penna, con la calligrafia di Elena:
 "Non dovevi venire."` },
 
-  doc_ordinanza: { id: 'doc_ordinanza', title: 'Ordinanza n. 114', date: '14 ottobre, 22:47',
+  doc_ordinanza: { id: 'doc_ordinanza', paper: 'typed', title: 'Ordinanza n. 114', date: '14 ottobre, 22:47',
     text:
 `COMUNE DI PORTO SALVO — ORDINANZA CONTINGIBILE E URGENTE
 
@@ -90,7 +93,7 @@ disorientamento, febbre o comportamento aggressivo.
 
 IL SINDACO` },
 
-  doc_storage_note: { id: 'doc_storage_note', title: 'Nota del deposito', date: '14 ottobre',
+  doc_storage_note: { id: 'doc_storage_note', paper: 'notebook', title: 'Nota del deposito', date: '14 ottobre',
     text:
 `PROMEMORIA — turno serale, Carmine
 
@@ -104,7 +107,7 @@ Io sono lì. Chiudo da dentro.
 
 NON FARE RUMORE.` },
 
-  doc_turni: { id: 'doc_turni', title: 'Registro di movimento', date: '14 ottobre',
+  doc_turni: { id: 'doc_turni', paper: 'typed', title: 'Registro di movimento', date: '14 ottobre',
     text:
 `22:31  Treno 847 — ritardo 12'.
 22:40  Ordine RFI: sospendere tutta la circolazione.
@@ -116,7 +119,7 @@ NON FARE RUMORE.` },
 
 (a matita) — è lui. il fratello della dottoressa.` },
 
-  doc_luigi: { id: 'doc_luigi', title: 'Biglietto di Luigi', date: '14 ottobre',
+  doc_luigi: { id: 'doc_luigi', paper: 'letter', title: 'Biglietto di Luigi', date: '14 ottobre',
     text:
 `Giulia,
 ho chiuso il negozio. Mia moglie ha la febbre
@@ -129,7 +132,7 @@ del condominio. La combinazione la sai.
 Se non torno, prendi quello che ti serve.
 — Luigi` },
 
-  doc_diario_giulia: { id: 'doc_diario_giulia', title: 'Diario di Giulia Conti', date: '12-14 ottobre',
+  doc_diario_giulia: { id: 'doc_diario_giulia', paper: 'notebook', title: 'Diario di Giulia Conti', date: '12-14 ottobre',
     text:
 `12 ott — Al San Rocco ci hanno detto di non parlare
 del reparto chiuso al piano -2. La dottoressa Ferri
@@ -145,7 +148,7 @@ cassaforte per le medicine di mamma:
 Stanotte torno in ospedale. Lascio qui la chiave
 del reparto, non voglio che la trovino addosso a me.` },
 
-  doc_cartella: { id: 'doc_cartella', title: 'Cartella clinica — Pz. 0', date: '9 ottobre',
+  doc_cartella: { id: 'doc_cartella', paper: 'clinical', title: 'Cartella clinica — Pz. 0', date: '9 ottobre',
     text:
 `OSPEDALE SAN ROCCO — Reparto isolamento
 
@@ -161,7 +164,7 @@ Ore 04:00: l'infermiere presenta gli stessi sintomi.
 
 Firma: Dott.ssa E. Ferri` },
 
-  doc_ricerca_elena: { id: 'doc_ricerca_elena', title: 'Appunti della Dott.ssa Ferri', date: '13 ottobre',
+  doc_ricerca_elena: { id: 'doc_ricerca_elena', paper: 'notebook', title: 'Appunti della Dott.ssa Ferri', date: '13 ottobre',
     text:
 `PROGETTO ROSSO — appunti personali (NON per la direzione)
 
@@ -177,7 +180,7 @@ Se i dati escono, qualcuno fuori potrà fare la cura.
 
 Luca, se mai leggerai questo: non venire.` },
 
-  doc_formula: { id: 'doc_formula', title: 'Protocollo campioni', date: '14 ottobre',
+  doc_formula: { id: 'doc_formula', paper: 'clinical', title: 'Protocollo campioni', date: '14 ottobre',
     text:
 `CAMPIONE R-0 — conservare a 4°C
 Frigo chirurgico, ripiano 2.
@@ -188,7 +191,7 @@ Senza entrambi, nessuna sintesi è possibile.
 
 — E.F.` },
 
-  doc_autopsia: { id: 'doc_autopsia', title: 'Referto autoptico', date: '14 ottobre',
+  doc_autopsia: { id: 'doc_autopsia', paper: 'clinical', title: 'Referto autoptico', date: '14 ottobre',
     text:
 `Soggetto: infermiere, 34 anni.
 
@@ -201,7 +204,7 @@ Alcuni soggetti "ascoltano" invece di guardare.
 
 Consiglio a chi legge: muoviti piano.` },
 
-  doc_avviso_metro: { id: 'doc_avviso_metro', title: 'Avviso ai viaggiatori', date: '14 ottobre',
+  doc_avviso_metro: { id: 'doc_avviso_metro', paper: 'typed', title: 'Avviso ai viaggiatori', date: '14 ottobre',
     text:
 `METRO PORTO SALVO — AVVISO
 
@@ -215,7 +218,7 @@ oltre il tunnel, nella sala tecnica.
 (scritto sopra con il pennarello)
 IL LABORATORIO È SOTTO DI NOI` },
 
-  doc_registro_metro: { id: 'doc_registro_metro', title: 'Registro del capotreno', date: '14 ottobre',
+  doc_registro_metro: { id: 'doc_registro_metro', paper: 'notebook', title: 'Registro del capotreno', date: '14 ottobre',
     text:
 `23:05 — Fermati in banchina B. Niente corrente.
 23:20 — Passeggeri agitati. Una signora con la febbre.
@@ -224,7 +227,7 @@ IL LABORATORIO È SOTTO DI NOI` },
 00:10 — Vado a piedi nel tunnel verso la sala tecnica.
         Se non torno, non seguitemi.` },
 
-  doc_taccuino: { id: 'doc_taccuino', title: 'Taccuino di un soldato', date: '15 ottobre, 00:40',
+  doc_taccuino: { id: 'doc_taccuino', paper: 'notebook', title: 'Taccuino di un soldato', date: '15 ottobre, 00:40',
     text:
 `Ordini: sigillare gli accessi al laboratorio.
 All'alba "bonifica" dall'alto.
@@ -235,7 +238,7 @@ Nessuno ci ha detto che si rialzano.
 Marchi è rimasto indietro. L'ho sentito
 chiamarmi per mezz'ora. Poi ha smesso.` },
 
-  doc_manuale: { id: 'doc_manuale', title: 'Manuale del generatore', date: '—',
+  doc_manuale: { id: 'doc_manuale', paper: 'printout', title: 'Manuale del generatore', date: '—',
     text:
 `GENERATORE DI EMERGENZA — LINEA 3
 
@@ -246,7 +249,7 @@ chiamarmi per mezz'ora. Poi ha smesso.` },
 
 ATTENZIONE: l'avvio è molto rumoroso.` },
 
-  doc_officina: { id: 'doc_officina', title: 'Nota in officina', date: '14 ottobre',
+  doc_officina: { id: 'doc_officina', paper: 'letter', title: 'Nota in officina', date: '14 ottobre',
     text:
 `Dottoressa Ferri,
 come mi ha chiesto ho lasciato la sua tessera
@@ -257,7 +260,7 @@ Il laboratorio si apre solo con la corrente
 del generatore. Non torni giù da sola.
 — Sandro, manutenzione` },
 
-  doc_accessi: { id: 'doc_accessi', title: 'Registro accessi', date: '15 ottobre',
+  doc_accessi: { id: 'doc_accessi', paper: 'printout', title: 'Registro accessi', date: '15 ottobre',
     text:
 `LABORATORIO — ACCESSI LIVELLO 3
 
@@ -269,7 +272,7 @@ del generatore. Non torni giù da sola.
 
 Nessuna uscita successiva.` },
 
-  doc_classificato: { id: 'doc_classificato', title: 'Direttiva riservata', date: '14 ottobre',
+  doc_classificato: { id: 'doc_classificato', paper: 'printout', title: 'Direttiva riservata', date: '14 ottobre',
     text:
 `CLASSIFICATO — PROGETTO ROSSO
 
@@ -282,7 +285,7 @@ In caso di perdita di contenimento:
 Nessun dato deve lasciare Porto Salvo.
 — Dir. Amati` },
 
-  doc_lettera_elena: { id: 'doc_lettera_elena', title: 'Lettera di Elena', date: '15 ottobre',
+  doc_lettera_elena: { id: 'doc_lettera_elena', paper: 'letter', title: 'Lettera di Elena', date: '15 ottobre',
     text:
 `Luca,
 

@@ -16,6 +16,7 @@
    hotspots: { id, x, w, label, markY, icon, iconY, give, doc, text,
                requires, failText, setFlag, event, once, showIf, hideIf }
    npcs:     { id, char, x, anim, facingRight, label, event, showIf, hideIf }
+   tint:     colore della luce della stanza sui personaggi (calcolato dal fondale)
    ambient:  suono in loop (assets/audio/<id>.mp3), steps: concrete|wet|metal|tile
    props:    { name, x, flip }
    overlays: { type:'monitor'|'neon'|'lever'|'barricade'|'state' (picked|door|flag), ... }
@@ -34,7 +35,7 @@ export const ROOMS = {
 
   train_wagon: {
     name: 'Treno 847 — Vagone 4', bg: BGV2 + 'train_wagon.png', layoutW: 1400, keepEdges: true, scale: 1.25, floorY: 660,
-    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal',
+    light: 0.6, map: [0, 0], spawnX: 420, ambient: 'train_idle', steps: 'metal', tint: '#4a6e8b',
     hotspots: [
       { id: 'window_wagon', x: 555, w: 245, label: 'Finestrino', markY: 290,
         text: 'Pioggia. Il binario 1 di Porto Salvo è deserto.\nNessun capotreno, nessun annuncio.' },
@@ -57,7 +58,7 @@ export const ROOMS = {
     scale: 0.74, floorY: 540,
     floorLine: [[300, 500], [1319, 592]],          // linea dei piedi (segue il marciapiede)
     scaleLine: [[300, 0.70], [1319, 0.84]],        // più vicino alla telecamera = più grande
-    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.45, map: [1, 0], ambient: 'station_ambient', steps: 'wet', tint: '#528380',
     props: [{ name: 'body_0', x: 890 }],
     hotspots: [
       { id: 'body_conductor', x: 820, w: 150, label: 'Il capotreno', markY: 520,
@@ -83,7 +84,7 @@ export const ROOMS = {
     // NUOVO SFONDO LATERALE (v2)
     name: 'Atrio', bg: BGV2 + 'station_hall.png', layoutW: 2782, keepEdges: true,
     scale: 0.92, floorY: 640,
-    light: 0.72, map: [2, 0], ambient: 'station_ambient', steps: 'tile',
+    light: 0.72, darkFlag: 'lights_out', darkLight: 0.5, map: [2, 0], ambient: 'station_ambient', steps: 'tile', tint: '#169cbf',
     hotspots: [
       { id: 'ticket_booth', x: 660, w: 320, label: 'Biglietteria', markY: 360, give: ['flashlight', 'battery'],
         text: 'La biglietteria è chiusa. Dalla fessura della serranda si vede il cassetto dei soldi, aperto e pieno.\nSotto il bancone, una torcia d\'emergenza.', event: 'got_flashlight' },
@@ -102,20 +103,20 @@ export const ROOMS = {
       { id: 'hall_contaminato', type: 'contaminato', x: 2000, patrol: [1850, 2200], showIf: { flag: 'has_pistol' } },
     ],
     overlays: [
-      { type: 'state', picked: 'ticket_booth', src: BGV2 + 'station_hall_open.png', x: 0, y: 0, w: 2782, h: 720 },
+      { type: 'state', picked: 'ticket_booth', src: BGV2 + 'station_hall_open.png', x: 690, y: 150, w: 300, h: 520, feather: 18 },
     ],
   },
 
   station_storage: {
     name: 'Servizi tecnici', bg: BGV2 + 'station_storage.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 600,
-    light: 0.5, map: [1, 1], ambient: 'room_hum', steps: 'tile',
+    light: 0.5, darkFlag: 'lights_out', darkLight: 0.38, map: [1, 1], ambient: 'room_hum', steps: 'tile', tint: '#448f92',
     props: [{ name: 'body_1', x: 350 }],
     hotspots: [
       { id: 'guard_body', x: 285, w: 130, label: 'La guardia', markY: 560,
-        give: ['bandage', ['ammo_pistol_small', 10]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
+        give: ['bandage', ['ammo_pistol_small', 6]], text: 'Una guardia giurata. Nella tasca: delle bende e un caricatore.' },
       { id: 'document_note_storage', x: 425, w: 90, label: 'Foglio sul quadro', icon: 'note', iconY: 300, doc: 'doc_storage_note' },
       { id: 'shelf_pistol', x: 545, w: 145, label: 'Armadio B3', icon: 'pistol', iconY: 400,
-        give: ['pistol', ['ammo_pistol_small', 32]], event: 'got_pistol' },
+        give: ['pistol', ['ammo_pistol_small', 16]], event: 'got_pistol' },
       { id: 'cart_storage', x: 695, w: 70, label: 'Carrello delle pulizie', markY: 470,
         text: 'Sul pavimento, impronte scalze che vanno verso il buio.' },
       { id: 'crate_key', x: 770, w: 105, label: 'Cassetta rossa', icon: 'key_station', iconY: 290, give: ['key_station'] },
@@ -126,13 +127,14 @@ export const ROOMS = {
         lockedText: 'Il corridoio finisce contro un muro di casse.', requires: NEVER },
     ],
     overlays: [
-      { type: 'state', picked: 'shelf_pistol', src: BGV2 + 'station_storage_open.png', x: 0, y: 0, w: 1289, h: 720 },
+      { type: 'state', picked: 'crate_key', src: BGV2 + 'station_storage_open.png', x: 785, y: 205, w: 115, h: 145, feather: 12 },
+      { type: 'state', picked: 'shelf_pistol', src: BGV2 + 'station_storage_open.png', x: 535, y: 215, w: 170, h: 340, feather: 18 },
     ],
   },
 
   station_control: {
     name: 'Sala controllo', bg: BGV2 + 'station_control.png', layoutW: 1472, keepEdges: true, scale: 1.42, floorY: 665,
-    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete',
+    light: 0.72, map: [3, 0], safe: true, ambient: 'electronics_hum', steps: 'concrete', tint: '#2595b0',
     npcs: [
       { id: 'carmine', char: 'carmine', x: 800, anim: 'scared', facingRight: false, label: 'Carmine, il ferroviere', event: 'talk_carmine' },
     ],
@@ -147,11 +149,14 @@ export const ROOMS = {
     doors: [
       { id: 'control_to_hall', x: 95, w: 140, top: 150, bottom: 665, label: 'Scala — Atrio', target: 'station_hall', noSprite: true },
     ],
+    overlays: [
+      { type: 'state', flag: 'shutter_open', src: BGV2 + 'station_control_open.png', x: 0, y: 0, w: 1472, h: 720 },
+    ],
   },
 
   station_exit: {
     name: 'Uscita della stazione', bg: BGV2 + 'station_exit.png', layoutW: 1360, keepEdges: true, scale: 1.12, floorY: 668,
-    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet',
+    light: 0.6, map: [4, 0], ambient: 'rain_heavy', steps: 'wet', tint: '#428893',
     props: [{ name: 'body_1', x: 1170 }],
     hotspots: [
       { id: 'exit_map', x: 290, w: 190, label: 'Piantina a terra', icon: 'city_map', iconY: 655, give: ['city_map'],
@@ -159,7 +164,7 @@ export const ROOMS = {
       { id: 'exit_phone', x: 370, w: 80, label: 'Telefono a gettoni', markY: 330,
         text: 'Il telefono a gettoni. Alzi la cornetta: nessun segnale.\nSolo un respiro, lontano. Riattacchi.' },
       { id: 'police_body', x: 1090, w: 170, label: 'Il poliziotto', markY: 610,
-        give: [['ammo_pistol_small', 16]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
+        give: [['ammo_pistol_small', 8]], text: 'Un agente della Polfer. Ha sparato tutti i colpi tranne quelli rimasti in tasca.' },
     ],
     doors: [
       { id: 'exit_to_hall', x: 95, w: 180, top: 235, bottom: 620, label: 'Atrio', target: 'station_hall', noSprite: true },
@@ -174,11 +179,11 @@ export const ROOMS = {
 
   city_street: {
     name: 'Via Ferrante', bg: BGV2 + 'city_street.png', layoutW: 2587, keepEdges: true, scale: 0.85, floorY: 625,
-    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
+    light: 0.55, map: [0, 2], rain: true, ambient: 'rain_heavy', steps: 'wet', tint: '#357ca1',
     props: [{ name: 'body_3', x: 1060, flip: true }],
     hotspots: [
       { id: 'car_glovebox', x: 1700, w: 110, label: 'Cinquecento con la portiera aperta', markY: 520,
-        give: ['battery', ['ammo_pistol_small', 12]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
+        give: ['battery', ['ammo_pistol_small', 6]], text: 'Nel cassetto del cruscotto: batterie, un rosario e una scatola di proiettili.' },
     ],
     doors: [
       { id: 'street_to_station', x: 190, w: 120, top: 300, bottom: 555, label: 'Stazione', target: 'station_exit', noSprite: true },
@@ -194,7 +199,7 @@ export const ROOMS = {
 
   alimentari: {
     name: 'Alimentari da Luigi', bg: BGV2 + 'alimentari.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile',
+    light: 0.6, map: [1, 2], ambient: 'rain_indoor', steps: 'tile', tint: '#2b99aa',
     props: [{ name: 'body_3', x: 420 }],
     hotspots: [
       { id: 'shop_crowbar', x: 215, w: 110, label: 'Dietro il bancone', icon: 'crowbar', iconY: 480, give: ['crowbar'] },
@@ -203,7 +208,7 @@ export const ROOMS = {
       { id: 'shop_meds', x: 500, w: 100, label: 'Scaffale farmacia', markY: 260, give: ['painkillers'] },
       { id: 'shop_safe', x: 605, w: 85, label: 'Cassaforte sotto la cassa', icon: 'padlock', iconY: 525,
         requires: [{ flag: 'knows_safe_code' }], failText: 'Una cassaforte a combinazione. Quattro cifre.\nNon la conosci.',
-        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 16]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
+        give: ['fuse', 'medikit_small', ['ammo_pistol_small', 8]], text: '1 - 4 - 1 - 0.\nLa cassaforte si apre con uno scatto.' },
       { id: 'shop_batteries', x: 885, w: 260, label: 'Frigoriferi', markY: 380, give: ['battery'],
         text: 'I frigo sono spenti. Tra le bottiglie qualcuno ha nascosto delle batterie.' },
     ],
@@ -213,7 +218,7 @@ export const ROOMS = {
         lockedText: 'La porta del retro è inchiodata dall\'interno.', requires: NEVER },
     ],
     overlays: [
-      { type: 'state', picked: 'shop_safe', src: BGV2 + 'alimentari_open.png', x: 0, y: 0, w: 1289, h: 720 },
+      { type: 'state', picked: 'shop_safe', src: BGV2 + 'alimentari_open.png', x: 575, y: 420, w: 150, h: 200, feather: 18 },
     ],
     enemies: [
       { id: 'shop_crawler', type: 'crawler', x: 950, ceiling: true },
@@ -222,7 +227,7 @@ export const ROOMS = {
 
   apartment: {
     name: 'Palazzo Conti — Int. 4', bg: BGV2 + 'apartment.png', layoutW: 1418, keepEdges: true, scale: 1.32, floorY: 682,
-    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete',
+    light: 0.55, map: [2, 2], ambient: 'rain_indoor', steps: 'concrete', tint: '#3b8c9b',
     overlays: [{ type: 'monitor', x: 404, y: 474, w: 92, h: 74 }],
     hotspots: [
       { id: 'apt_diary', x: 40, w: 260, label: 'Diario sul divano', icon: 'note', iconY: 520, doc: 'doc_diario_giulia',
@@ -245,12 +250,12 @@ export const ROOMS = {
 
   city_alley: {
     name: 'Vicolo dei Pescatori', bg: BGV2 + 'city_alley.png', layoutW: 1388, keepEdges: true, scale: 1.1, floorY: 645,
-    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet',
+    light: 0.5, map: [3, 2], rain: true, ambient: 'rain_heavy', steps: 'wet', tint: '#3587a0',
     props: [{ name: 'body_4', x: 560 }],
     hotspots: [
       { id: 'alley_woman', x: 470, w: 180, label: 'Una donna', markY: 610,
         text: 'Una donna in cappotto. La borsa è ancora a tracolla. Dentro, solo le chiavi di casa.' },
-      { id: 'alley_dumpster', x: 780, w: 170, label: 'Cassonetto', markY: 440, give: [['ammo_pistol_small', 16]],
+      { id: 'alley_dumpster', x: 780, w: 170, label: 'Cassonetto', markY: 440, give: [['ammo_pistol_small', 8]],
         text: 'Qualcuno ha buttato una scatola di munizioni ancora piena. O l\'ha nascosta.' },
     ],
     doors: [
@@ -268,15 +273,15 @@ export const ROOMS = {
 
   hospital_corridor: {
     name: 'San Rocco — Corridoio', bg: BGV2 + 'hospital_corridor.png', layoutW: 2711, keepEdges: true, scale: 1.08, floorY: 655,
-    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile',
+    light: 0.55, map: [0, 3], ambient: 'hospital_hum', steps: 'tile', tint: '#3194a5',
     props: [{ name: 'body_2', x: 2170 }],
     hotspots: [
       { id: 'hosp_cart', x: 1040, w: 240, label: 'Carrello medicazioni', icon: 'note', iconY: 455,
-        give: ['bandage', ['ammo_pistol_small', 12]], doc: 'doc_cartella' },
+        give: ['bandage', ['ammo_pistol_small', 6]], doc: 'doc_cartella' },
     ],
     doors: [
       { id: 'corr_to_alley', x: 385, w: 165, top: 230, bottom: 600, label: 'Vicolo', target: 'city_alley', noSprite: true },
-      { id: 'corr_to_ward', x: 770, w: 190, top: 240, bottom: 610, label: 'Degenze', target: 'hospital_ward', noSprite: true,
+      { id: 'corr_to_ward', x: 770, w: 190, top: 240, bottom: 610, label: 'Scale — Degenze 2° piano', target: 'hospital_ward', noSprite: true,
         keyId: 'key_hospital', lockedText: 'Porta del reparto degenze. Chiusa a chiave.' },
       { id: 'corr_to_morgue', x: 1545, w: 200, top: 270, bottom: 555, label: 'Scale — Obitorio', target: 'hospital_morgue', noSprite: true,
         requires: [{ item: 'shotgun' }], failText: 'Le scale scendono verso l\'obitorio. Da laggiù arrivano dei versi, tanti.\nCon una pistola sola non scendi.' },
@@ -286,16 +291,17 @@ export const ROOMS = {
     enemies: [
       { id: 'corr_inf1', type: 'infermiere', x: 1250, patrol: [1050, 1450] },
       { id: 'corr_inf2', type: 'infermiere', x: 2050, patrol: [1900, 2250] },
+      { id: 'surg_corridore', type: 'corridore', x: 2600, idle: true, facingRight: false, showIf: { item: 'badge' } },
     ],
   },
 
   hospital_ward: {
     name: 'Degenze — 2° piano', bg: BGV2 + 'hospital_ward.png', layoutW: 2701, keepEdges: true, scale: 1.32, floorY: 685,
-    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile',
+    light: 0.5, map: [1, 3], ambient: 'hospital_hum', steps: 'tile', tint: '#3092a5',
     props: [{ name: 'body_2', x: 2060, flip: true }],
     hotspots: [
       { id: 'ward_locker', x: 420, w: 180, label: 'Mobiletto della vigilanza', icon: 'shotgun', iconY: 420,
-        give: ['shotgun', ['ammo_shells', 16]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
+        give: ['shotgun', ['ammo_shells', 10]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
       { id: 'ward_notes', x: 680, w: 210, label: 'Cartellina sul letto', icon: 'note', iconY: 500, doc: 'doc_ricerca_elena' },
       { id: 'ward_bed', x: 1180, w: 240, label: 'Letto', markY: 470,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
@@ -310,13 +316,13 @@ export const ROOMS = {
       { id: 'ward_inf', type: 'infermiere', x: 2400, patrol: [2250, 2600] },
     ],
     overlays: [
-      { type: 'state', picked: 'ward_locker', src: BGV2 + 'hospital_ward_open.png', x: 0, y: 0, w: 2701, h: 720 },
+      { type: 'state', picked: 'ward_locker', src: BGV2 + 'hospital_ward_open.png', x: 370, y: 255, w: 210, h: 340, feather: 18 },
     ],
   },
 
   hospital_surgery: {
     name: 'Sala operatoria', bg: BGV2 + 'hospital_surgery.png', layoutW: 1451, keepEdges: true, scale: 1.22, floorY: 670,
-    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile',
+    light: 0.62, map: [2, 3], safe: true, ambient: 'electronics_hum', steps: 'tile', tint: '#409495',
     hotspots: [
       { id: 'surg_terminal', x: 270, w: 190, label: 'Terminale [SALVA]', markY: 380, event: 'open_save' },
       { id: 'surg_table', x: 580, w: 420, label: 'Tavolo operatorio', markY: 450,
@@ -328,17 +334,17 @@ export const ROOMS = {
     doors: [
       { id: 'surg_to_corr', x: 60, w: 180, top: 150, bottom: 680, label: 'Corridoio', target: 'hospital_corridor', noSprite: true },
     ],
-    enemies: [
-      { id: 'surg_corridore', type: 'corridore', x: 1150, idle: true, facingRight: false },
+    overlays: [
+      { type: 'state', picked: 'surg_fridge', src: BGV2 + 'hospital_surgery_open.png', x: 0, y: 0, w: 1451, h: 720 },
     ],
   },
 
   hospital_morgue: {
     name: 'Obitorio', bg: BGV2 + 'hospital_morgue.png', layoutW: 1360, keepEdges: true, scale: 1.15, floorY: 655,
-    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile',
+    light: 0.45, map: [3, 3], ambient: 'morgue_cold', steps: 'tile', tint: '#429093',
     hotspots: [
       { id: 'morgue_report', x: 260, w: 350, label: 'Tavolo autoptico', icon: 'note', iconY: 430,
-        doc: 'doc_autopsia', give: [['ammo_shells', 8]] },
+        doc: 'doc_autopsia', give: [['ammo_shells', 4]] },
       { id: 'morgue_drawer', x: 745, w: 190, label: 'Celle frigorifere', markY: 420,
         text: 'Una cella è aperta. Vuota. Il lenzuolo è sul pavimento.' },
     ],
@@ -356,7 +362,7 @@ export const ROOMS = {
 
   metro_ingresso: {
     name: 'Metro — Ingresso', bg: BGV2 + 'metro_ingresso.png', layoutW: 1592, keepEdges: true, scale: 1.1, floorY: 660,
-    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile',
+    light: 0.55, map: [0, 4], ambient: 'metro_drip', steps: 'tile', tint: '#2da0a8',
     hotspots: [
       { id: 'metro_notice', x: 305, w: 155, label: 'Avviso', icon: 'note', iconY: 360, doc: 'doc_avviso_metro' },
       { id: 'metro_turnstiles', x: 470, w: 270, label: 'Tornelli', markY: 450,
@@ -375,11 +381,11 @@ export const ROOMS = {
 
   metro_banchina: {
     name: 'Metro — Banchina B', bg: BGV2 + 'metro_banchina.png', layoutW: 3047, keepEdges: true, scale: 0.98, floorY: 665,
-    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete',
+    light: 0.5, map: [1, 4], ambient: 'metro_drip', steps: 'concrete', tint: '#3c8b99',
     props: [{ name: 'body_5', x: 1900 }],
     hotspots: [
       { id: 'mb_train', x: 1380, w: 140, label: 'Carrozze abbandonate', markY: 470,
-        give: ['medikit_small', ['ammo_pistol_small', 12]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
+        give: ['medikit_small', ['ammo_pistol_small', 6]], text: 'Tra i sedili una borsa da infermiera e la fondina di un vigilante.' },
       { id: 'mb_log', x: 1820, w: 170, label: 'Il capotreno', icon: 'note', iconY: 640, doc: 'doc_registro_metro' },
       { id: 'mb_phone', x: 2330, w: 90, label: 'Colonnina SOS [SALVA]', markY: 420, event: 'open_save' },
     ],
@@ -395,11 +401,11 @@ export const ROOMS = {
 
   metro_tunnel: {
     name: 'Tunnel Linea 3', bg: BGV2 + 'metro_tunnel.png', layoutW: 2617, keepEdges: true, scale: 0.92, floorY: 600,
-    light: 0.3, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete',
+    light: 0.3, poweredFlag: 'power_on', poweredLight: 0.48, map: [2, 4], ambient: 'tunnel_wind', steps: 'concrete', tint: '#419194',
     props: [{ name: 'body_0', x: 720 }],
     hotspots: [
       { id: 'tunnel_notebook', x: 630, w: 180, label: 'Il soldato', icon: 'note', iconY: 575,
-        doc: 'doc_taccuino', give: [['ammo_pistol_small', 16]] },
+        doc: 'doc_taccuino', give: [['ammo_pistol_small', 8]] },
     ],
     doors: [
       { id: 'tunnel_to_mb', x: 0, w: 150, top: 160, bottom: 600, label: 'Banchina B', target: 'metro_banchina', noSprite: true },
@@ -413,7 +419,7 @@ export const ROOMS = {
 
   sala_generatori: {
     name: 'Sala generatori', bg: BGV2 + 'sala_generatori.png', layoutW: 2732, keepEdges: true, scale: 0.85, floorY: 650,
-    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal',
+    light: 0.45, poweredFlag: 'power_on', poweredLight: 0.75, map: [3, 4], ambient: 'room_hum', poweredAmbient: 'generator_loop', steps: 'metal', tint: '#3b8e9a',
     hotspots: [
       { id: 'generator', x: 520, w: 680, label: 'Generatore di emergenza', markY: 330, event: 'start_generator',
         requires: [{ item: 'fuse' }], failText: 'Il vano del fusibile principale è vuoto.\nSenza un fusibile da 30A non parte.',
@@ -437,10 +443,10 @@ export const ROOMS = {
 
   stanza_manutenzione: {
     name: 'Officina', bg: BGV2 + 'stanza_manutenzione.png', layoutW: 1672, keepEdges: true, scale: 1.26, floorY: 670,
-    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete',
+    light: 0.55, map: [4, 4], ambient: 'room_hum', steps: 'concrete', tint: '#36889f',
     hotspots: [
       { id: 'maint_bench', x: 700, w: 510, label: 'Banco da lavoro', icon: 'note', iconY: 440,
-        doc: 'doc_officina', give: [['ammo_shells', 8]] },
+        doc: 'doc_officina', give: [['ammo_shells', 4]] },
       { id: 'maint_locker', x: 1345, w: 110, label: 'Armadietto 7', icon: 'card', iconY: 400, give: ['card'] },
     ],
     doors: [
@@ -449,7 +455,7 @@ export const ROOMS = {
         requires: [{ flag: 'power_on' }], failText: 'Porta blindata a comando elettrico. Senza corrente non si apre.' },
     ],
     overlays: [
-      { type: 'state', picked: 'maint_locker', src: BGV2 + 'stanza_manutenzione_open.png', x: 0, y: 0, w: 1672, h: 720 },
+      { type: 'state', picked: 'maint_locker', src: BGV2 + 'stanza_manutenzione_open.png', x: 1300, y: 130, w: 200, h: 530, feather: 18 },
     ],
     enemies: [
       { id: 'maint_listener', type: 'listener', x: 1100, idle: true, facingRight: false },
@@ -458,10 +464,10 @@ export const ROOMS = {
 
   safe_room: {
     name: 'Il rifugio di Elena', bg: BGV2 + 'safe_room.png', layoutW: 1303, keepEdges: true, scale: 1.3, floorY: 680,
-    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete',
+    light: 0.85, map: [5, 4], safe: true, ambient: 'room_hum', steps: 'concrete', tint: '#957c40',
     hotspots: [
       { id: 'safe_shelf', x: 265, w: 270, label: 'Scaffale', markY: 400,
-        give: ['medikit_small', ['ammo_shells', 8], ['ammo_pistol_small', 16]] },
+        give: ['medikit_small', ['ammo_shells', 4], ['ammo_pistol_small', 8]] },
       { id: 'safe_radio', x: 640, w: 120, label: 'Radio di Elena [SALVA]', markY: 400, event: 'open_save' },
       { id: 'safe_recorder', x: 780, w: 130, label: 'Registratore sulla scrivania', icon: 'recorder', iconY: 370, event: 'elena_tape_2' },
     ],
@@ -471,7 +477,7 @@ export const ROOMS = {
         keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
     ],
     overlays: [
-      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
+      { type: 'state', door: 'safe_to_lab', src: BGV2 + 'safe_room_open.png', x: 1140, y: 125, w: 163, h: 580, feather: 18 },
     ],
   },
 
@@ -479,7 +485,7 @@ export const ROOMS = {
 
   lab_ingresso: {
     name: 'Laboratorio — Ingresso', bg: BGV2 + 'lab_ingresso.png', layoutW: 1559, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.6, map: [0, 5], ambient: 'lab_hum', steps: 'tile', tint: '#3f8c96',
     hotspots: [
       { id: 'lab_papers', x: 1150, w: 260, label: 'Fogli a terra', markY: 600,
         text: 'Moduli di evacuazione. Tutti firmati "Dir. Amati". Nessuno compilato.' },
@@ -495,10 +501,10 @@ export const ROOMS = {
 
   lab_corridoio: {
     name: 'Laboratorio — Corridoio', bg: BGV2 + 'lab_corridoio.png', layoutW: 2587, keepEdges: true, scale: 1.15, floorY: 640,
-    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.6, map: [1, 5], ambient: 'lab_hum', steps: 'tile', tint: '#368da0',
     hotspots: [
       { id: 'lc_log', x: 335, w: 60, label: 'Registro accessi', icon: 'note', iconY: 390, doc: 'doc_accessi' },
-      { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 6], ['ammo_pistol_small', 12]] },
+      { id: 'lc_bench', x: 1390, w: 370, label: 'Bancone', markY: 400, give: ['painkillers', ['ammo_shells', 4], ['ammo_pistol_small', 6]] },
     ],
     doors: [
       { id: 'lc_to_li', x: 110, w: 215, top: 200, bottom: 595, label: 'Ingresso', target: 'lab_ingresso', noSprite: true },
@@ -513,7 +519,7 @@ export const ROOMS = {
 
   lab_biologico: {
     name: 'Laboratorio biologico', bg: BGV2 + 'lab_biologico.png', layoutW: 1257, keepEdges: true, scale: 1.02, floorY: 640,
-    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile',
+    light: 0.55, map: [2, 5], ambient: 'lab_hum', steps: 'tile', tint: '#56805a',
     hotspots: [
       { id: 'bio_cabinet', x: 245, w: 165, label: 'Vetrina dei reagenti', markY: 330,
         text: 'Flaconi etichettati "R-0", tutti vuoti. Qualcuno li ha svuotati in fretta.' },
@@ -529,14 +535,17 @@ export const ROOMS = {
       { id: 'bio_cr', type: 'crawler', x: 900, ceiling: true },
       { id: 'bio_c', type: 'contaminato', x: 1050, patrol: [900, 1180] },
     ],
+    overlays: [
+      { type: 'state', picked: 'bio_usb', src: BGV2 + 'lab_biologico_open.png', x: 0, y: 0, w: 1257, h: 720 },
+    ],
   },
 
   sala_server: {
-    name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
-    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal',
+    name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640, alarmFlag: 'core_alarm',
+    light: 0.55, map: [3, 5], ambient: 'electronics_hum', steps: 'metal', tint: '#39729c',
     overlays: [
       { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
-      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
+      { type: 'state', flag: 'data_sent', src: BGV2 + 'sala_server_open.png', x: 590, y: 225, w: 270, h: 385, feather: 18 },
     ],
     hotspots: [
       { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },
@@ -555,8 +564,8 @@ export const ROOMS = {
   },
 
   camera_centrale: {
-    name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650,
-    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal',
+    name: 'Camera centrale', bg: BGV2 + 'camera_centrale.png', layoutW: 1418, keepEdges: true, scale: 0.98, floorY: 650, alarmFlag: 'core_alarm',
+    light: 0.62, map: [4, 5], ambient: 'lab_hum', steps: 'metal', tint: '#397c9c',
     npcs: [
       { id: 'elena', char: 'elena', x: 930, anim: 'idle', facingRight: false, label: 'Elena', event: 'talk_elena', hideIf: { flag: 'elena_gone' } },
     ],
@@ -576,17 +585,20 @@ export const ROOMS = {
       { id: 'core_run1', type: 'corridore', x: 260, facingRight: true, showIf: { flag: 'core_alarm' } },
       { id: 'core_run2', type: 'contaminato', x: 380, facingRight: true, showIf: { flag: 'core_alarm' } },
     ],
+    overlays: [
+      { type: 'state', flag: 'elena_gone', src: BGV2 + 'camera_centrale_after.png', x: 0, y: 0, w: 1418, h: 720 },
+    ],
   },
 
   /* ═══════════ CAPITOLO 6 — IL PORTO ═══════════ */
 
   porto: {
     name: 'Porto commerciale', bg: BGV2 + 'porto.png', layoutW: 2261, keepEdges: true, scale: 0.78, floorY: 630,
-    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
+    light: 0.55, map: [0, 6], rain: true, ambient: 'harbor_waves', steps: 'wet', tint: '#3c859a',
     props: [{ name: 'body_5', x: 1200 }],
     hotspots: [
       { id: 'port_container', x: 840, w: 160, label: 'Container aperto', markY: 330,
-        give: [['ammo_shells', 8], 'medikit_small'] },
+        give: [['ammo_shells', 4], 'medikit_small'] },
     ],
     doors: [
       { id: 'port_to_core', x: 100, w: 280, top: 280, bottom: 600, label: 'Galleria', target: 'camera_centrale', noSprite: true,
@@ -602,7 +614,7 @@ export const ROOMS = {
 
   molo_finale: {
     name: 'Molo 4', bg: BGV2 + 'molo_finale.png', layoutW: 1289, keepEdges: true, scale: 1.05, floorY: 650,
-    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet',
+    light: 0.55, map: [1, 6], rain: true, ambient: 'harbor_waves', steps: 'wet', tint: '#4a788b',
     hotspots: [
       { id: 'the_boat', x: 90, w: 520, label: 'Bitta — il gozzo di papà', markY: 430, event: 'ending',
         requires: [{ item: 'key_rusty' }], failText: 'Alla bitta è legato il gozzo di papà, con una catena e un lucchetto.' },

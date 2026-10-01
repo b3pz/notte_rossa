@@ -5,6 +5,7 @@
 
 const SAVE_KEY_PREFIX = 'notterossa_save_';
 const NUM_SLOTS       = 3;
+const AUTO_SLOT       = 3;     // salvataggio automatico (inizio di ogni capitolo)
 
 export class SaveManager {
   constructor(game) {
@@ -14,8 +15,11 @@ export class SaveManager {
   }
 
   /** Salva la partita nello slot indicato */
+  /** Salvataggio automatico (slot a parte, non sovrascrive quelli del giocatore) */
+  autoSave() { return this.saveGame(AUTO_SLOT); }
+
   saveGame(slot = 0) {
-    if (slot < 0 || slot >= NUM_SLOTS) return false;
+    if (slot < 0 || slot > AUTO_SLOT) return false;
     const data = this._buildSaveData(slot);
     try {
       localStorage.setItem(SAVE_KEY_PREFIX + slot, JSON.stringify(data));
@@ -49,7 +53,7 @@ export class SaveManager {
   loadLast() {
     // Cerca lo slot più recente
     let latest = null, latestSlot = 0;
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
       if (!raw) continue;
       const d = JSON.parse(raw);
@@ -62,7 +66,7 @@ export class SaveManager {
   /** Slot con il salvataggio più recente, o null */
   latestSlot() {
     let best = null, bestT = -1;
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
       if (!raw) continue;
       try { const d = JSON.parse(raw); if (d.timestamp > bestT) { bestT = d.timestamp; best = i; } } catch (e) {}
@@ -72,12 +76,12 @@ export class SaveManager {
 
   /** Restituisce info sugli slot (per la UI "Carica") */
   getSlotsInfo() {
-    return Array.from({ length: NUM_SLOTS }, (_, i) => {
+    return Array.from({ length: AUTO_SLOT + 1 }, (_, i) => {
       const raw = localStorage.getItem(SAVE_KEY_PREFIX + i);
-      if (!raw) return { slot: i, empty: true };
+      if (!raw) return { slot: i, empty: true, auto: i === AUTO_SLOT };
       const d = JSON.parse(raw);
       return {
-        slot: i, empty: false,
+        slot: i, empty: false, auto: i === AUTO_SLOT,
         room: d.roomName || '—',
         time: d.playTime || 0,
         date: new Date(d.timestamp).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }),
@@ -86,7 +90,7 @@ export class SaveManager {
   }
 
   hasSaveData() {
-    for (let i = 0; i < NUM_SLOTS; i++) {
+    for (let i = 0; i <= AUTO_SLOT; i++) {
       if (localStorage.getItem(SAVE_KEY_PREFIX + i)) return true;
     }
     return false;

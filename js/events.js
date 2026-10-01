@@ -6,7 +6,7 @@
    ============================================= */
 
 const LUCA = 'LUCA', ELENA = 'ELENA', CARMINE = 'CARMINE', TAPE = 'ELENA (registrazione)';
-const say = (speaker, text) => ({ type: 'dialogue', speaker, text });
+const say = (speaker, text, portrait) => ({ type: 'dialogue', speaker, text, portrait });
 const narr = (text) => ({ type: 'dialogue', speaker: '', text });
 
 export class EventManager {
@@ -41,7 +41,7 @@ export class EventManager {
       { type: 'set_flag', flag: 'phone_ringing', value: false },
       { type: 'sfx', id: 'ui_confirm' },
       say('???', '...Luca?'),
-      say(LUCA, 'Elena! Elena, sono in stazione. Il treno si è fermato, non c\'è nessuno. Dove sei?'),
+      say(LUCA, 'Elena! Elena, sono in stazione. Il treno si è fermato, non c\'è nessuno. Dove sei?', 'luca_scared'),
       say('???', 'Non uscire dalla stazione. Mi senti? Non uscire.'),
       say('???', 'Vai su, in sala controllo. C\'è Carmine, il ferroviere. Ha una cosa per te...'),
       say('???', 'Ho sbagliato tutto, Luca. Perdonami.'),
@@ -55,6 +55,7 @@ export class EventManager {
       { type: 'respawn' },
       narr('Dal treno è sceso qualcuno. Barcolla. Non è un passeggero.'),
       narr('Sei disarmato. L\'atrio è a destra.'),
+      { type: 'autosave' },
     ]});
 
     R('got_flashlight', { once: true, actions: [
@@ -75,7 +76,7 @@ export class EventManager {
     R('talk_carmine', { actions: [
       { type: 'branch', if: { notFlag: 'carmine_talked' }, then: [
         { type: 'npc_anim', id: 'carmine', anim: 'talk' },
-        say(CARMINE, 'Fermo! Fermo... ah. Sei tu. Hai la stessa faccia della dottoressa.'),
+        say(CARMINE, 'Fermo! Fermo... ah. Sei tu. Hai la stessa faccia della dottoressa.', 'carmine_scared'),
         say(LUCA, 'Elena. Mia sorella. Dov\'è?'),
         say(CARMINE, 'È passata di qua due ore fa, prima che chiudessero tutto. Andava al San Rocco, l\'ospedale.'),
         say(CARMINE, 'Diceva che doveva «far uscire i dati». Mi ha lasciato questo. Ha detto: se viene, daglielo.'),
@@ -131,6 +132,8 @@ export class EventManager {
     /* ── CAPITOLO 4 ── */
     R('enter_metro', { trigger: 'room_enter', room: 'metro_ingresso', once: true, delay: 0.6, actions: [
       { type: 'chapter', text: 'CAPITOLO 4 — SOTTERRANEI' },
+      narr('Il passaggio dell\'obitorio sbuca nella metro. Niente corrente, solo l\'acqua che gocciola.'),
+      narr('Elena diceva che il laboratorio è qui sotto. Per arrivarci serve la luce.'),
     ]});
 
     R('start_generator', { once: true, actions: [
@@ -159,6 +162,7 @@ export class EventManager {
     /* ── CAPITOLO 5 ── */
     R('enter_lab', { trigger: 'room_enter', room: 'lab_ingresso', once: true, delay: 0.6, actions: [
       { type: 'chapter', text: 'CAPITOLO 5 — PROGETTO ROSSO' },
+      narr('Il posto dove lavorava Elena. Sulla porta, una goccia rossa e la scritta PROGETTO ROSSO.'),
     ]});
 
     R('upload_data', { once: true, actions: [
@@ -177,7 +181,7 @@ export class EventManager {
       say(ELENA, 'Luca... lo sapevo che saresti venuto. Non avvicinarti troppo.'),
       say(LUCA, 'Elena, andiamo via. Adesso.'),
       { type: 'npc_anim', id: 'elena', anim: 'scared' },
-      say(ELENA, 'Mi hanno morsa quattro ore fa. Sento la febbre che sale. Tra poco non sarò più io.'),
+      say(ELENA, 'Mi hanno morsa quattro ore fa. Sento la febbre che sale. Tra poco non sarò più io.', 'elena_sad'),
       { type: 'npc_anim', id: 'elena', anim: 'talk' },
       say(ELENA, 'Ho visto la trasmissione partire. I dati sono fuori. Adesso qualcuno può fare una cura.'),
       { type: 'branch', if: { item: 'vial' },
@@ -185,7 +189,7 @@ export class EventManager {
         else: [say(ELENA, 'Ma il campione R-0 è rimasto al San Rocco. Senza, fuori ci metteranno anni.')] },
       say(ELENA, 'All\'alba parte la procedura ALBA: bruceranno tutto. Io tengo aperta la galleria verso il porto.'),
       { type: 'npc_anim', id: 'elena', anim: 'point' },
-      say(ELENA, 'La chiave della barca è sul tavolo. Vai, Luca. Non voltarti.'),
+      say(ELENA, 'La chiave della barca è sul tavolo. Vai, Luca. Non voltarti.', 'elena_sad'),
       { type: 'fade_out', ms: 900 },
       { type: 'set_flag', flag: 'elena_gone' },
       { type: 'set_flag', flag: 'elena_talked' },
@@ -255,7 +259,7 @@ export class EventManager {
     switch (a.type) {
       case 'dialogue': {
         const txt = (a.touchText && document.body.classList.contains('touch')) ? a.touchText : a.text;
-        await new Promise(res => g.dialogue.show(a.speaker, txt, res));
+        await new Promise(res => g.dialogue.show(a.speaker, txt, res, a.portrait));
         break;
       }
       case 'wait':        await this._wait(a.sec); break;
@@ -274,7 +278,11 @@ export class EventManager {
       case 'lights_fade': g.startLightFade(a.duration); break;
       case 'set_light':   if (g.roomManager.current) g.roomManager.current.lightLevel = a.value; break;
       case 'title':       g.showCinematicTitle(a.duration); break;
-      case 'chapter':     g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text); await this._wait(2.6); break;
+      case 'chapter':
+        g.audio.playSfx('chapter_sting'); g.ui.showChapter(a.text);
+        await this._exec({ type: 'autosave' });
+        await this._wait(2.6); break;
+      case 'autosave':    if (g.save.autoSave()) g.ui.showNotification('Salvataggio automatico'); break;
       case 'respawn':     g.roomManager.respawnEnemies(); break;
       case 'spawn': {
         const e = g.enemyManager.spawnEnemy(a.enemy, a.x, 0, { id: a.id, facingRight: a.facingRight, scale: g.roomManager.current.scaleAt(a.x) });

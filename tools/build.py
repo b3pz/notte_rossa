@@ -15,7 +15,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ordine di dipendenza
 ORDER = [
-    'sprite_manifest', 'sprites', 'input', 'audio', 'camera', 'collision',
+    'sprite_manifest', 'sprites', 'skin', 'input', 'audio', 'camera', 'collision',
     'dialogue', 'player', 'items', 'inventory', 'weapons', 'enemy',
     'events', 'citymap', 'ui', 'save', 'rooms_data', 'rooms', 'editor', 'touch', 'game', 'main',
 ]
@@ -42,6 +42,16 @@ def main():
     adir = os.path.join(ROOT, 'assets', 'audio')
     present = sorted(f[:-4] for f in os.listdir(adir) if f.endswith('.mp3')) if os.path.isdir(adir) else []
     bundle = bundle.replace('/*__AUDIO_FILES__*/null', repr(present).replace("'", '"'))
+    # immagini dell'interfaccia e degli effetti presenti (js/skin.js carica solo queste)
+    ui = []
+    for sub in ('ui', 'fx', 'fonts'):
+        d = os.path.join(ROOT, 'assets', sub)
+        if os.path.isdir(d):
+            ui += [f'assets/{sub}/{f}' for f in sorted(os.listdir(d)) if f.endswith(('.png', '.woff2', '.ttf'))]
+    bundle = bundle.replace('/*__UI_FILES__*/null', repr(ui).replace("'", '"'))
+    bgd = os.path.join(ROOT, 'assets', 'backgrounds', 'v2')
+    bgs = [f'assets/backgrounds/v2/{f}' for f in sorted(os.listdir(bgd)) if f.endswith('.png')]
+    bundle = bundle.replace('/*__BG_FILES__*/null', repr(bgs).replace("'", '"'))
     if re.search(r'^\s*(import|export)\s', bundle, re.M):
         sys.exit('ERRORE: import/export rimasti nel bundle')
 
