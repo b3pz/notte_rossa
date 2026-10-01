@@ -172,6 +172,7 @@ def scan(path):
     return figs
 
 
+# Pose curve (camminate, attacchi): altezza ridotta perché la testa sia grande come nella posa "fermo".
 # infermiere_dead.png resta quella originale (5 pose, camice azzurro).
 # Tavole recuperate (ottobre 2026): le strisce nuove erano finite sotto il nome
 # sbagliato. Sorgenti in tools/recover_src/ (copie delle strisce sbagliate),
@@ -185,18 +186,16 @@ RECOVER = [
     ('player_torch6.png',  [0, 1, 2, 3, 4, 5],               'player_flashlight_walk.png', 270),
     ('shotgun_sheet.png',  [0, 1],                           'player_shotgun_aim.png',  270),
     ('shotgun_sheet.png',  [2, 3, 4, 5],                     'player_shotgun_shoot.png', 270),
-    ('contaminato_dead4.png', [0, 1, 2, 3],                  'contaminato_dead.png',    256),
+    ('contaminato_dead4.png', [0, 1, 2, 3],                  'contaminato_dead.png',    196),
     ('corridore_run6.png', [0, 1, 2, (3, 0, 2), (3, 1, 2), 4], 'corridore_run.png',     205),
-    ('ferroviere_walk6.png', [0, 1, 2, 3, 4, 5],             'ferroviere_walk.png',     264),
-    ('ferroviere_attack4.png', [0, 1, 2, 3],                 'ferroviere_attack.png',   264),
-    ('ferroviere_dead.png', [0, (1, 0, 2), (1, 1, 2), 2],    'ferroviere_dead.png',     264),
-    ('infermiere_walk6.png', [0, 1, 2, 3, 4, 5],             'infermiere_walk.png',     264),
-    ('infermiere_attack4.png', [0, 1, 2, 3],                 'infermiere_attack.png',   264),
-    ('infermiere_walk6.png', [0],                            'infermiere_idle.png',     264),
-    ('contaminato_walk8.png', [0],                           'contaminato_idle.png',    256),
-    ('tecnico_walk6.png',  [0, 1, 2, 3, 4, 5],               'tecnico_walk.png',        264),
-    ('tecnico_attack4.png', [0, 1, 2, 3],                    'tecnico_attack.png',      264),
-    ('tecnico_dead4.png',  [0, 1, 2, 3],                     'tecnico_dead.png',        264),
+    ('ferroviere_walk6.png', [0, 1, 2, 3, 4, 5],             'ferroviere_walk.png',     206),
+    ('ferroviere_attack4.png', [0, 1, 2, 3],                 'ferroviere_attack.png',   200),
+    ('ferroviere_dead.png', [0, (1, 0, 2), (1, 1, 2), 2],    'ferroviere_dead.png',     206),
+    ('infermiere_walk6.png', [0, 1, 2, 3, 4, 5],             'infermiere_walk.png',     206),
+    ('infermiere_attack4.png', [0, 1, 2, 3],                 'infermiere_attack.png',   200),
+    ('tecnico_walk6.png',  [0, 1, 2, 3, 4, 5],               'tecnico_walk.png',        204),
+    ('tecnico_attack4.png', [0, 1, 2, 3],                    'tecnico_attack.png',      200),
+    ('tecnico_dead4.png',  [0, 1, 2, 3],                     'tecnico_dead.png',        200),
     # tavole nuove dal kit dei prompt
     ('luca_gun_idle.png',     [0, 1],                         'player_gun_idle.png',     272),
     ('luca_walk_pistol.png',  [0, 1, 2, 3, 4, 5],             'player_walk_gun.png',     268),
@@ -208,6 +207,11 @@ RECOVER = [
     ('carmine_check_new.png', [0, 1],                         'carmine_check.png',       266),
     ('carmine_scared_new.png', [0, 1],                        'carmine_scared.png',      262),
     ('contaminato_hurt_new.png', [0, 1],                      'contaminato_hurt.png',    250),
+    ('contaminato_idle_new.png', [0, 1],                      'contaminato_idle.png',    256),
+    ('ferroviere_idle_new.png',  [0, 1],                      'ferroviere_idle.png',     264),
+    ('ferroviere_hurt_new.png',  [0, 1],                      'ferroviere_hurt.png',     250),
+    ('infermiere_idle_new.png',  [0, 1],                      'infermiere_idle.png',     264),
+    ('corridore_idle_new.png',   [0, 1],                      'corridore_idle.png',      190),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 

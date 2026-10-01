@@ -131,8 +131,8 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/contaminato_idle.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 1.5,
         "loop": true
       },
       "walk": {
@@ -166,8 +166,8 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/corridore_idle.png",
-        "frames": 1,
-        "fps": 6,
+        "frames": 2,
+        "fps": 2,
         "loop": true
       },
       "walk": {
@@ -371,8 +371,8 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/ferroviere_idle.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 1.5,
         "loop": true
       },
       "walk": {
@@ -392,6 +392,12 @@ export const SPRITES = {
         "frames": 4,
         "fps": 5,
         "loop": false
+      },
+      "hurt": {
+        "file": "assets/sprites/cut/ferroviere_hurt.png",
+        "frames": 2,
+        "fps": 6,
+        "loop": false
       }
     }
   },
@@ -400,8 +406,8 @@ export const SPRITES = {
     "anims": {
       "idle": {
         "file": "assets/sprites/cut/infermiere_idle.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 1.5,
         "loop": true
       },
       "walk": {
