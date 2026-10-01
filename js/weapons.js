@@ -1,6 +1,6 @@
 /* =============================================
    NOTTE ROSSA — weapons.js
-   Pistola 9mm e fucile a pompa. Colpi in corsia unica.
+   Pistola 9mm e fucile a pompa. Colpi istantanei con mira assistita.
    ============================================= */
 
 const WEAPON_DEFS = {
@@ -9,15 +9,15 @@ const WEAPON_DEFS = {
     magSize: 8, damage: 34, pellets: 1, spread: 0,
     cooldown: 0.32, reloadTime: 1.5,
     ammoItem: 'ammo_pistol_small',
-    bulletSpeed: 1500, bulletRange: 1100, knock: 1,
+    bulletSpeed: 1500, bulletRange: 1100, knock: 1.6,
     shake: 5,
   },
   shotgun: {
     id: 'shotgun', name: 'Fucile a pompa',
-    magSize: 4, damage: 30, pellets: 4, spread: 14,
+    magSize: 4, damage: 26, pellets: 4, spread: 14,
     cooldown: 0.85, reloadTime: 2.4,
     ammoItem: 'ammo_shells',
-    bulletSpeed: 1300, bulletRange: 480, knock: 3,
+    bulletSpeed: 1300, bulletRange: 520, knock: 4,
     shake: 12,
   },
 };
@@ -28,7 +28,8 @@ export class WeaponSystem {
     this.equipped = null;
     this.bullets  = [];
     this._flash   = 0;
-    this._mags    = {};   // colpi nel caricatore per arma, conservati quando si cambia arma
+    this._mags    = {};
+    this.particles = [];   // colpi nel caricatore per arma, conservati quando si cambia arma
   }
 
   equip(weaponId) {
@@ -62,34 +63,42 @@ export class WeaponSystem {
         if (w.reloadTimer <= 0) this._finishReload();
       }
     }
-
-    const em = this.game.enemyManager;
+    // scie dei colpi (solo effetto visivo: il danno è istantaneo)
     for (let i = this.bullets.length - 1; i >= 0; i--) {
-      const b = this.bullets[i];
-      const step = b.vx * dt;
-      b.x += step;
-      b.travel += Math.abs(step);
-      if (b.travel > b.range || b.x < -50 || b.x > 1330) { this.bullets.splice(i, 1); continue; }
-
-      // Colpisce il primo nemico vivo attraversato (tutta l'altezza: corsia unica)
-      let hit = null;
-      for (const e of em?.enemies || []) {
-        if (!e.alive) continue;
-        if (b.x >= e.x && b.x <= e.x + e.width) {
-          if (!hit || Math.abs(e.centerX - b.x0) < Math.abs(hit.centerX - b.x0)) hit = e;
-        }
-      }
-      if (hit) {
-        // il fucile perde forza con la distanza
-        const falloff = b.pellet ? Math.max(0.35, 1 - b.travel / b.range) : 1;
-        hit.takeDamage(Math.round(b.damage * falloff), Math.sign(b.vx) * b.knock);
-        if (!hit.alive) em.onEnemyKilled(hit);
-        this.bullets.splice(i, 1);
-      }
+      this.bullets[i].life -= dt;
+      if (this.bullets[i].life <= 0) this.bullets.splice(i, 1);
+    }
+    // schizzi di sangue
+    const floor = this.game.roomManager?.current?.floorY ?? 700;
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const q = this.particles[i];
+      q.life -= dt;
+      if (q.y < floor) { q.vy += 1400 * dt; q.x += q.vx * dt; q.y += q.vy * dt; }
+      else { q.y = floor; q.vx = 0; q.vy = 0; }
+      if (q.life <= 0) this.particles.splice(i, 1);
     }
   }
 
-  shoot(fromX, fromY, dir) {
+  /**
+   * Nemico più vicino davanti al giocatore (direzione dir) entro range.
+   * Conta anche chi è già addosso (sovrapposto al giocatore).
+   */
+  findTarget(player, dir, range) {
+    const em = this.game.enemyManager;
+    const px = player.centerX;
+    let best = null, bestD = Infinity;
+    for (const e of em?.enemies || []) {
+      if (!e.alive) continue;
+      const near = dir > 0 ? e.x + e.width - px : px - e.x;   // bordo più lontano davanti
+      const far  = dir > 0 ? e.x - px : px - (e.x + e.width); // bordo più vicino
+      if (near < -10 || far > range) continue;
+      const d = Math.max(0, far);
+      if (d < bestD) { bestD = d; best = e; }
+    }
+    return best;
+  }
+
+  shoot(player) {
     const w = this.equipped;
     if (!w) return false;
     if (w.isReloading || w.cooldownTimer > 0) return false;
@@ -103,20 +112,45 @@ export class WeaponSystem {
     w.ammoInMag--;
     w.cooldownTimer = w.def.cooldown;
 
+    const dir = player.facingRight ? 1 : -1;
+    const fromX = player.handX, fromY = player.handY;
+    const target = this.findTarget(player, dir, w.def.bulletRange);
+    let endX = fromX + dir * w.def.bulletRange;
+    if (target) {
+      const dist = Math.max(0, Math.abs(target.centerX - player.centerX) - target.width / 2);
+      // il fucile perde forza con la distanza
+      const falloff = w.def.pellets > 1 ? Math.max(0.35, 1 - dist / w.def.bulletRange) : 1;
+      const crit = Math.random() < 0.18;
+      const dmg = Math.round(w.def.damage * w.def.pellets * falloff * (crit ? 2 : 1));
+      const hx = target.centerX - dir * target.width * 0.2;
+      const hy = target.y + target.height * (crit ? 0.18 : 0.4);
+      target.takeDamage(dmg, dir * w.def.knock);
+      if (!target.alive) this.game.enemyManager.onEnemyKilled(target);
+      this._blood(hx, hy, dir, crit ? 22 : 12);
+      if (crit) this.game.ui?.showNotification('Colpo alla testa!', 900);
+      endX = hx;
+    }
     for (let p = 0; p < w.def.pellets; p++) {
-      this.bullets.push({
-        x: fromX, x0: fromX,
-        y: fromY + (p - (w.def.pellets - 1) / 2) * w.def.spread,
-        vx: dir * w.def.bulletSpeed,
-        damage: w.def.damage, range: w.def.bulletRange,
-        knock: w.def.knock, travel: 0, pellet: w.def.pellets > 1,
-      });
+      const off = (p - (w.def.pellets - 1) / 2) * w.def.spread;
+      this.bullets.push({ x0: fromX, y0: fromY, x1: endX, y1: fromY + off * (target ? 0.4 : 1) + (target ? (target.y + target.height * 0.4 - fromY) : 0), life: 0.07 });
     }
     this._flash = 0.06;
     this._flashX = fromX; this._flashY = fromY; this._flashDir = dir;
     this.game.audio?.playSfx('shot');
     this.game.camera?.shake(w.def.shake, 0.12);
     return true;
+  }
+
+  _blood(x, y, dir, n) {
+    for (let i = 0; i < n; i++) {
+      this.particles.push({
+        x, y,
+        vx: dir * (60 + Math.random() * 260) + (Math.random() - 0.5) * 120,
+        vy: -120 - Math.random() * 320,
+        r: 1.5 + Math.random() * 2.5,
+        life: 1.2 + Math.random() * 1.5,
+      });
+    }
   }
 
   reload() {
@@ -143,30 +177,64 @@ export class WeaponSystem {
   loadAmmo() { return 0; }
 
   draw(ctx) {
-    // Proiettili: scia sottile
+    // sangue
+    ctx.fillStyle = 'rgba(110,8,8,0.9)';
+    for (const q of this.particles) {
+      ctx.globalAlpha = Math.min(1, q.life);
+      ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // scie
     for (const b of this.bullets) {
-      const g = ctx.createLinearGradient(b.x - Math.sign(b.vx) * 40, 0, b.x, 0);
+      const g = ctx.createLinearGradient(b.x0, b.y0, b.x1, b.y1);
       g.addColorStop(0, 'rgba(255,220,140,0)');
-      g.addColorStop(1, 'rgba(255,230,160,0.9)');
+      g.addColorStop(1, `rgba(255,235,170,${Math.min(1, b.life * 14)})`);
       ctx.strokeStyle = g;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(b.x - Math.sign(b.vx) * 40, b.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(b.x0, b.y0); ctx.lineTo(b.x1, b.y1); ctx.stroke();
     }
-    // Vampata
+    // vampata
     if (this._flash > 0) {
-      const r = 38;
+      const r = 42;
       const gr = ctx.createRadialGradient(this._flashX, this._flashY, 0, this._flashX, this._flashY, r);
       gr.addColorStop(0, 'rgba(255,240,190,0.95)');
       gr.addColorStop(0.4, 'rgba(255,170,60,0.6)');
       gr.addColorStop(1, 'rgba(255,120,20,0)');
       ctx.fillStyle = gr;
-      ctx.beginPath();
-      ctx.arc(this._flashX, this._flashY, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(this._flashX, this._flashY, r, 0, Math.PI * 2); ctx.fill();
     }
+  }
+
+  /** Mirino sul nemico agganciato (disegnato sopra il buio) */
+  drawAim(ctx) {
+    const p = this.game.player, w = this.equipped;
+    if (!w || !p.alive || !(p.isAiming || p.aimHold > 0)) return;
+    const dir = p.facingRight ? 1 : -1;
+    const t = this.findTarget(p, dir, w.def.bulletRange);
+    ctx.save();
+    if (t) {
+      const cx = t.centerX, cy = t.y + t.height * 0.4;
+      const r = 20 + Math.sin(Date.now() / 90) * 2;
+      ctx.strokeStyle = 'rgba(230,50,40,0.95)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - r - 8, cy); ctx.lineTo(cx - r + 6, cy);
+      ctx.moveTo(cx + r - 6, cy); ctx.lineTo(cx + r + 8, cy);
+      ctx.moveTo(cx, cy - r - 8); ctx.lineTo(cx, cy - r + 6);
+      ctx.moveTo(cx, cy + r - 6); ctx.lineTo(cx, cy + r + 8);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(230,50,40,0.25)';
+      ctx.beginPath(); ctx.moveTo(p.handX, p.handY); ctx.lineTo(cx, cy); ctx.stroke();
+    } else {
+      const g = ctx.createLinearGradient(p.handX, 0, p.handX + dir * 300, 0);
+      g.addColorStop(0, 'rgba(230,50,40,0.3)');
+      g.addColorStop(1, 'rgba(230,50,40,0)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(p.handX, p.handY); ctx.lineTo(p.handX + dir * 300, p.handY); ctx.stroke();
+    }
+    ctx.restore();
   }
 }
 

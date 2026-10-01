@@ -18,6 +18,7 @@ import { EnemyManager }     from './enemy.js';
 import { SaveManager }      from './save.js';
 import { ITEMS, DOCUMENTS } from './items.js';
 import { SpriteLib }        from './sprites.js';
+import { TouchControls }    from './touch.js';
 
 const CANVAS_W = 1280;
 const CANVAS_H =  720;
@@ -36,7 +37,6 @@ export class Game {
     this._lastTime = 0;
     this._fpsAvg   = 60;
     this._rain     = [];
-    this._edgeMsgCd = 0;
 
     this._darkCanvas = document.createElement('canvas');
     this._darkCanvas.width = CANVAS_W;
@@ -53,6 +53,7 @@ export class Game {
     this._resetState();
     this.dialogue = new DialogueManager(this);
     this.ui       = new UIManager(this);
+    this.touch    = new TouchControls(this);
     this.roomManager.preload();
 
     if (this.save.hasSaveData()) document.getElementById('btn-continua')?.removeAttribute('disabled');
@@ -74,6 +75,8 @@ export class Game {
     this.events       = new EventManager(this);
     this._playTime    = 0;
     this._transitioning = false;
+    this._openingDoor = null;
+    this._near = null;
     this._lightFadeActive = false;
     this.paused = false;
     this._ended = false;
@@ -87,8 +90,8 @@ export class Game {
   /* ══════════ MENU ══════════ */
   _bindMenuEvents() {
     const on = (id, fn) => document.getElementById(id)?.addEventListener('click', fn);
-    on('btn-nuova',    () => { this.audio.resume(); this._startNewGame(); });
-    on('btn-continua', () => { this.audio.resume(); this._continueGame(); });
+    on('btn-nuova',    () => { this.audio.resume(); this.touch.enterFullscreen(); this._startNewGame(); });
+    on('btn-continua', () => { this.audio.resume(); this.touch.enterFullscreen(); this._continueGame(); });
     on('btn-carica',   () => { this._showScreen('load-screen'); this._renderLoadSlots(); });
     on('btn-opzioni',  () => { this._showScreen('options-screen'); });
     on('btn-crediti',  () => this._showScreen('credits-screen'));
@@ -165,6 +168,7 @@ export class Game {
     document.getElementById('main-menu-bg')?.classList.add('hidden');
     this.canvas.style.display = 'block';
     this.ui.showHUD();
+    this.touch.show();
     this.ui.toggleDebug(this.debug);
     if (startRoom) this.roomManager.loadRoom(startRoom);
     this._initRain();
@@ -178,6 +182,7 @@ export class Game {
     const dt = Math.min((ts - this._lastTime) / 1000, 0.05);
     this._lastTime = ts;
     if (!this.running) return;
+    this.touch.update();
     this._fpsAvg = this._fpsAvg * 0.95 + (1 / Math.max(dt, 0.001)) * 0.05;
 
     if (this.paused || this.ui.hasOpenOverlay()) {
@@ -193,7 +198,6 @@ export class Game {
 
   _update(dt) {
     const p = this.player, input = this.input;
-    if (this._edgeMsgCd > 0) this._edgeMsgCd -= dt;
 
     // stato che il giocatore deve conoscere
     p.hasFlashlight = this.inventory.hasItem('flashlight');
@@ -203,10 +207,17 @@ export class Game {
     p.update(dt, input, this.collision);
     this.camera.update(dt);
 
-    // Armi
+    // Armi: basta premere spara (clic / Spazio). La mira si aggancia da sola
+    // al nemico più vicino; se c'è solo un nemico alle spalle ci si gira.
     if (p.alive && p.armed && !input.locked) {
-      if (p.isAiming && (input.justPressed('shoot') || (this.weapon.equipped.id === 'pistol' ? false : input.isDown('shoot')))) {
-        if (this.weapon.shoot(p.handX, p.handY, p.facingRight ? 1 : -1)) p.shotTimer = 0.18;
+      const w = this.weapon.equipped;
+      const trigger = w.id === 'pistol' ? input.justPressed('shoot') : input.isDown('shoot');
+      if (trigger) {
+        const dir = p.facingRight ? 1 : -1;
+        const range = w.def.bulletRange;
+        if (!this.weapon.findTarget(p, dir, range) && this.weapon.findTarget(p, -dir, range)) p.facingRight = !p.facingRight;
+        p.aimHold = 0.45;
+        if (this.weapon.shoot(p)) p.shotTimer = 0.18;
       }
       if (input.justPressed('reload')) this.weapon.reload();
     }
@@ -227,7 +238,6 @@ export class Game {
 
     if (!input.locked) {
       this._handleInteraction();
-      this._handleEdges();
       if (input.justPressed('inventory')) this.ui.openInventory();
       else if (input.justPressed('map'))  this.ui.openMap();
     } else {
@@ -245,6 +255,7 @@ export class Game {
   /* ══════════ INTERAZIONI ══════════ */
   _handleInteraction() {
     const near = this.roomManager.nearest(this.player);
+    this._near = near;
     if (!near) { this.ui.hideInteractPrompt(); return; }
     this.ui.showInteractPrompt(near.obj.label);
     if (!this.player.isInteract) return;
@@ -310,34 +321,30 @@ export class Game {
       if (d.lockedText) this.dialogue.show('', d.lockedText);
       return false;
     }
-    this._transitionToRoom(d.target, d.targetX);
+    // porta disegnata: si apre, poi si passa
+    if (SpriteLib.hasScene('door_' + d.look)) {
+      this._openingDoor = d.id;
+      this.input.lock();
+      this.ui.hideInteractPrompt();
+      this.audio.playSfx('door_open');
+      setTimeout(() => this._transitionToRoom(d.target, d.targetX, true), 380);
+    } else {
+      this._transitionToRoom(d.target, d.targetX);
+    }
     return true;
   }
 
-  _handleEdges() {
-    const p = this.player, input = this.input;
-    let side = null;
-    if (p.x <= 40 && input.isDown('moveLeft'))  side = 'left';
-    if (p.x + p.width >= CANVAS_W - 40 && input.isDown('moveRight')) side = 'right';
-    if (!side) return;
-    const d = this.roomManager.edgeDoor(side);
-    if (!d) return;
-    if (d.target && (!d.requires || this.roomManager.check(d.requires)) && (!d.keyId || this.roomManager.isDoorOpen(d.id) || this.inventory.hasItem(d.keyId))) {
-      this._tryDoor(d);
-    } else if (this._edgeMsgCd <= 0) {
-      this._edgeMsgCd = 1.5;
-      this._tryDoor(d);
-    }
-  }
-
-  _transitionToRoom(roomId, targetX) {
+  _transitionToRoom(roomId, targetX, soundPlayed = false) {
     if (this._transitioning) return;
     this._transitioning = true;
     this.input.lock();
     this.ui.hideInteractPrompt();
-    this.audio.playSfx('door_open');
+    if (!soundPlayed) this.audio.playSfx('door_open');
     this.ui.fadeOut(350, () => {
+      this._openingDoor = null;
+      this._near = null;
       this.weapon.bullets = [];
+      this.weapon.particles = [];
       this._lightFadeActive = false;
       this.roomManager.loadRoom(roomId, targetX);
       this._initRain();
@@ -394,7 +401,6 @@ export class Game {
     this.camera.applyTransform(ctx);
     this.roomManager.drawBackground(ctx);
     this.roomManager.drawDoors(ctx);
-    this.roomManager.drawInteractions(ctx);
     this.enemyManager.draw(ctx);
     this.player.draw(ctx);
     this.weapon.draw(ctx);
@@ -402,6 +408,12 @@ export class Game {
     this.camera.restoreTransform(ctx);
 
     this._drawDarkness(ctx, room);
+
+    // segnalini e mirino sopra il buio: si vedono sempre
+    this.camera.applyTransform(ctx);
+    if (!this.input.locked || this._openingDoor) this.roomManager.drawMarkers(ctx, this.input.locked ? null : this._near);
+    this.weapon.drawAim(ctx);
+    this.camera.restoreTransform(ctx);
     this._drawVignette(ctx);
     if (this.debug) {
       ctx.strokeStyle = 'rgba(80,160,255,0.7)';
@@ -519,6 +531,7 @@ export class Game {
     this.dialogue.close();
     this.ui.resetOverlays();
     this.ui.hideHUD();
+    this.touch.hide();
     this.audio.stopAmbient(0.5);
     this.canvas.style.display = 'none';
     document.getElementById('main-menu-bg')?.classList.remove('hidden');
@@ -541,6 +554,7 @@ export class Game {
     const total = Object.keys(DOCUMENTS).length;
     this.ui.fadeOut(1500, () => {
       this.running = false;
+      this.touch.hide();
       this.audio.stopAmbient(1);
       this.ui.showEnding({
         title: good ? 'FINALE — ALBA' : 'FINALE — NOTTE',

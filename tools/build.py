@@ -15,9 +15,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ordine di dipendenza
 ORDER = [
-    'sprite_manifest', 'sprites', 'input', 'audio', 'camera', 'collision',
+    'sprite_manifest', 'scene_manifest', 'sprites', 'input', 'audio', 'camera', 'collision',
     'dialogue', 'player', 'items', 'inventory', 'weapons', 'enemy',
-    'events', 'ui', 'save', 'rooms', 'game', 'main',
+    'events', 'ui', 'save', 'rooms', 'touch', 'game', 'main',
 ]
 
 def strip_modules(src):

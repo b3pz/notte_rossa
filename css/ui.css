@@ -488,3 +488,55 @@
   font-size: 10px;
   color: var(--text-dim);
 }
+
+/* ══════════ COMANDI TOUCH ══════════ */
+#touch-controls {
+  position: fixed; inset: 0; z-index: 900;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#touch-controls.hidden { display: none; }
+#touch-controls .tc-left, #touch-controls .tc-right, #touch-controls .tc-top {
+  position: absolute; display: flex; flex-direction: column; gap: 10px;
+}
+#touch-controls .tc-left  { left:  max(14px, env(safe-area-inset-left));  bottom: max(14px, env(safe-area-inset-bottom)); }
+#touch-controls .tc-right { right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); align-items: flex-end; }
+#touch-controls .tc-top   { right: max(14px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); flex-direction: row; }
+#touch-controls .tc-row   { display: flex; gap: 10px; align-items: flex-end; }
+.tc-btn {
+  pointer-events: auto;
+  touch-action: none;
+  background: rgba(12, 12, 16, 0.55);
+  border: 2px solid rgba(220, 205, 180, 0.45);
+  color: #eee4d0;
+  border-radius: 50%;
+  font-family: inherit; font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+.tc-btn.on { background: rgba(192, 21, 42, 0.6); border-color: #ff5a5a; }
+.tc-big   { width: 74px; height: 74px; font-size: 22px; }
+.tc-small { height: 40px; padding: 0 12px; border-radius: 20px; font-size: 11px; letter-spacing: 1px; }
+.tc-shoot { width: 88px; height: 88px; font-size: 15px; border-color: rgba(230, 70, 60, 0.8); }
+.tc-use   { font-size: 26px; }
+#tc-aim   { width: 60px; height: 60px; font-size: 12px; }
+#touch-controls:not(.armed) .tc-gun { display: none; }
+/* con inventario/mappa/pausa aperti resta solo il tasto per chiudere */
+#touch-controls.overlay .tc-left, #touch-controls.overlay .tc-right,
+#touch-controls.overlay #tc-inv, #touch-controls.overlay #tc-map { display: none; }
+/* l'etichetta dell'oggetto vicino è disegnata sopra l'oggetto stesso */
+#interact-prompt { display: none !important; }
+
+#rotate-hint { display: none; }
+@media (orientation: portrait) {
+  body.touch #rotate-hint {
+    display: flex; position: fixed; inset: 0; z-index: 2000;
+    align-items: center; justify-content: center; text-align: center; padding: 30px;
+    background: #080a0e; color: #d8cfc4; font-family: var(--font-ui); font-size: 18px; letter-spacing: 2px;
+  }
+}
+/* su telefono l'HUD va in alto, i pulsanti occupano gli angoli in basso */
+body.touch #hud-health { top: 16px; bottom: auto; left: 20px; }
+body.touch #hud-flashlight { top: 50px; bottom: auto; left: 20px; right: auto; }
+body.touch #hud-ammo { top: 64px; bottom: auto; right: 24px; }

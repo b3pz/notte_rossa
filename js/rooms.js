@@ -14,6 +14,7 @@
    ============================================= */
 
 import { SpriteLib } from './sprites.js';
+import { SCENE } from './scene_manifest.js';
 
 export const ROOM_W = 1280;
 export const ROOM_H = 720;
@@ -72,7 +73,7 @@ export const ROOMS = {
     name: 'Atrio', chapter: 'Stazione', bg: BG + 'station_hall.png',
     light: 0.55, map: [2, 0], ambient: 'station_ambient',
     hotspots: [
-      { id: 'ticket_booth', x: 200, w: 220, label: 'Biglietteria', markY: 480,
+      { id: 'ticket_booth', x: 320, w: 130, label: 'Biglietteria', markY: 480,
         text: 'La biglietteria è chiusa. Il cassetto dei soldi è aperto e pieno.\nChi scappa non pensa ai soldi.' },
       { id: 'notice_board', x: 470, w: 120, label: 'Avviso affisso', icon: 'note', iconY: 470, doc: 'doc_ordinanza' },
       { id: 'locker_flashlight', x: 600, w: 110, label: 'Armadietto del personale', markY: 520,
@@ -80,7 +81,7 @@ export const ROOMS = {
     ],
     doors: [
       { id: 'hall_to_platform', edge: 'left', label: 'Binario 1', target: 'station_platform', targetX: R },
-      { id: 'hall_to_storage', x: 60, w: 110, label: 'Porta DEPOSITO', target: 'station_storage', targetX: L + 40 },
+      { id: 'hall_to_storage', x: 175, w: 130, label: 'Porta DEPOSITO', target: 'station_storage', targetX: L + 40 },
       { id: 'hall_to_control', x: 730, w: 130, label: 'Scala mobile — Sala controllo', target: 'station_control', targetX: L,
         keyId: 'key_station', lockedText: 'In cima alla scala mobile c\'è una porta blindata.\n"SALA CONTROLLO — solo personale". Serve la chiave.' },
       { id: 'hall_to_exit', edge: 'right', label: 'Uscita', target: 'station_exit', targetX: L,
@@ -108,7 +109,7 @@ export const ROOMS = {
         text: 'Il carrello è rovesciato. Sul pavimento, impronte scalze che vanno verso il buio.' },
     ],
     doors: [
-      { id: 'storage_to_hall', edge: 'left', label: 'Atrio', target: 'station_hall', targetX: 120 },
+      { id: 'storage_to_hall', edge: 'left', label: 'Atrio', target: 'station_hall', targetX: 200 },
       { id: 'storage_dark', edge: 'right', label: 'Corridoio buio', lockedText: 'Il corridoio finisce contro un muro di casse.', requires: [{ flag: 'never' }] },
     ],
     spawnX: L + 40,
@@ -166,7 +167,7 @@ export const ROOMS = {
     ],
     doors: [
       { id: 'street_to_station', edge: 'left', label: 'Stazione', target: 'station_exit', targetX: 560 },
-      { id: 'street_to_apartment', x: 90, w: 130, label: 'Portone — Palazzo Conti', target: 'apartment', targetX: L },
+      { id: 'street_to_apartment', x: 150, w: 130, label: 'Portone — Palazzo Conti', target: 'apartment', targetX: L },
       { id: 'street_to_alley', x: 590, w: 120, label: 'Vicolo verso il San Rocco', target: 'city_alley', targetX: L },
       { id: 'street_to_shop', x: 1040, w: 140, label: 'Alimentari da Luigi', target: 'alimentari', targetX: L },
     ],
@@ -216,7 +217,7 @@ export const ROOMS = {
       { id: 'apt_key', x: 1000, w: 120, label: 'Mensola della cucina', icon: 'key_hospital', iconY: 450, give: ['key_hospital', 'bandage'] },
     ],
     doors: [
-      { id: 'apt_to_street', edge: 'left', label: 'Via Ferrante', target: 'city_street', targetX: 150 },
+      { id: 'apt_to_street', edge: 'left', label: 'Via Ferrante', target: 'city_street', targetX: 180 },
       { id: 'apt_exit', x: 1150, w: 100, label: 'Uscita di sicurezza', lockedText: 'L\'uscita di sicurezza dà su un cortile murato. Non porta da nessuna parte.', requires: [{ flag: 'never' }] },
     ],
     enemies: [
@@ -259,7 +260,7 @@ export const ROOMS = {
     ],
     doors: [
       { id: 'corr_to_alley', edge: 'left', label: 'Vicolo', target: 'city_alley', targetX: 640 },
-      { id: 'corr_to_ward', x: 160, w: 120, label: 'Degenze', target: 'hospital_ward', targetX: L,
+      { id: 'corr_to_ward', x: 240, w: 120, label: 'Degenze', target: 'hospital_ward', targetX: L,
         keyId: 'key_hospital', lockedText: 'Porta del reparto degenze. Chiusa a chiave.' },
       { id: 'corr_to_morgue', x: 590, w: 120, label: 'Scale — Obitorio (-1)', target: 'hospital_morgue', targetX: L,
         requires: [{ item: 'shotgun' }], failText: 'Le scale scendono verso l\'obitorio. Da laggiù arrivano dei versi, tanti.\nCon una pistola sola non scendi.' },
@@ -278,7 +279,7 @@ export const ROOMS = {
     light: 0.45, map: [1, 2],
     props: [{ name: 'body_2', x: 1010, flip: true }],
     hotspots: [
-      { id: 'ward_locker', x: 90, w: 140, label: 'Armadietto della vigilanza', icon: 'shotgun', iconY: 520,
+      { id: 'ward_locker', x: 250, w: 140, label: 'Armadietto della vigilanza', icon: 'shotgun', iconY: 520,
         give: ['shotgun', ['ammo_shells', 8]], text: 'Il fucile della vigilanza. Qualcuno l\'ha lasciato qui con le cartucce.' },
       { id: 'ward_bed', x: 740, w: 220, label: 'Letto', markY: 560,
         text: 'Le cinghie del letto sono state strappate. Non tagliate: strappate.' },
@@ -287,7 +288,7 @@ export const ROOMS = {
         text: 'Sul camice c\'è scritto GIULIA. Il badge è ancora appeso al taschino.' },
     ],
     doors: [
-      { id: 'ward_to_corr', edge: 'left', label: 'Corridoio', target: 'hospital_corridor', targetX: 220 },
+      { id: 'ward_to_corr', edge: 'left', label: 'Corridoio', target: 'hospital_corridor', targetX: 265 },
     ],
     enemies: [
       { id: 'ward_listener', type: 'listener', x: 620, idle: true, facingRight: true },
@@ -627,6 +628,60 @@ const FRAMING = {
   molo_finale:        [0.75, 656],
 };
 
+
+/* Aspetto delle porte.
+   'wood' | 'metal' | 'glass' | 'security' = porta disegnata (sprite)
+   'painted'  = il passaggio è già nello sfondo: solo segnalino
+   'passage'  = uscita laterale (strada, banchina, tunnel): cartello a freccia
+   Le uscite "edge" senza voce qui sono 'passage'; le altre 'painted'. */
+const DOOR_LOOK = {
+  wagon_left: 'metal',        wagon_to_platform: 'painted',
+  platform_to_wagon: 'passage', platform_to_hall: 'passage',
+  hall_to_platform: 'passage', hall_to_storage: 'metal', hall_to_control: 'painted', hall_to_exit: 'passage',
+  storage_to_hall: 'metal',   storage_dark: 'passage',
+  control_to_hall: 'security',
+  exit_to_hall: 'glass',      exit_to_city: 'painted',
+  street_to_station: 'passage', street_to_apartment: 'wood', street_to_alley: 'painted', street_to_shop: 'glass',
+  shop_to_street: 'glass',
+  apt_to_street: 'wood',      apt_exit: 'metal',
+  alley_to_street: 'passage', alley_to_hospital: 'metal',
+  corr_to_alley: 'metal',     corr_to_ward: 'wood', corr_to_morgue: 'painted', corr_to_surgery: 'security',
+  ward_to_corr: 'wood',
+  surg_to_corr: 'glass',
+  morgue_to_corr: 'metal',    morgue_to_metro: 'metal',
+  mi_to_morgue: 'metal',      mi_to_banchina: 'painted',
+  mb_to_mi: 'passage',        mb_to_tunnel: 'passage',
+  tunnel_to_mb: 'passage',    tunnel_to_gen: 'metal',
+  gen_to_tunnel: 'metal',     gen_to_maint: 'metal',
+  maint_to_gen: 'passage',    maint_to_safe: 'security',
+  safe_to_maint: 'passage',   safe_to_lab: 'passage',
+  li_to_safe: 'security',     li_to_corr: 'painted',
+  lc_to_li: 'glass',          lc_to_bio: 'painted', lc_to_server: 'glass',
+  bio_to_corr: 'glass',
+  server_to_lc: 'glass',      server_to_core: 'painted',
+  core_to_server: 'security', core_to_port: 'security',
+  port_to_core: 'passage',    port_to_pier: 'passage',
+  pier_to_port: 'passage',
+};
+
+/* Oggetti di scena disegnati sopra lo sfondo (dalle tavole in assets).
+   { name, x (centro), lift (px sopra i piedi, a scala 1), flip, openWhen: id hotspot → usa <name>_open } */
+const SCENERY = {
+  station_platform: [{ name: 'payphone', x: 1100, lift: 120 }],
+  station_hall:     [{ name: 'locker', x: 655, openWhen: 'locker_flashlight' }],
+  station_storage:  [{ name: 'locker_fallen', x: 1000 }],
+  station_control:  [{ name: 'radio_set', x: 620, lift: 95 }],
+  apartment:        [{ name: 'radio_set', x: 880, lift: 85 }],
+  hospital_ward:    [{ name: 'locker', x: 290, openWhen: 'ward_locker' }, { name: 'locker', x: 355 }],
+  metro_banchina:   [{ name: 'payphone', x: 620, lift: 110 }],
+  sala_generatori:  [{ name: 'electric_box', x: 1020, lift: 70 }],
+  stanza_manutenzione: [{ name: 'locker', x: 990, openWhen: 'maint_locker' }, { name: 'locker_bent', x: 1055 }],
+  safe_room:        [],
+};
+
+/* Scala di disegno delle porte: nelle inquadrature ravvicinate non devono uscire dallo schermo */
+export function doorScale(room) { return Math.min(room.scale, 1.2) * 0.9; }
+
 // Completa i campi di default
 for (const [id, r] of Object.entries(ROOMS)) {
   const fr = FRAMING[id] || [1, FLOOR];
@@ -642,6 +697,21 @@ for (const [id, r] of Object.entries(ROOMS)) {
   r.npcs = r.npcs || [];
   r.props = r.props || [];
   r.enemies = r.enemies || [];
+  r.scenery = SCENERY[id] || [];
+  const ds = doorScale(r);
+  for (const d of r.doors) {
+    d.look = DOOR_LOOK[d.id] || (d.edge ? 'passage' : 'painted');
+    const spr = SCENE['door_' + d.look];
+    if (d.edge) {
+      // le uscite laterali diventano porte vere e proprie: ci si va sopra e si preme E
+      const sw = spr ? Math.round(spr.w * ds) : 110;
+      d.w = 110;
+      d.x = d.edge === 'left' ? 16 : ROOM_W - 16 - d.w;
+      d.cx = d.edge === 'left' ? 16 + sw / 2 : ROOM_W - 16 - sw / 2;
+    } else {
+      d.cx = d.x + d.w / 2;
+    }
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -758,7 +828,7 @@ export class RoomManager {
       consider('hotspot', h, h.x, h.x + h.w);
     }
     for (const d of room.doors) {
-      if (d.edge || !this.visible(d)) continue;
+      if (!this.visible(d)) continue;
       consider('door', d, d.x, d.x + d.w);
     }
     for (const n of room.npcs) {
@@ -772,6 +842,25 @@ export class RoomManager {
     return this.current?.doors.find(d => d.edge === side && this.visible(d)) || null;
   }
 
+  /** La porta si può attraversare adesso? (condizioni e chiave) */
+  doorPassable(d) {
+    if (!d.target) return false;
+    if (d.requires && !this.check(d.requires)) return false;
+    if (d.keyId && !this.isDoorOpen(d.id) && !this.game.inventory.hasItem(d.keyId)) return false;
+    return true;
+  }
+
+  /** Tipo di segnalino per un oggetto interattivo */
+  markerKind(kind, o) {
+    if (kind === 'door') return 'door';
+    if (kind === 'npc') return 'use';
+    if (o.event === 'open_save') return 'save';
+    if (o.doc) return 'document';
+    if (o.give?.length) return 'take';
+    if (o.event || o.requires) return 'use';
+    return 'examine';
+  }
+
   /* ── RENDER ── */
   drawBackground(ctx) {
     const room = this.current;
@@ -783,74 +872,153 @@ export class RoomManager {
       ctx.fillStyle = '#07080b';
       ctx.fillRect(0, 0, ROOM_W, ROOM_H);
     }
-    // oggetti di scena
-    for (const pr of room.props) SpriteLib.drawProp(ctx, pr.name, pr.x, room.floorY + 18 * room.scale, pr.flip, 1, room.scale);
+    const sc = room.scale, fy = room.floorY;
+    // oggetti di scena (armadietti, telefoni, quadri elettrici…)
+    for (const o of room.scenery) {
+      const open = o.openWhen && this.isPicked(o.openWhen) && SpriteLib.hasScene(o.name + '_open');
+      const name = open ? o.name + '_open' : o.name;
+      const s = Math.min(sc, 1.3) * 0.88;
+      const foot = fy - 34 * sc - (o.lift || 0) * s;
+      if (!o.lift) SpriteLib.shadow(ctx, o.x, foot + 3, (SpriteLib.sceneSize(name)?.w || 80) * s * 0.6, 0.5);
+      SpriteLib.drawScene(ctx, name, o.x, foot, s, o.flip);
+    }
+    // cadaveri
+    for (const pr of room.props) {
+      SpriteLib.shadow(ctx, pr.x, fy + 10 * sc, 120 * sc, 0.5);
+      SpriteLib.drawProp(ctx, pr.name, pr.x, fy + 18 * sc, pr.flip, 1, sc);
+    }
     // personaggi non giocanti
     for (const n of room.npcs) {
       if (!this.visible(n)) continue;
       const anim = this.game.events.getFlag(`npc_${n.id}_anim`) || n.anim || 'idle';
-      SpriteLib.draw(ctx, n.char, anim, 0, n.x, room.floorY, n.facingRight, { scale: room.scale });
+      SpriteLib.shadow(ctx, n.x, fy, 62 * sc);
+      SpriteLib.draw(ctx, n.char, anim, 0, n.x, fy, n.facingRight, { scale: sc });
     }
   }
 
+  /** Porte disegnate e cartelli delle uscite */
   drawDoors(ctx) {
     const room = this.current;
     if (!room) return;
-    const t = Date.now() / 1000;
-    ctx.save();
-    ctx.font = '600 13px "Courier New", monospace';
-    ctx.textAlign = 'center';
+    const ds = doorScale(room), fy = room.floorY;
+    const opening = this.game._openingDoor;
     for (const d of room.doors) {
       if (!this.visible(d)) continue;
-      const blocked = d.requires && !this.check(d.requires);
-      const a = 0.35 + Math.sin(t * 2.5) * 0.15;
-      ctx.fillStyle = blocked ? `rgba(190,60,60,${a})` : `rgba(230,220,200,${a})`;
-      if (d.edge) {
-        const x = d.edge === 'left' ? 22 : ROOM_W - 22;
-        const y = room.floorY - 130;
-        ctx.beginPath();
-        if (d.edge === 'left') { ctx.moveTo(x - 8, y); ctx.lineTo(x + 8, y - 12); ctx.lineTo(x + 8, y + 12); }
-        else                   { ctx.moveTo(x + 8, y); ctx.lineTo(x - 8, y - 12); ctx.lineTo(x - 8, y + 12); }
-        ctx.fill();
+      const cx = d.cx;
+      if (SpriteLib.hasScene('door_' + d.look)) {
+        const open = opening === d.id;
+        const name = 'door_' + d.look + (open ? '_open' : '');
+        const foot = fy - 12 * room.scale;
+        // la porta aperta ha l'anta di lato: la allineo al telaio della chiusa
+        const closedW = SpriteLib.sceneSize('door_' + d.look).w * ds;
+        SpriteLib.shadow(ctx, cx, foot + 4, closedW * 0.55, 0.45);
+        const openW = SpriteLib.sceneSize(name).w * ds;
+        const ox = open ? (openW - closedW) / 2 * (d.edge === 'right' ? -1 : 1) : 0;
+        SpriteLib.drawScene(ctx, name, cx + ox, foot, ds, open && d.edge === 'right');
       }
     }
-    ctx.restore();
   }
 
-  drawInteractions(ctx) {
+  /** Segnalini sopra porte, oggetti e persone. Disegnati sopra il buio. */
+  drawMarkers(ctx, near) {
     const room = this.current;
     if (!room) return;
     const t = Date.now() / 1000;
+    const sc = room.scale, fy = room.floorY, ds = doorScale(room);
+    const badge = (kind, cx, cy, isNear, locked, label) => {
+      const pulse = 0.5 + 0.5 * Math.sin(t * 3 + cx * 0.02);
+      const r = isNear ? 24 : 17;
+      ctx.save();
+      ctx.globalAlpha = isNear ? 1 : 0.55 + pulse * 0.3;
+      ctx.fillStyle = locked ? 'rgba(70,10,10,0.8)' : 'rgba(10,10,12,0.72)';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = isNear ? 2.5 : 1.5;
+      ctx.strokeStyle = locked ? 'rgba(230,80,70,0.95)' : (isNear ? 'rgba(255,225,160,1)' : 'rgba(230,220,200,0.7)');
+      ctx.stroke();
+      SpriteLib.drawUi(ctx, kind, cx, cy, r * 1.35, 1);
+      if (locked) SpriteLib.drawIcon(ctx, 'padlock', cx + r * 0.8, cy + r * 0.7, r * 1.1, 1);
+      if (isNear && label) {
+        ctx.font = '600 15px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        const text = label;
+        const w = ctx.measureText(text).width + 34;
+        const ly = cy - r - 20;
+        ctx.fillStyle = 'rgba(8,8,10,0.82)';
+        ctx.fillRect(cx - w / 2, ly - 13, w, 24);
+        ctx.fillStyle = '#c0392b';
+        ctx.fillText('E', cx - w / 2 + 12, ly + 5);
+        ctx.fillStyle = '#eee4d0';
+        ctx.fillText(text, cx + 8, ly + 5);
+      }
+      ctx.restore();
+    };
+
+    // porte
+    for (const d of room.doors) {
+      if (!this.visible(d)) continue;
+      const isNear = near?.obj === d;
+      const locked = !this.doorPassable(d);
+      const cx = d.cx;
+      const spr = SpriteLib.sceneSize('door_' + d.look);
+      if (d.look === 'passage') {
+        // freccia sul pavimento verso l'uscita
+        const dir = d.edge === 'right' ? 1 : (d.edge === 'left' ? -1 : 0);
+        const ay = fy - 30 * sc;
+        const ax = cx;
+        ctx.save();
+        ctx.globalAlpha = isNear ? 0.95 : 0.45 + 0.25 * Math.sin(t * 3);
+        ctx.fillStyle = locked ? 'rgb(200,70,60)' : 'rgb(240,225,190)';
+        for (let k = 0; k < 3; k++) {
+          const x = cx + dir * (k * 18 - 18) + (dir === 0 ? (k - 1) * 18 : 0);
+          ctx.beginPath();
+          ctx.moveTo(x + dir * 9, ay);
+          ctx.lineTo(x - dir * 5, ay - 11);
+          ctx.lineTo(x - dir * 5, ay + 11);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      const top = spr ? fy - 12 * sc - spr.h * ds - 26 : (d.markY ?? fy - 330 * Math.min(sc, 1.2) * 0.9);
+      badge('door', cx, Math.max(40, top), isNear, locked, d.label);
+    }
+
+    // oggetti e punti da esaminare
     for (const h of room.hotspots) {
       if (this.isPicked(h.id) || !this.visible(h)) continue;
+      const isNear = near?.obj === h;
       const cx = h.x + h.w / 2;
+      const locked = h.requires && !this.check(h.requires);
       if (h.icon) {
-        const y = h.iconY ?? room.floorY - 40;
-        // alone
-        const g = ctx.createRadialGradient(cx, y, 0, cx, y, 46);
-        g.addColorStop(0, `rgba(255,235,190,${0.18 + Math.sin(t * 3 + cx) * 0.08})`);
+        // oggetto a terra: icona dell'oggetto con alone, sempre visibile
+        const y = h.iconY ?? fy - 40;
+        const g = ctx.createRadialGradient(cx, y, 0, cx, y, 50);
+        g.addColorStop(0, `rgba(255,235,190,${0.22 + Math.sin(t * 3 + cx) * 0.1 + (isNear ? 0.15 : 0)})`);
         g.addColorStop(1, 'rgba(255,235,190,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(cx - 46, y - 46, 92, 92);
-        SpriteLib.drawIcon(ctx, h.icon, cx, y, 46, 0.95);
+        ctx.fillRect(cx - 50, y - 50, 100, 100);
+        SpriteLib.drawIcon(ctx, h.icon, cx, y, isNear ? 56 : 46, 1);
+        if (isNear) badge(this.markerKind('hotspot', h), cx, y - 58, true, locked, h.label);
       } else {
-        // scintilla per "esamina"
-        const y = h.markY ?? room.floorY - 160;
-        const a = 0.35 + Math.max(0, Math.sin(t * 2.2 + cx * 0.01)) * 0.5;
-        ctx.fillStyle = `rgba(255,245,220,${a})`;
-        ctx.beginPath(); ctx.arc(cx, y, 3.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(255,245,220,${a * 0.25})`;
-        ctx.beginPath(); ctx.arc(cx, y, 10, 0, Math.PI * 2); ctx.fill();
+        const y = Math.max(40, h.markY ?? fy - 160);
+        badge(this.markerKind('hotspot', h), cx, y, isNear, locked, h.label);
       }
       if (this.game.debug) {
         ctx.strokeStyle = 'rgba(255,200,0,0.6)';
-        ctx.strokeRect(h.x, 300, h.w, room.floorY - 300);
+        ctx.strokeRect(h.x, 300, h.w, fy - 300);
       }
     }
+
+    // persone con cui parlare
+    for (const n of room.npcs) {
+      if (!this.visible(n)) continue;
+      const isNear = near?.obj === n;
+      badge('use', n.x, fy - 300 * sc, isNear, false, n.label);
+    }
+
     if (this.game.debug) {
-      for (const d of room.doors) if (!d.edge) {
+      for (const d of room.doors) {
         ctx.strokeStyle = 'rgba(80,200,120,0.7)';
-        ctx.strokeRect(d.x, 280, d.w, room.floorY - 280);
+        ctx.strokeRect(d.x, 280, d.w, fy - 280);
       }
     }
   }
