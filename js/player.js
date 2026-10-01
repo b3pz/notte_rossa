@@ -193,7 +193,7 @@ export class Player {
     }
     if (this.interactTimer > 0 && has('interact')) return 'interact';
     if (this.isCrouching) return 'crouch';
-    if (this.armed) return sg ? or('shotgun_idle', 'gun_idle') : 'gun_idle';
+    if (this.armed) return sg ? or('shotgun_idle', 'shotgun_aim') : 'gun_idle';
     if (this.flashlightOn) return 'flashlight';
     if (this.healthState === HEALTH_STATE.DANGER) return 'wounded';
     return 'idle';

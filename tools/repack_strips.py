@@ -71,6 +71,26 @@ def figures(im, min_h=0.30):
     return out, keep
 
 
+def figures_by_components(im):
+    """Figure che si sovrappongono in orizzontale ma non si toccano (es. canne dei fucili):
+    ogni pezzo grande è una figura, i pezzi piccoli (vampate, schegge) vanno alla figura più vicina."""
+    _, keep = figures(im)
+    lab, n = ndimage.label(keep)
+    sizes = ndimage.sum(keep, lab, range(1, n + 1))
+    big = [i + 1 for i, sz in enumerate(sizes) if sz >= 0.08 * sizes.max()]
+    objs = ndimage.find_objects(lab)
+    cx = {i: (objs[i - 1][1].start + objs[i - 1][1].stop) / 2 for i in range(1, n + 1)}
+    owner = {}
+    for i in range(1, n + 1):
+        owner[i] = i if i in big else min(big, key=lambda b: abs(cx[b] - cx[i]))
+    out = []
+    for b in sorted(big, key=lambda b: cx[b]):
+        mask = np.isin(lab, [i for i, o in owner.items() if o == b])
+        ys, xs = np.where(mask)
+        out.append(((xs.min(), xs.max() + 1, ys.min(), ys.max() + 1), mask))
+    return out
+
+
 def leg_center(alpha):
     h = alpha.shape[0]
     low = alpha[int(h * 0.8):] > 40
@@ -78,18 +98,35 @@ def leg_center(alpha):
     return (xs[0] + xs[-1]) / 2 if len(xs) else alpha.shape[1] / 2
 
 
-def pack(src, picks, dst, target_h=None, flip=False, bottom=4):
+def pack(src, picks, dst, target_h=None, flip=False, bottom=4, components=False):
     """picks: indici delle figure; (i, k, n) = figura i tagliata in n parti uguali, prendi la k-esima.
     target_h: altezza della figura più alta della striscia (le altre in proporzione)."""
     im = load_rgba(src)
     figs, keep = figures(im)
+    comps = figures_by_components(im) if components else None
     cells = []
     for p in picks:
+        if comps is not None:
+            (x0, x1, y0, y1), mask = comps[p]
+            crop = im[y0:y1, x0:x1].copy()
+            crop[~mask[y0:y1, x0:x1], 3] = 0
+            c = Image.fromarray(crop)
+            cells.append(c.transpose(Image.FLIP_LEFT_RIGHT) if flip else c)
+            continue
         i, k, n = p if isinstance(p, tuple) else (p, 0, 1)
         x0, x1, y0, y1 = figs[i]
         if n > 1:
+            # taglio nella colonna più vuota vicino alla divisione in parti uguali
+            # (figure che si toccano con armi o piedi)
             w = (x1 - x0) / n
-            x0, x1 = round(x0 + k * w), round(x0 + (k + 1) * w)
+            col = keep[:, x0:x1].sum(axis=0)
+            def cut(j):
+                if j <= 0: return 0
+                if j >= n: return x1 - x0
+                c = round(j * w); r = round(w * 0.25)
+                a, b = max(1, c - r), min(len(col) - 1, c + r)
+                return a + int(np.argmin(col[a:b]))
+            x0, x1 = x0 + cut(k), x0 + cut(k + 1)
             rows = keep[:, x0:x1].any(axis=1)
             ys = np.where(rows)[0]
             y0, y1 = ys[0], ys[-1] + 1
@@ -131,7 +168,7 @@ def scan(path):
 # infermiere_dead.png resta quella originale (5 pose, camice azzurro).
 # Tavole recuperate (ottobre 2026): le strisce nuove erano finite sotto il nome
 # sbagliato. Sorgenti in tools/recover_src/ (copie delle strisce sbagliate),
-# destinazione = nome giusto.  (sorgente, figure, destinazione, altezza figura)
+# destinazione = nome giusto.  (sorgente, figure, destinazione, altezza figura[, separa per pezzi connessi])
 RECOVER = [
     ('pistol_sheet.png',   [0, 1],                           'player_aim.png',          272),
     ('pistol_sheet.png',   [(2, 0, 3), (2, 1, 3), (2, 2, 3)], 'player_shoot.png',        272),
@@ -153,6 +190,12 @@ RECOVER = [
     ('tecnico_walk6.png',  [0, 1, 2, 3, 4, 5],               'tecnico_walk.png',        264),
     ('tecnico_attack4.png', [0, 1, 2, 3],                    'tecnico_attack.png',      264),
     ('tecnico_dead4.png',  [0, 1, 2, 3],                     'tecnico_dead.png',        264),
+    # tavole nuove dal kit dei prompt
+    ('luca_gun_idle.png',     [0, 1],                         'player_gun_idle.png',     272),
+    ('luca_walk_pistol.png',  [0, 1, 2, 3, 4, 5],             'player_walk_gun.png',     268),
+    ('luca_hurt.png',         [0, 1],                         'player_hurt.png',         250),
+    ('luca_shotgun_walk.png', [0, 1, 2, 3, 4, 5],             'player_walk_shotgun.png', 266, True),
+    ('luca_wounded.png',      [0, 1, 2, 3],                   'player_wounded.png',      255),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 
@@ -161,6 +204,6 @@ if __name__ == '__main__':
         for p in sys.argv[2:]:
             print(os.path.basename(p), [(f[1] - f[0], f[3] - f[2]) for f in scan(p)])
     else:
-        for src, picks, dst, h in RECOVER:
-            n, cw = pack(os.path.join(SRC_DIR, src), picks, os.path.join(CUT, dst), target_h=h)
+        for src, picks, dst, h, *opt in RECOVER:
+            n, cw = pack(os.path.join(SRC_DIR, src), picks, os.path.join(CUT, dst), target_h=h, components=bool(opt and opt[0]))
             print(f'{dst:30s} {n} pose, cella {cw}x{CELL_H}')

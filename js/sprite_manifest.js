@@ -24,8 +24,8 @@ export const SPRITES = {
       },
       "gun_idle": {
         "file": "assets/sprites/cut/player_gun_idle.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 2,
         "loop": true
       },
       "aim": {
@@ -54,8 +54,8 @@ export const SPRITES = {
       },
       "wounded": {
         "file": "assets/sprites/cut/player_wounded.png",
-        "frames": 2,
-        "fps": 4,
+        "frames": 4,
+        "fps": 3,
         "loop": true
       },
       "death": {
@@ -111,6 +111,18 @@ export const SPRITES = {
         "frames": 4,
         "fps": 12,
         "loop": false
+      },
+      "walk_gun": {
+        "file": "assets/sprites/cut/player_walk_gun.png",
+        "frames": 6,
+        "fps": 10,
+        "loop": true
+      },
+      "walk_shotgun": {
+        "file": "assets/sprites/cut/player_walk_shotgun.png",
+        "frames": 6,
+        "fps": 10,
+        "loop": true
       }
     }
   },
