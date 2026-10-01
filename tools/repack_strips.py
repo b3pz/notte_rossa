@@ -218,6 +218,13 @@ RECOVER = [
     ('crawler_attack_new.png',   [0, 1, 2, 3],                'crawler_attack.png',      130, True),
     ('crawler_ceiling_new.png',  [0, 1],                      'crawler_ceiling.png',     137),
     ('crawler_leap_new.png',     [0, 1, 2],                   'crawler_leap.png',        146),
+    ('crawler_dead_new.png',     [0, 1, 2, 3],                'crawler_dead.png',        189),
+    # Listener (disegno nuovo: calvo, cappotto verde col cappuccio)
+    ('listener_walk_new.png',    [0, 1, 2, 3, 4, 5],          'listener_walk.png',       262),
+    ('listener_listen_new.png',  [0, 1],                      'listener_listen.png',     264),
+    ('listener_listen_new.png',  [1],                         'listener_idle.png',       264),
+    ('listener_alert_new.png',   [0, 1],                      'listener_alert.png',      266),
+    ('listener_run_new.png',     [0, 1, 2, 3, 4, 5],          'listener_run.png',        268, True),
 ]
 SRC_DIR = os.path.join(ROOT, 'tools', 'recover_src')
 

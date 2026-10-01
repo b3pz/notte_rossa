@@ -43,7 +43,7 @@ CHAR = {
     'tecnico': "infected bald maintenance technician zombie, grey overalls, leather tool belt",
     'corridore': "fast infected runner, very thin, long dark greasy hair, dark ragged clothes",
     'crawler': "pale hairless infected creature with elongated limbs that moves on all fours and can cling to ceilings",
-    'listener': "blind infected man in a long dark green coat, pale skin, mouth open, head tilted as if listening",
+    'listener': "blind bald infected man, pale grey cracked skin, white eyes, long torn dark green hooded coat, dark jeans, worn boots, head tilted up as if listening",
 }
 # riferimento del personaggio (strisce già nel gioco)
 CHAR_REF = {
@@ -54,9 +54,9 @@ CHAR_REF = {
     'ferroviere': ['ferroviere_walk.png', 'ferroviere_attack.png'],
     'infermiere': ['infermiere_walk.png', 'infermiere_attack.png'],
     'tecnico': ['tecnico_walk.png', 'tecnico_attack.png'],
-    'corridore': ['corridore_run.png'],
-    'crawler': ['crawler_idle.png', 'crawler_walk.png', 'crawler_ceiling.png'],
-    'listener': ['listener_idle.png', 'listener_walk.png', 'listener_run.png'],
+    'corridore': ['corridore_idle.png', 'corridore_hurt.png'],
+    'crawler': ['crawler_run.png', 'crawler_attack.png', 'crawler_ceiling.png'],
+    'listener': ['listener_walk.png', 'listener_listen.png', 'listener_run.png'],
 }
 
 # ───────────────────────── lavori ─────────────────────────

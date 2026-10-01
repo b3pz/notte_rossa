@@ -249,8 +249,8 @@ export const SPRITES = {
       },
       "dead": {
         "file": "assets/sprites/cut/crawler_dead.png",
-        "frames": 1,
-        "fps": 1,
+        "frames": 4,
+        "fps": 6,
         "loop": false
       }
     }
@@ -261,31 +261,31 @@ export const SPRITES = {
       "idle": {
         "file": "assets/sprites/cut/listener_idle.png",
         "frames": 1,
-        "fps": 3,
+        "fps": 1,
         "loop": true
       },
       "walk": {
         "file": "assets/sprites/cut/listener_walk.png",
-        "frames": 2,
-        "fps": 4,
+        "frames": 6,
+        "fps": 6,
         "loop": true
       },
       "listen": {
         "file": "assets/sprites/cut/listener_listen.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 1.5,
         "loop": true
       },
       "alert": {
         "file": "assets/sprites/cut/listener_alert.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 2,
+        "fps": 4,
         "loop": true
       },
       "run": {
         "file": "assets/sprites/cut/listener_run.png",
-        "frames": 1,
-        "fps": 3,
+        "frames": 6,
+        "fps": 12,
         "loop": true
       },
       "attack": {
