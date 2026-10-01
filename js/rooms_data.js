@@ -100,6 +100,9 @@ export const ROOMS = {
     enemies: [
       { id: 'hall_contaminato', type: 'contaminato', x: 2000, patrol: [1850, 2200], showIf: { flag: 'has_pistol' } },
     ],
+    overlays: [
+      { type: 'state', picked: 'ticket_booth', src: BGV2 + 'station_hall_open.png', x: 0, y: 0, w: 2782, h: 720 },
+    ],
   },
 
   station_storage: {
@@ -120,6 +123,9 @@ export const ROOMS = {
       { id: 'storage_to_platform', x: 85, w: 175, top: 200, bottom: 545, label: 'Binario 1', target: 'station_platform', noSprite: true },
       { id: 'storage_dark', x: 940, w: 220, top: 190, bottom: 560, label: 'Corridoio buio', noSprite: true,
         lockedText: 'Il corridoio finisce contro un muro di casse.', requires: NEVER },
+    ],
+    overlays: [
+      { type: 'state', picked: 'shelf_pistol', src: BGV2 + 'station_storage_open.png', x: 0, y: 0, w: 1289, h: 720 },
     ],
   },
 
@@ -204,6 +210,9 @@ export const ROOMS = {
       { id: 'shop_to_street', x: 20, w: 170, top: 100, bottom: 630, label: 'Via Ferrante', target: 'city_street', noSprite: true },
       { id: 'shop_back', x: 700, w: 115, top: 190, bottom: 555, label: 'Retro', noSprite: true,
         lockedText: 'La porta del retro è inchiodata dall\'interno.', requires: NEVER },
+    ],
+    overlays: [
+      { type: 'state', picked: 'shop_safe', src: BGV2 + 'alimentari_open.png', x: 0, y: 0, w: 1289, h: 720 },
     ],
     enemies: [
       { id: 'shop_crawler', type: 'crawler', x: 950, ceiling: true },
@@ -298,6 +307,9 @@ export const ROOMS = {
     enemies: [
       { id: 'ward_listener', type: 'listener', x: 1550, idle: true, facingRight: false },
       { id: 'ward_inf', type: 'infermiere', x: 2400, patrol: [2250, 2600] },
+    ],
+    overlays: [
+      { type: 'state', picked: 'ward_locker', src: BGV2 + 'hospital_ward_open.png', x: 0, y: 0, w: 2701, h: 720 },
     ],
   },
 
@@ -431,6 +443,9 @@ export const ROOMS = {
       { id: 'maint_to_gen', x: 55, w: 145, top: 115, bottom: 680, label: 'Sala generatori', target: 'sala_generatori', noSprite: true },
       { id: 'maint_to_safe', x: 320, w: 300, top: 130, bottom: 600, label: 'Porta blindata — Rifugio', target: 'safe_room', noSprite: true,
         requires: [{ flag: 'power_on' }], failText: 'Porta blindata a comando elettrico. Senza corrente non si apre.' },
+    ],
+    overlays: [
+      { type: 'state', picked: 'maint_locker', src: BGV2 + 'stanza_manutenzione_open.png', x: 0, y: 0, w: 1672, h: 720 },
     ],
     enemies: [
       { id: 'maint_listener', type: 'listener', x: 1100, idle: true, facingRight: false },
