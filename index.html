@@ -4703,6 +4703,9 @@ const ROOMS = {
       { id: 'gen_to_tunnel', x: 40, w: 270, top: 280, bottom: 690, label: 'Tunnel', target: 'metro_tunnel', noSprite: true },
       { id: 'gen_to_maint', x: 2140, w: 150, top: 380, bottom: 610, label: 'Officina', target: 'stanza_manutenzione', noSprite: true },
     ],
+    overlays: [
+      { type: 'state', flag: 'power_on', src: BGV2 + 'sala_generatori_on.png', x: 0, y: 0, w: 2732, h: 720 },
+    ],
     enemies: [
       { id: 'gen_tec', type: 'tecnico', x: 1500, patrol: [1300, 1800] },
       { id: 'gen_run', type: 'corridore', x: 2450, facingRight: false, showIf: { flag: 'power_on' } },
@@ -4743,6 +4746,9 @@ const ROOMS = {
       { id: 'safe_to_maint', x: 45, w: 160, top: 110, bottom: 690, label: 'Officina', target: 'stanza_manutenzione', noSprite: true },
       { id: 'safe_to_lab', x: 1170, w: 120, top: 185, bottom: 680, label: 'Laboratorio', target: 'lab_ingresso', noSprite: true,
         keyId: 'card', lockedText: 'La porta del laboratorio. Lettore di tessere: "LIVELLO 3".' },
+    ],
+    overlays: [
+      { type: 'state', picked: 'safe_to_maint', src: BGV2 + 'safe_room_open.png', x: 0, y: 0, w: 1303, h: 720 },
     ],
   },
 
@@ -4805,7 +4811,10 @@ const ROOMS = {
   sala_server: {
     name: 'Sala server', bg: BGV2 + 'sala_server.png', layoutW: 1341, keepEdges: true, scale: 1.05, floorY: 640,
     light: 0.55, map: [3, 5],
-    overlays: [{ type: 'monitor', x: 920, y: 316, w: 105, h: 74 }],
+    overlays: [
+      { type: 'monitor', x: 920, y: 316, w: 105, h: 74 },
+      { type: 'state', flag: 'power_on', src: BGV2 + 'sala_server_open.png', x: 0, y: 0, w: 1341, h: 720 },
+    ],
     hotspots: [
       { id: 'server_doc', x: 370, w: 140, label: 'Stampa sul pavimento', icon: 'note', iconY: 625, doc: 'doc_classificato' },
       { id: 'server_upload', x: 895, w: 160, label: 'Terminale di trasmissione', markY: 300, event: 'upload_data',
