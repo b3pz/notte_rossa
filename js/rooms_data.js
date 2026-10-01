@@ -40,11 +40,11 @@ export const ROOMS = {
       { id: 'seat_protagonist', x: 290, w: 170, label: 'Il tuo posto', markY: 470,
         text: 'La tua borsa è ancora qui. Il telefono non ha campo da Porto Salvo Vecchia.' },
       { id: 'document_ticket', x: 470, w: 110, label: 'Biglietto a terra', icon: 'note', iconY: 650, doc: 'doc_ticket' },
+      { id: 'wagon_side_door', x: 1330, w: 300, label: 'Porta laterale', markY: 330,
+        text: 'Questa porta dà sul lato dei binari: sotto c\'è solo la massicciata.\nSi scende dalla porta di coda, in fondo al vagone.' },
     ],
     doors: [
-      { id: 'wagon_inner', x: 805, w: 80, top: 260, bottom: 470, label: 'Vagone 3', noSprite: true,
-        lockedText: 'La porta verso il vagone 3 è bloccata.\nDall\'altra parte qualcosa sta grattando.', requires: NEVER },
-      { id: 'wagon_to_platform', x: 1310, w: 330, top: 130, bottom: 680, label: 'Scendi — Binario 1', target: 'station_platform', noSprite: true },
+      { id: 'wagon_to_platform', x: 805, w: 80, top: 260, bottom: 470, label: 'Porta di coda — Binario 1', target: 'station_platform', noSprite: true },
     ],
   },
 

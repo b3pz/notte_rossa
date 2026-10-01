@@ -23,7 +23,7 @@ Il **primo livello è brutto** perché il vagone è ancora il vecchio fondale in
 
 ### train_wagon.png
 ```
-Interior of an old Italian regional train carriage seen exactly from the side, row of worn blue seats along the back wall, rain-streaked windows above the seats showing an empty dark platform, flickering neon tubes on the ceiling, abandoned bags and newspapers on the seats, on the far left a closed connecting door to the next carriage with a small dark window, on the far right the open sliding exit door showing the wet platform. 2D side-scrolling survival horror game background, strict orthographic side view, camera parallel to the back wall, no vanishing point, flat floor strip along the bottom, painterly semi-realistic style, night, cold blue and teal light with sickly red accents, no people, no text, wide 1536x1024 or wider
+Interior of an old Italian regional train carriage seen exactly from the side, row of worn blue seats along the back wall, rain-streaked windows above the seats, flickering neon tubes on the ceiling, abandoned bags and newspapers on the seats, the side sliding doors are CLOSED, on the far left end a closed connecting door to the next carriage with a small dark window, on the far right end the open rear door of the train with the wet platform and a station wall visible through it. 2D side-scrolling survival horror game background, strict orthographic side view, camera parallel to the back wall, no vanishing point, flat floor strip along the bottom, painterly semi-realistic style, night, cold blue and teal light with sickly red accents, no people, no text, wide 1536x1024 or wider
 ```
 
 ### lab_biologico.png
