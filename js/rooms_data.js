@@ -32,19 +32,21 @@ export const ROOMS = {
   /* ═══════════ CAPITOLO 1 — STAZIONE CENTRALE ═══════════ */
 
   train_wagon: {
-    name: 'Treno 847 — Vagone 4', bg: BG + 'train_wagon.png', keepEdges: true, scale: 1.35, floorY: 682,
-    light: 0.5, map: [0, 0], ambient: 'train_idle', spawnX: 380,
+    name: 'Treno 847 — Vagone 4', bg: BGV2 + 'train_wagon.png', layoutW: 1400, keepEdges: true, scale: 1.25, floorY: 660,
+    light: 0.6, map: [0, 0], ambient: 'train_idle', spawnX: 420,
     hotspots: [
-      { id: 'window_wagon', x: 40, w: 200, label: 'Finestrino', markY: 300,
+      { id: 'window_wagon', x: 555, w: 245, label: 'Finestrino', markY: 290,
         text: 'Pioggia. Il binario 1 di Porto Salvo è deserto.\nNessun capotreno, nessun annuncio.' },
-      { id: 'seat_protagonist', x: 290, w: 170, label: 'Il tuo posto', markY: 470,
-        text: 'La tua borsa è ancora qui. Il telefono non ha campo da Porto Salvo Vecchia.' },
-      { id: 'document_ticket', x: 470, w: 110, label: 'Biglietto a terra', icon: 'note', iconY: 650, doc: 'doc_ticket' },
-      { id: 'wagon_side_door', x: 1330, w: 300, label: 'Porta laterale', markY: 330,
-        text: 'Questa porta dà sul lato dei binari: sotto c\'è solo la massicciata.\nSi scende dalla porta di coda, in fondo al vagone.' },
+      { id: 'seat_protagonist', x: 250, w: 110, label: 'Il tuo posto', markY: 420,
+        text: 'Lo zaino è ancora qui. Il telefono non ha campo da Porto Salvo Vecchia.' },
+      { id: 'document_ticket', x: 640, w: 90, label: 'Biglietto sul sedile', icon: 'note', iconY: 480, doc: 'doc_ticket' },
+      { id: 'wagon_bag', x: 900, w: 140, label: 'Borsa abbandonata', markY: 430,
+        text: 'Una borsa da viaggio aperta. Dentro, vestiti piegati e un biglietto di ritorno mai usato.' },
     ],
     doors: [
-      { id: 'wagon_to_platform', x: 805, w: 80, top: 260, bottom: 470, label: 'Porta di coda — Binario 1', target: 'station_platform', noSprite: true },
+      { id: 'wagon_inner', x: 25, w: 160, top: 150, bottom: 585, label: 'Vagone 3', noSprite: true,
+        lockedText: 'La porta verso il vagone 3 è bloccata.\nDall\'altra parte qualcosa sta grattando.', requires: NEVER },
+      { id: 'wagon_to_platform', x: 1195, w: 175, top: 140, bottom: 590, label: 'Scendi — Binario 1', target: 'station_platform', noSprite: true },
     ],
   },
 
