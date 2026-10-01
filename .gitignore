@@ -1,3 +1,6 @@
 tools/slice_debug/
 __pycache__/
 *.pyc
+# pacchetti per i prompt: si rigenerano con tools/make_reference.py e tools/make_prompt_kit.py
+docs/reference/*.zip
+tools/.bundle_check.js

@@ -24,8 +24,6 @@
    cond:     { flag } | { notFlag } | { item }
    ============================================= */
 
-const BG  = 'assets/backgrounds/';
-const BGP = 'assets/backgrounds/provvisori/';
 const BGV2 = 'assets/backgrounds/v2/';   // nuovi sfondi laterali
 const NEVER = [{ flag: 'never' }];
 

@@ -9,7 +9,7 @@ os.makedirs(OUT, exist_ok=True)
 
 errors = []
 with sync_playwright() as p:
-    b = p.chromium.launch(args=['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required'])
+    b = p.chromium.launch(args=['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required'], **({'executable_path': os.environ['PW_CHROMIUM']} if os.environ.get('PW_CHROMIUM') else {}))
     pg = b.new_page(viewport={'width': 1280, 'height': 720})
     pg.on('console', lambda m: errors.append(f'[{m.type}] {m.text}') if m.type in ('error', 'warning') else None)
     pg.on('pageerror', lambda e: errors.append(f'[pageerror] {e}'))
